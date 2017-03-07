@@ -5,22 +5,23 @@ console.log('*        NekoBot alpha v.0003       *');
 console.log('* Ostatnie zmiany z dnia 07.03.2017 *');
 console.log('*************************************');
 
+/* Ładowanie modułów*/
 Discord = require('discord.js');
 Trigger = require('./includes/Trigger.js');
 LoadTriggers = require('./includes/LoadTriggers.js');
+FS = require('fs');
 //ReloadModule = require('./includes/ReloadModule.js');
 
-const TOKEN = 'Token';
+/* Załadowanie konfiguracji */
+CONFIG = JSON.parse(FS.readFileSync('./config/config.json', 'utf8'));
+/* Załadowanie tokenów */
+TOKENS = JSON.parse(FS.readFileSync('./config/tokens.json', 'utf8'));
 
-LOG_CHANNEL_ID = '286927326565105665';
-ADMIN_ID = '166956114154356736';
-ADMIN_ROLE_ID = ''; // DO ZROBIENIA !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-WOT_APP_ID = 'ID';
 
 triggers = new LoadTriggers().loadTriggers();
 
 client = new Discord.Client();
-client.login(TOKEN);
+client.login(TOKENS.DiscordBot);
 
 client.on('ready', () => {
     /* Obecny czas */
@@ -56,13 +57,13 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
 
     if (newMember.voiceChannelID !== oldMember.voiceChannelID) {
         if (oldMember.voiceChannelID === null || oldMember.voiceChannelID === undefined) {
-            client.channels.get(LOG_CHANNEL_ID)
+            client.channels.get(CONFIG.LogChannelId)
                     .sendMessage('[' + messageTime + '] **' + newMember.displayName + '** (' + newMember.user.username + ')' + ' joined to **' + newMember.voiceChannel + '**');
         } else if (newMember.voiceChannelID && oldMember.voiceChannelID) {
-            client.channels.get(LOG_CHANNEL_ID)
+            client.channels.get(CONFIG.LogChannelId)
                     .sendMessage('[' + messageTime + '] **' + newMember.displayName + '** (' + newMember.user.username + ')' + ' switched from **' + oldMember.voiceChannel + '** to **' + newMember.voiceChannel + '**');
         } else {
-            client.channels.get(LOG_CHANNEL_ID)
+            client.channels.get(CONFIG.LogChannelId)
                     .sendMessage('[' + messageTime + '] **' + oldMember.displayName + '** (' + oldMember.user.username + ')' + ' left **' + oldMember.voiceChannel + '**');
         }
 
