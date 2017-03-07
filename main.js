@@ -1,7 +1,7 @@
 
 console.log('Startowanie...');
 console.log('*************************************');
-console.log('*        NekoBot alpha v.0003       *');
+console.log('*        NekoBot alpha v.0004       *');
 console.log('* Ostatnie zmiany z dnia 07.03.2017 *');
 console.log('*************************************');
 
@@ -29,7 +29,7 @@ client.on('ready', () => {
     /* Czas wiadomości hh:mm:ss */
     var messageTime = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2);
     console.log(messageTime + ' Połączono!');
-    client.user.setGame('NekoBot alpha v.0003');
+    client.user.setGame('NekoBot alpha v.0004');
 });
 
 client.on('disconnect', closeEvent => {
