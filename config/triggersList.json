@@ -1,14 +1,17 @@
 [
     {
         "name": "wot",
+        "status": true,
         "path": "../triggers/wot.js"
     },
     {
         "name": "pisz",
+        "status": true,
         "path": "../triggers/pisz.js"
     },
     {
         "name": "setgame",
+        "status": true,
         "path": "../triggers/setgame.js"
     }
 ]
