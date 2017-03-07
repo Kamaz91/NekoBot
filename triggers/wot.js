@@ -6,12 +6,14 @@ function wot(message, trigger) {
         url: 'https://api.worldoftanks.eu/wot/account/list/?application_id=' + TOKENS.WotAppId + '&search=' + trigger.text,
         json: true
     }, function (error, response, body) {
+        var nicks = [];
         if (!error && response.statusCode === 200) {
             for (var x in body.data) {
-                if (body.data[x].nickname === trigger.text) {
+                if (body.data[x].nickname.toString().toLowerCase() === trigger.text.toString().toLowerCase()) {
                     var profile = body.data[x];
                     break;
                 }
+                nicks.push(body.data[x].nickname);
             }
             if (profile) {
                 request({
@@ -30,6 +32,12 @@ function wot(message, trigger) {
                         message.channel.sendMessage(string);
                     }
                 });
+            } else {
+                string = 'Nie znaleziono użytkownika jakiego szukano';
+                if (nicks.length > 0) {
+                    string += ' spróbuj: ' + nicks.toString();
+                }
+                message.channel.sendMessage(string);
             }
         }
     });
