@@ -28,7 +28,7 @@ client.on('ready', () => {
     /* Czas wiadomości hh:mm:ss */
     var messageTime = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2);
     console.log(messageTime + ' Połączono!');
-    client.user.setGame('NekoBot alpha v.0002');
+    client.user.setGame('NekoBot alpha v.0003');
 });
 
 client.on('disconnect', closeEvent => {
