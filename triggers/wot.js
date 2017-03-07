@@ -1,9 +1,9 @@
-/* global WOT_APP_ID, ADMIN_ID */
+/* global WOT_APP_ID, ADMIN_ID, TOKENS */
 
 function wot(message, trigger) {
     var request = require("request");
     request({
-        url: 'https://api.worldoftanks.eu/wot/account/list/?application_id=' + WOT_APP_ID + '&search=' + trigger.text,
+        url: 'https://api.worldoftanks.eu/wot/account/list/?application_id=' + TOKENS.WotAppId + '&search=' + trigger.text,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
@@ -15,7 +15,7 @@ function wot(message, trigger) {
             }
             if (profile) {
                 request({
-                    url: 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + WOT_APP_ID + '&account_id=' + profile.account_id,
+                    url: 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + TOKENS.WotAppId + '&account_id=' + profile.account_id,
                     json: true
                 }, function (error, response, body) {
                     if (!error && response.statusCode === 200) {
