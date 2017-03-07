@@ -33,6 +33,8 @@ method.loadTriggers = function () {
                 console.log(exception);
             }
             module = null;
+        } else {
+            console.log(messageTime + ' Pominięto moduł: ' + trigger.name);
         }
     }
     return triggers;
