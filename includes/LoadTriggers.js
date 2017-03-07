@@ -1,3 +1,5 @@
+/* global FS */
+
 var method = LoadTriggers.prototype;
 function LoadTriggers() {
     /* Domyślny prefix triggera */
@@ -16,8 +18,8 @@ method.loadTriggers = function () {
     /* Lista triggerów */
     /* [name, alias, path] */
     var triggers = [];
-    var fs = require('fs');
-    var json = JSON.parse(fs.readFileSync('./config/triggersList.json', 'utf8'));
+
+    var json = JSON.parse(FS.readFileSync('./config/triggersList.json', 'utf8'));
     for (var trigger of json) {
         try {
             console.log(messageTime + ' Ładowanie modułu: ' + trigger.name);
