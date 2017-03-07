@@ -1,0 +1,14 @@
+[
+    {
+        "name": "wot",
+        "path": "../triggers/wot.js"
+    },
+    {
+        "name": "pisz",
+        "path": "../triggers/pisz.js"
+    },
+    {
+        "name": "setgame",
+        "path": "../triggers/setgame.js"
+    }
+]
