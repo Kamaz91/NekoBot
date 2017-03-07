@@ -21,17 +21,19 @@ method.loadTriggers = function () {
 
     var json = JSON.parse(FS.readFileSync('./config/triggersList.json', 'utf8'));
     for (var trigger of json) {
-        try {
-            console.log(messageTime + ' Ładowanie modułu: ' + trigger.name);
-            var module = require(trigger.path);
-            //console.log(new module());
-            triggers[this.prefix + trigger.name] = module;
-            console.log('   - Załadowano moduł');
-        } catch (exception) {
-            console.log('   - Wystąpił błąd Podczas ładowania ');
-            console.log(exception);
+        if (trigger.status) {
+            try {
+                console.log(messageTime + ' Ładowanie modułu: ' + trigger.name);
+                var module = require(trigger.path);
+                //console.log(new module());
+                triggers[this.prefix + trigger.name] = module;
+                console.log('   - Załadowano moduł');
+            } catch (exception) {
+                console.log('   - Wystąpił błąd Podczas ładowania ');
+                console.log(exception);
+            }
+            module = null;
         }
-        module = null;
     }
     return triggers;
 };
