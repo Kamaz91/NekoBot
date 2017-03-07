@@ -13,7 +13,7 @@ function Trigger(message, triggers) {
     /* Trigger */
     this.trigger['trigger'] = this.trigger.splitTigger[0];
     /* Tekst wiadomości bez triggera */
-    this.trigger['text'] = this.message.content.slice(this.trigger.splitTigger[0].length);
+    this.trigger['text'] = this.message.content.slice(this.trigger.splitTigger[0].length).trim();
     /* Lista triggerów */
     /* [name, path]    */
     this.triggers = triggers;
