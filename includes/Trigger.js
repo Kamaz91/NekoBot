@@ -10,12 +10,10 @@ function Trigger(message, triggers) {
     this.trigger['raw'] = this.message.content;
     /* Rozdzielenie wiadomości po spacjach */
     this.trigger['splitTigger'] = this.message.content.split(' ');
-    /*  */
-    this.trigger['splitText'] = this.message.content.split(this.trigger.splitTigger[0]);
     /* Trigger */
     this.trigger['trigger'] = this.trigger.splitTigger[0];
-    /* Tekst wiadomości bez triggera*/
-    this.trigger['text'] = this.trigger.splitText[1].trim();
+    /* Tekst wiadomości bez triggera */
+    this.trigger['text'] = this.message.content.slice(this.trigger.splitTigger[0].length);
     /* Lista triggerów */
     /* [name, path]    */
     this.triggers = triggers;
