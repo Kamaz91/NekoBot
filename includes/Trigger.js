@@ -5,26 +5,24 @@ function Trigger(message, triggers) {
     /* Objekt wiadomości */
     this.message = message;
     /* Obiekt trigger */
-    this.trigger = {};
-    /* Cała wiadomość */
-    this.trigger['raw'] = this.message.content;
+    this.params = {};
     /* Rozdzielenie wiadomości po spacjach */
-    this.trigger['splitTigger'] = this.message.content.split(' ');
+    this.params['splitTigger'] = this.message.content.split(' ');
     /* Trigger */
-    this.trigger['trigger'] = this.trigger.splitTigger[0];
+    this.params['trigger'] = this.params.splitTigger[0];
     /* Tekst wiadomości bez triggera */
-    this.trigger['text'] = this.message.content.slice(this.trigger.splitTigger[0].length).trim();
+    this.params['text'] = this.message.content.slice(this.params.splitTigger[0].length).trim();
     /* Lista triggerów */
     /* [name, path]    */
-    this.triggers = triggers;
+    this.params['triggers'] = triggers;
     /*  */
     this.process();
 }
 
 method.process = function () {
-    if (this.triggers[this.trigger.trigger]) {
+    if (this.params.triggers[this.params.trigger]) {
         try {
-            this.triggers[this.trigger.trigger](this.message, this.trigger);
+            this.params.triggers[this.params.trigger](this.message, this.params);
         } catch (exception) {
             console.log(exception);
         }
