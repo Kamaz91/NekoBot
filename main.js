@@ -1,3 +1,7 @@
+function time() {
+    date = new Date();
+    return ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2) + '.' + ('00' + date.getMilliseconds()).slice(-3);
+}
 
 console.log('Startowanie...');
 console.log('*************************************');
@@ -7,9 +11,10 @@ console.log('*************************************');
 
 /* Ładowanie modułów*/
 Discord = require('discord.js');
-Trigger = require('./includes/Trigger.js');
-LoadTriggers = require('./includes/LoadTriggers.js');
 FS = require('fs');
+Trigger = require('./includes/Trigger.js');
+Readline = require('readline');
+
 //ReloadModule = require('./includes/ReloadModule.js');
 
 /* Załadowanie konfiguracji */
@@ -17,43 +22,51 @@ CONFIG = JSON.parse(FS.readFileSync('./config/config.json', 'utf8'));
 /* Załadowanie tokenów */
 TOKENS = JSON.parse(FS.readFileSync('./config/tokens.json', 'utf8'));
 
-
-triggers = new LoadTriggers().loadTriggers();
+trig = new Trigger();
+trig.loadTriggers();
 
 client = new Discord.Client();
 client.login(TOKENS.DiscordBot);
 
+rl = Readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+rl.on('line', (line) => {
+    var messageTime = time();
+
+    if (line === 'x1') {
+        console.log(`${messageTime} x1: ${line}`);
+    }
+
+});
+
 client.on('ready', () => {
-    /* Obecny czas */
-    var date = new Date();
     /* Czas wiadomości hh:mm:ss */
-    var messageTime = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2);
+    var messageTime = time();
     console.log(messageTime + ' Połączono!');
     client.user.setGame('NekoBot alpha v.0005');
 });
 
 client.on('disconnect', closeEvent => {
-    /* Obecny czas */
-    var date = new Date();
     /* Czas wiadomości hh:mm:ss */
-    var messageTime = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2);
+    var messageTime = time();
+    //client.login(TOKENS.DiscordBot);
     console.log(messageTime + ' ************');
     console.log(messageTime + ' Koniec Sesji');
 });
 
 client.on('reconnecting', function () {
-    /* Obecny czas */
-    var date = new Date();
     /* Czas wiadomości hh:mm:ss */
-    var messageTime = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2);
+    var messageTime = time();
     console.log(messageTime + ' reconnecting');
 });
 
 // event listeners
 client.on('voiceStateUpdate', (oldMember, newMember) => {
 
-    var date = new Date(); // Obecny czas
-    var messageTime = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2);
+    var messageTime = time();
 
     if (newMember.voiceChannelID !== oldMember.voiceChannelID) {
         if (oldMember.voiceChannelID === null || oldMember.voiceChannelID === undefined) {
@@ -72,14 +85,12 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
 });
 
 client.on('message', message => {
-    /* Obecny czas */
-    var date = new Date();
     /* Czas wiadomości hh:mm:ss */
-    var messageTime = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2);
+    var messageTime = time(date);
     var guildchan = '';
 
     if (message.guild && message.channel) {
-        guildchan = ' ' + message.guild.name + '->#' + message.channel.name;
+        guildchan = ' @ ' + message.guild.name + '->#' + message.channel.name;
     }
 
     console.log('[' + messageTime + '] <' + message.author.username + guildchan + '> ' +
@@ -92,5 +103,5 @@ client.on('message', message => {
      }*/
 
     // Triggery
-    new Trigger(message, triggers);
+    trig.checkTrigger(message);
 });
