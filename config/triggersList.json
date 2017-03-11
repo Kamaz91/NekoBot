@@ -13,5 +13,10 @@
         "name": "setgame",
         "status": true,
         "path": "../triggers/setgame.js"
+    },
+    {
+        "name": "avek",
+        "status": true,
+        "path": "../triggers/avek.js"
     }
 ]
