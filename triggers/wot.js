@@ -21,13 +21,29 @@ function wot(message, trigger) {
                     json: true
                 }, function (error, response, body) {
                     if (!error && response.statusCode === 200) {
+
+                        var ll = new Date(body.data[profile.account_id].logout_at * 1000);
+                        var lb = new Date(body.data[profile.account_id].last_battle_time * 1000);
+                        console.log(body.data[profile.account_id].last_battle_time);
                         all = body.data[profile.account_id].statistics.all;
                         string = '```' +
-                                'Nick       : ' + profile.nickname + '\n' +
-                                'Exp        : ' + all.xp + '\n' +
-                                'Battles    : ' + all.battles + '\n' +
-                                'Frags      : ' + all.frags + '\n' +
-                                'Max damage : ' + all.max_damage + '\n' +
+                                `Id          : ${profile.account_id} \n` +
+                                `Nick        : ${profile.nickname} \n` +
+                                `Exp         : ${all.xp}\n` +
+                                `--------------------------------\n` +
+                                `Battles     : ${all.battles}\n` +
+                                `Win         : ${all.wins}\n` +
+                                `Losses      : ${all.losses}\n` +
+                                `Draws       : ${all.draws}\n` +
+                                `Win ratio   : ${((all.wins / all.battles) * 100).toString().slice(0, 5)}% \n` +
+                                `Survived    : ${all.survived_battles}\n` +
+                                `--------------------------------\n` +
+                                `Frags       : ${all.frags}\n` +
+                                `Max damage  : ${all.max_damage}\n` +
+                                `Last online : ${('0' + ll.getDate()).slice(-2)} / ${('0' + (ll.getMonth() + 1)).slice(-2)} / ${ll.getFullYear()} ` +
+                                `${ll.toLocaleTimeString()}\n` +
+                                `Last battle : ${('0' + lb.getDate()).slice(-2)} / ${('0' + (lb.getMonth() + 1)).slice(-2)} / ${lb.getFullYear()} ` +
+                                `${lb.toLocaleTimeString()}\n` +
                                 '```';
                         message.channel.sendMessage(string);
                     }
@@ -40,7 +56,8 @@ function wot(message, trigger) {
                 message.channel.sendMessage(string);
             }
         }
-    });
+    }
+    );
 
 }
 
