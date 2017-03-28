@@ -1,12 +1,8 @@
 [
     {
-        "name": "wot2",
-        "status": true,
-        "path": "../triggers/wot.js"
-    }, {
         "name": "wot",
         "status": true,
-        "path": "../triggers/wot2.js"
+        "path": "../triggers/wot.js"
     }, {
         "name": "pisz",
         "status": true,
