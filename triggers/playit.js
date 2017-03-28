@@ -30,18 +30,9 @@ function play(message, trigger) {
         default:
             if (trigger.text.length <= 0)
                 message.reply(help);
-            else
-                switch (PlayIt.streamToVChannel(trigger, message.member.voiceChannel)) {
-                    case 1 :
-                        message.reply('Blokada || Tu będzie kiedyś kolejkowanie do playlisty'); // Dodawanie do kolejki
-                        break;
-                    case 2 :
-                        message.reply('Git');
-                        break;
-                    case 3 :
-                        message.reply('Nie można dołączyć');
-                        break;
-                }
+            else {
+                message.reply(PlayIt.streamToVChannel(trigger, message.member.voiceChannel).text);
+            }
     }
 
     /*

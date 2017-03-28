@@ -24,13 +24,18 @@ method.joinVChannel = function (vChannel) {
 };
 
 method.streamToVChannel = function (trigger, vChannel) {
+    try {
+        var stream = this.ytdl(trigger.text, {filter: 'audioonly'});
+    } catch (exception) {
+        return {error: true, code: 400, text: 'Zły link'};
+    }
+
     if (this.joinVChannel(vChannel)) {
         if (this.playing === false) {
             this.playing = true;
             this.playingVChannel.then(connection => {
-                const stream = this.ytdl(trigger.text, {filter: 'audioonly'});
-                this.dispatcher = connection.playStream(stream, this.streamOptions);
 
+                this.dispatcher = connection.playStream(stream, this.streamOptions);
                 this.dispatcher.on('start', information => {
 
                     //console.log(this.ytdl.getInfo);
@@ -43,6 +48,7 @@ method.streamToVChannel = function (trigger, vChannel) {
                 });
                 this.dispatcher.on('error', information => {
                     this.leave();
+                    return {error: true, text: 'Błąd podczas odtwarzania'};
                     //console.log(this.ytdl.getInfo);
                     console.log('Stream error');
                 });
@@ -57,12 +63,12 @@ method.streamToVChannel = function (trigger, vChannel) {
                      }*/
                 });
             }).catch(console.error);
-            return 2;
+            return {text: 'ok', code: 200};
         } else {
-            return 1;
+            return {text: 'Blokada || Tu będzie kiedyś kolejkowanie do playlisty', code: 100};
         }
     } else {
-        return 0;
+        return {text: 'Nie można dołączyć', code: 100};
     }
 
 };
