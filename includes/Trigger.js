@@ -4,6 +4,7 @@ const Cfg = require('./Config.js');
 
 class Trigger {
     constructor(client) {
+        this.client = client;
         this.prefix = '!';
         this.triggersList = {};
         /* Lista triggerów */
@@ -105,7 +106,7 @@ class Trigger {
                 /* Tekst wiadomości bez triggera */
                 params['text'] = message.content.slice(params.splitTigger[0].length).trim();
                 try {
-                    new this.triggers[params.trigger](message, params);
+                    new this.triggers[params.trigger](message, params, this.client);
                 } catch (exception) {
                     console.log(exception);
                 }
