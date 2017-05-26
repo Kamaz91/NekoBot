@@ -111,7 +111,7 @@ method.checkTrigger = function (message) {
             params['text'] = message.content.slice(params.splitTigger[0].length).trim();
 
             try {
-                this.triggers[params.trigger](message, params);
+                new this.triggers[params.trigger](message, params);
             } catch (exception) {
                 console.log(exception);
             }
