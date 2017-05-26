@@ -1,6 +1,9 @@
 /* global WOT_APP_ID, ADMIN_ID, TOKENS */
 const request = require("request");
 const Wargamer = require('wargamer');
+const Cfg = new require('../includes/Config.js');
+const Discord = require('discord.js');
+
 var method = wot.prototype;
 
 function wot(message, trigger) {
@@ -16,7 +19,7 @@ function wot(message, trigger) {
 
 method.drwal = function (message, trigger) {
 
-    WorldOfTanks = new Wargamer.WorldOfTanks({realm: 'eu', applicationId: TOKENS.WotAppId});
+    WorldOfTanks = new Wargamer.WorldOfTanks({realm: 'eu', applicationId: new Cfg().getToken('WotAppId')});
 
     delete trigger.splitTigger[0];
     delete trigger.splitTigger[1];
@@ -44,7 +47,7 @@ method.dd = function (message, trigger, lp) {
 
 method.getProfile = function (message, trigger) {
     request({
-        url: 'https://api.worldoftanks.eu/wot/account/list/?application_id=' + TOKENS.WotAppId + '&search=' + trigger.text,
+        url: 'https://api.worldoftanks.eu/wot/account/list/?application_id=' + new Cfg().getToken('WotAppId') + '&search=' + trigger.text,
         json: true
     }, function (error, response, body) {
         var nicks = [];
@@ -58,7 +61,7 @@ method.getProfile = function (message, trigger) {
             }
             if (profile) {
                 request({
-                    url: 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + TOKENS.WotAppId + '&account_id=' + profile.account_id,
+                    url: 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + new Cfg().getToken('WotAppId') + '&account_id=' + profile.account_id,
                     json: true
                 }, function (error, response, body) {
                     if (!error && response.statusCode === 200) {
