@@ -109,7 +109,7 @@ method.getProfile = function (message, trigger) {
                 if (nicks.length > 0) {
                     string += ' spróbuj: ' + nicks.toString();
                 }
-                message.channel.sendMessage(string);
+                message.channel.send(string);
             }
         }
     }

@@ -62,6 +62,6 @@ function pisz(message, trigger) {
         //console.log(val);
     }
     /* Wysłanie wiadomości do kanału/użytkownika */
-    message.channel.sendMessage(stringBuild);
+    message.channel.send(stringBuild);
 }
 module.exports = pisz;
