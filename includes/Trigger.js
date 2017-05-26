@@ -97,20 +97,19 @@ method.removeTrigger = function (moduleName) {
 method.checkTrigger = function (message) {
 
     if (!message.author.bot) {
-        /* Objekt wiadomości */
-        /* Obiekt trigger */
         var params = {};
-        /* Rozdzielenie wiadomości po spacjach */
-        params['splitTigger'] = message.content.split(' ');
         /* Trigger */
-        params['trigger'] = params.splitTigger[0];
-        /* Tekst wiadomości bez triggera */
-        params['text'] = message.content.slice(params.splitTigger[0].length).trim();
+        params['trigger'] = message.content.substring(0, message.content.indexOf(' ')) || message.content;
 
         if (params['trigger'] === '!reload' && message.author.id === CONFIG.AdminId) {
             this.reloadTriggers();
         } else
         if (this.triggers[params.trigger]) {
+            /* Rozdzielenie wiadomości po spacjach */
+            params['splitTigger'] = message.content.split(' ');
+            /* Tekst wiadomości bez triggera */
+            params['text'] = message.content.slice(params.splitTigger[0].length).trim();
+
             try {
                 this.triggers[params.trigger](message, params);
             } catch (exception) {
