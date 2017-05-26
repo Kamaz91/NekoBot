@@ -1,139 +1,135 @@
-time = function () {
+
+const Discord = require('discord.js');
+const Cfg = new require('./includes/Config.js');
+
+const Peoples = require('./includes/Peoples.js');
+const Trigger = require('./includes/Trigger.js');
+const VoiceManager = require('./includes/VoiceManager.js');
+const CLI = require('readline');
+
+function time() {
     var date = new Date();
     return ('0' + date.getHours()).slice(-2) + ':' +
             ('0' + date.getMinutes()).slice(-2) + ':' +
             ('0' + date.getSeconds()).slice(-2) + '.' +
             ('00' + date.getMilliseconds()).slice(-3);
-};
+}
 
-console.log('Startowanie...');
-console.log('*************************************');
-console.log('*        NekoBot alpha v.0006       *');
-console.log('* Ostatnie zmiany z dnia 28.03.2017 *');
-console.log('*************************************');
+class Main {
 
-var debugLock = true;
+    constructor() {
+        console.log('Startowanie...');
+        console.log('*************************************');
+        console.log('*        NekoBot alpha v.0006       *');
+        console.log('* Ostatnie zmiany z dnia 26.05.2017 *');
+        console.log('*************************************');
 
-/* Ładowanie modułów*/
-Discord = require('discord.js');
-FS = require('fs');
-const Peoples = require('./includes/Peoples.js');
-const Trigger = require('./includes/Trigger.js');
-const VoiceManager = require('./includes/VoiceManager.js');
-const Readline = require('readline');
+        this.pop = new Peoples();
+        this.PlayIt = new VoiceManager();
 
-/* Załadowanie konfiguracji */
-CONFIG = JSON.parse(FS.readFileSync('./config/config.json', 'utf8'));
-/* Załadowanie tokenów */
-TOKENS = JSON.parse(FS.readFileSync('./config/tokens.json', 'utf8'));
+        this.debugLock = true;
 
-pop = new Peoples();
+        this.client = new Discord.Client();
+        this.client.login(new Cfg().getToken('DiscordBot'));
 
-const trig = new Trigger();
-trig.loadTriggers();
+        /* Ładowanie modułów*/
+        this.trig = new Trigger(this.client);
+        this.trig.loadTriggers();
 
-PlayIt = new VoiceManager();
-
-//let opts = {shardId: 1, shardCount: 2};
-client = new Discord.Client();
-client.login(TOKENS.DiscordBot);
-
-const rl = Readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
-rl.on('line', (line) => {
-    var messageTime = time();
-
-    if (line === 'debug on') {
-        debugLock = false;
-        console.log(messageTime + ' Debug mode on');
-    }
-    if (line === 'debug off') {
-        debugLock = true;
-        console.log(messageTime + ' Debug mode off');
-    }
-    if (line === 'reload triggers') {
-        trig.reloadTriggers();
-    }
-    if (line === 'rt') {
-        trig.reloadTriggers();
-    }
-});
-
-client.on('ready', () => {
-    pop.scanGuildUsers(client.guilds.array());
-    /* Czas wiadomości hh:mm:ss */
-    var messageTime = time();
-    console.log(messageTime + ' Połączono!');
-    client.user.setGame('NekoBot alpha v.0005');
-});
-
-client.on('disconnect', closeEvent => {
-    //client.destroy();
-    //client.login(TOKENS.DiscordBot);
-    /* Czas wiadomości hh:mm:ss */
-    var messageTime = time();
-    //client.login(TOKENS.DiscordBot);
-    console.log(messageTime + ' ************');
-    console.log(messageTime + ' Koniec Sesji');
-});
-
-client.on('reconnecting', function () {
-    /* Czas wiadomości hh:mm:ss */
-    var messageTime = time();
-    console.log(messageTime + ' reconnecting');
-});
-
-client.on('error', error => {
-    /* Czas wiadomości hh:mm:ss */
-    var messageTime = time();
-    console.log(messageTime + ' error');
-    console.log(error);
-});
-
-client.on('debug', info => {
-    if (debugLock === false) {
-        /* Czas wiadomości hh:mm:ss */
-        var messageTime = time();
-        console.log(messageTime + ' debug {' + info + '}');
-    }
-});
-
-// event listeners
-client.on('voiceStateUpdate', (oldMember, newMember) => {
-
-    var messageTime = time();
-
-    if (newMember.voiceChannelID !== oldMember.voiceChannelID) {
-        if (oldMember.voiceChannelID === null || oldMember.voiceChannelID === undefined) {
-            client.channels.get(CONFIG.LogChannelId)
-                    .sendMessage('[' + messageTime + '] **' + newMember.displayName + '** (' + newMember.user.username + ')' + ' joined to **' + newMember.voiceChannel + '**');
-        } else if (newMember.voiceChannelID && oldMember.voiceChannelID) {
-            client.channels.get(CONFIG.LogChannelId)
-                    .sendMessage('[' + messageTime + '] **' + newMember.displayName + '** (' + newMember.user.username + ')' + ' switched from **' + oldMember.voiceChannel + '** to **' + newMember.voiceChannel + '**');
-        } else {
-            client.channels.get(CONFIG.LogChannelId)
-                    .sendMessage('[' + messageTime + '] **' + oldMember.displayName + '** (' + oldMember.user.username + ')' + ' left **' + oldMember.voiceChannel + '**');
-        }
-
-        //serverDeaf serverMute
-    }
-});
-
-client.on('message', message => {
-    /* Czas wiadomości hh:mm:ss */
-    var messageTime = time();
-    var guildchan = '';
-
-    if (message.guild && message.channel) {
-        guildchan = ' @ ' + message.guild.name + '->#' + message.channel.name;
+        this.initCLI();
+        this.initListeners(this.trig);
     }
 
-    console.log('[' + messageTime + '] <' + message.author.username + guildchan + '> ' +
-            message.content);
+    initCLI() {
+        const rl = CLI.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+        rl.on('line', (line) => {
+            var messageTime = time();
+            if (line === 'debug on') {
+                this.debugLock = false;
+                console.log(messageTime + ' Debug mode on');
+            }
+            if (line === 'debug off') {
+                this.debugLock = true;
+                console.log(messageTime + ' Debug mode off');
+            }
+            if (line === 'reload triggers') {
+                this.trig.reloadTriggers();
+            }
+            if (line === 'rt') {
+                this.trig.reloadTriggers();
+            }
+        });
+    }
 
-    // Triggery
-    trig.checkTrigger(message);
-});
+    initListeners() {
+
+        this.client.on('message', message => {
+            /* Czas wiadomości hh:mm:ss */
+            var messageTime = time();
+            var guildchan = '';
+            if (message.guild && message.channel) {
+                guildchan = ' @ ' + message.guild.name + '->#' + message.channel.name;
+            }
+
+            console.log('[' + messageTime + '] <' + message.author.username + guildchan + '> ' +
+                    message.content);
+            // Triggery
+            this.trig.checkTrigger(message);
+        });
+        this.client.on('ready', () => {
+            this.pop.scanGuildUsers(this.client.guilds.array());
+            /* Czas wiadomości hh:mm:ss */
+            var messageTime = time();
+            console.log(messageTime + ' Połączono!');
+            this.client.user.setGame('NekoBot alpha v.0006');
+        });
+        this.client.on('disconnect', closeEvent => {
+            //client.destroy();
+            //client.login(TOKENS.DiscordBot);
+            /* Czas wiadomości hh:mm:ss */
+            var messageTime = time();
+            //client.login(TOKENS.DiscordBot);
+            console.log(messageTime + ' ************');
+            console.log(messageTime + ' Koniec Sesji');
+        });
+        this.client.on('reconnecting', function () {
+            /* Czas wiadomości hh:mm:ss */
+            var messageTime = time();
+            console.log(messageTime + ' Próba Połączenia');
+        });
+        this.client.on('error', error => {
+            /* Czas wiadomości hh:mm:ss */
+            var messageTime = time();
+            console.log(messageTime + ' error');
+            console.log(error);
+        });
+        this.client.on('debug', info => {
+            if (this.debugLock === false) {
+                /* Czas wiadomości hh:mm:ss */
+                var messageTime = time();
+                console.log(messageTime + ' debug {' + info + '}');
+            }
+        });
+        // voice listener
+        this.client.on('voiceStateUpdate', (oldMember, newMember) => {
+            var logsChannel = this.client.channels.get(new Cfg().logsChannelId);
+            var messageTime = time();
+            if (newMember.voiceChannelID !== oldMember.voiceChannelID) {
+                if (oldMember.voiceChannelID === null || oldMember.voiceChannelID === undefined) {
+                    logsChannel.send('[' + messageTime + '] **' + newMember.displayName + '** (' + newMember.user.username + ')' + ' joined to **' + newMember.voiceChannel + '**');
+                } else if (newMember.voiceChannelID && oldMember.voiceChannelID) {
+                    logsChannel.send('[' + messageTime + '] **' + newMember.displayName + '** (' + newMember.user.username + ')' + ' switched from **' + oldMember.voiceChannel + '** to **' + newMember.voiceChannel + '**');
+                } else {
+                    logsChannel.send('[' + messageTime + '] **' + oldMember.displayName + '** (' + oldMember.user.username + ')' + ' left **' + oldMember.voiceChannel + '**');
+                }
+
+                //serverDeaf serverMute
+            }
+        });
+    }
+}
+
+new Main();
