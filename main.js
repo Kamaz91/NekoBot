@@ -57,7 +57,9 @@ rl.on('line', (line) => {
     if (line === 'reload triggers') {
         trig.reloadTriggers();
     }
-
+    if (line === 'rt') {
+        trig.reloadTriggers();
+    }
 });
 
 client.on('ready', () => {
