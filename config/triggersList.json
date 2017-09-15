@@ -2,26 +2,37 @@
     {
         "name": "wot",
         "status": true,
+        "desc": "World of Tanks",
         "path": "../triggers/wot.js"
     }, {
         "name": "pisz",
         "status": true,
+        "desc": "",
         "path": "../triggers/pisz.js"
     }, {
         "name": "setgame",
         "status": true,
+        "desc": "",
         "path": "../triggers/setgame.js"
     }, {
         "name": "avek",
         "status": true,
+        "desc": "Pokazuje link do twojego avataru",
         "path": "../triggers/avek.js"
     }, {
         "name": "playit",
         "status": true,
+        "desc": "",
         "path": "../triggers/playit.js"
     }, {
         "name": "peoples",
         "status": true,
+        "desc": "",
         "path": "../triggers/peoples.js"
+    }, {
+        "name": "test",
+        "status": true,
+        "desc": "",
+        "path": "../triggers/test.js"
     }
 ]
