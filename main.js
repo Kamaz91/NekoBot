@@ -7,6 +7,13 @@ const Trigger = require('./includes/Trigger.js');
 const VoiceManager = require('./includes/VoiceManager.js');
 const CLI = require('readline');
 
+knex = require('knex')({
+    client: 'sqlite3',
+    connection: {
+        filename: "data/database.sqlite"
+    }
+});
+
 function time() {
     var date = new Date();
     return ('0' + date.getHours()).slice(-2) + ':' +
@@ -20,8 +27,8 @@ class Main {
     constructor() {
         console.log('Startowanie...');
         console.log('*************************************');
-        console.log('*        NekoBot alpha v.0006       *');
-        console.log('* Ostatnie zmiany z dnia 26.05.2017 *');
+        console.log('*        NekoBot alpha v.0007       *');
+        console.log('* Ostatnie zmiany z dnia 16.09.2017 *');
         console.log('*************************************');
 
         this.pop = new Peoples();
