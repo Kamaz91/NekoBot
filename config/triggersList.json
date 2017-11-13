@@ -30,9 +30,9 @@
         "desc": "",
         "path": "../triggers/peoples.js"
     }, {
-        "name": "test",
+        "name": "quote",
         "status": true,
         "desc": "",
-        "path": "../triggers/test.js"
+        "path": "../triggers/quotes.js"
     }
 ]
