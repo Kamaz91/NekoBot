@@ -28,7 +28,7 @@ class Main {
         console.log('Startowanie...');
         console.log('*************************************');
         console.log('*        NekoBot alpha v.0007       *');
-        console.log('* Ostatnie zmiany z dnia 16.09.2017 *');
+        console.log('* Ostatnie zmiany z dnia 13.11.2017 *');
         console.log('*************************************');
 
         this.pop = new Peoples();
@@ -91,7 +91,7 @@ class Main {
             /* Czas wiadomości hh:mm:ss */
             var messageTime = time();
             console.log(messageTime + ' Połączono!');
-            this.client.user.setGame('NekoBot alpha v.0006');
+            this.client.user.setGame('NekoBot alpha v.0007');
         });
         this.client.on('disconnect', closeEvent => {
             //client.destroy();
@@ -122,9 +122,22 @@ class Main {
         });
         // voice listener
         this.client.on('voiceStateUpdate', (oldMember, newMember) => {
-            var logsChannel = this.client.channels.get(new Cfg().logsChannelId);
+
+            if (newMember.voiceChannelID === null || newMember.voiceChannelID === undefined) {
+                var guild = newMember.guild;
+            } else {
+                var guild = oldMember.guild;
+            }
+
+            var channelsArray = new Cfg().logsChannels;
+            var logsChannelId = channelsArray[guild.id];
             var messageTime = time();
-            if (newMember.voiceChannelID !== oldMember.voiceChannelID) {
+
+            //var guild = this.client.guilds.get(new Cfg().logsChannels);
+
+            if (newMember.voiceChannelID !== oldMember.voiceChannelID && logsChannelId !== null) {
+                var logsChannel = guild.channels.get(logsChannelId);
+
                 if (oldMember.voiceChannelID === null || oldMember.voiceChannelID === undefined) {
                     logsChannel.send('[' + messageTime + '] **' + newMember.displayName + '** (' + newMember.user.username + ')' + ' joined to **' + newMember.voiceChannel + '**');
                 } else if (newMember.voiceChannelID && oldMember.voiceChannelID) {
@@ -134,6 +147,17 @@ class Main {
                 }
 
                 //serverDeaf serverMute
+            }
+            if (newMember.guild.id !== oldMember.guild.id) {
+                if (channelsArray[oldMember.guild.id] !== null) {
+                    var ologsChannel = oldMember.guild.channels.get(channelsArray[oldMember.guild.id]);
+                    ologsChannel.send('[' + messageTime + '] **' + oldMember.displayName + '** (' + oldMember.user.username + ')' + ' left **' + oldMember.voiceChannel + '**');
+                }
+
+                if (channelsArray[newMember.guild.id] !== null) {
+                    var nlogsChannel = newMember.guild.channels.get(channelsArray[newMember.guild.id]);
+                    nlogsChannel.send('[' + messageTime + '] **' + newMember.displayName + '** (' + newMember.user.username + ')' + ' joined to **' + newMember.voiceChannel + '**');
+                }
             }
         });
     }
