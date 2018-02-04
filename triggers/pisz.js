@@ -61,7 +61,13 @@ function pisz(message, trigger) {
         }
         //console.log(val);
     }
+    if (message.deletable) {
+        message.delete()
+                .then(msg => console.log(`Deleted message from ${msg.author}`))
+                .catch(console.error);
+    }
+
     /* Wysłanie wiadomości do kanału/użytkownika */
-    message.channel.send(stringBuild);
+    message.channel.send(message.author.username + ': ' + stringBuild);
 }
 module.exports = pisz;
