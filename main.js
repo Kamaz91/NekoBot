@@ -27,8 +27,8 @@ class Main {
     constructor() {
         console.log('Startowanie...');
         console.log('*************************************');
-        console.log('*        NekoBot alpha v.0007       *');
-        console.log('* Ostatnie zmiany z dnia 13.11.2017 *');
+        console.log('*        NekoBot alpha v.0008       *');
+        console.log('* Ostatnie zmiany z dnia 08.02.2018 *');
         console.log('*************************************');
 
         this.pop = new Peoples();
@@ -91,7 +91,7 @@ class Main {
             /* Czas wiadomości hh:mm:ss */
             var messageTime = time();
             console.log(messageTime + ' Połączono!');
-            this.client.user.setGame('NekoBot alpha v.0007');
+            this.client.user.setActivity('NekoBot alpha v.0008');
         });
         this.client.on('disconnect', closeEvent => {
             //client.destroy();
