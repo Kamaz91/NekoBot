@@ -5,9 +5,9 @@ var method = setgame.prototype;
 function setgame(message, trigger, client) {
     if (message.author.id === new Cfg().adminId) {
         if (trigger.text.length > 1) {
-            client.user.setGame(trigger.text);
+            client.user.setActivity(trigger.text);
         } else {
-            client.user.setGame();
+            client.user.setActivity();
         }
     }
 }
