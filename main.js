@@ -2,13 +2,14 @@
 const Discord = require('discord.js');
 const Cfg = new require('./includes/Config.js');
 
-const Peoples = require('./includes/Peoples.js');
+const userWatch = require('./includes/userWatch.js');
 const Trigger = require('./includes/Trigger.js');
-const VoiceManager = require('./includes/VoiceManager.js');
+//const VoiceManager = require('./includes/VoiceManager.js');
 const CLI = require('readline');
 
 knex = require('knex')({
     client: 'sqlite3',
+    useNullAsDefault: true,
     connection: {
         filename: "data/database.sqlite"
     }
@@ -25,24 +26,22 @@ function time() {
 class Main {
 
     constructor() {
-        console.log('Startowanie...');
-        console.log('*************************************');
-        console.log('*        NekoBot alpha v.0008       *');
-        console.log('* Ostatnie zmiany z dnia 08.02.2018 *');
-        console.log('*************************************');
-
-        this.pop = new Peoples();
-        this.PlayIt = new VoiceManager();
-
-        this.debugLock = true;
+        console.log('Starting...');
+        console.log('************************************');
+        console.log('*        NekoBot alpha v.0009      *');
+        console.log('* Last changes from day 07.05.2018 *');
+        console.log('************************************');
 
         this.client = new Discord.Client();
         this.client.login(new Cfg().getToken('DiscordBot'));
 
+        this.debugLock = true;
         /* Ładowanie modułów*/
+        //this.PlayIt = new VoiceManager();
+        this.userWatch = new userWatch(this.client);
         this.trig = new Trigger(this.client);
         this.trig.loadTriggers();
-
+        /* Listeners */
         this.initCLI();
         this.initListeners(this.trig);
     }
@@ -87,11 +86,10 @@ class Main {
             this.trig.checkTrigger(message);
         });
         this.client.on('ready', () => {
-            this.pop.scanGuildUsers(this.client.guilds.array());
             /* Czas wiadomości hh:mm:ss */
             var messageTime = time();
-            console.log(messageTime + ' Połączono!');
-            this.client.user.setActivity('NekoBot alpha v.0008');
+            console.log(messageTime + ' Connected!');
+            this.client.user.setActivity('NekoBot alpha v.0009');
         });
         this.client.on('disconnect', closeEvent => {
             //client.destroy();
@@ -100,12 +98,12 @@ class Main {
             var messageTime = time();
             //client.login(TOKENS.DiscordBot);
             console.log(messageTime + ' ************');
-            console.log(messageTime + ' Koniec Sesji');
+            console.log(messageTime + ' End of Session');
         });
         this.client.on('reconnecting', function () {
             /* Czas wiadomości hh:mm:ss */
             var messageTime = time();
-            console.log(messageTime + ' Próba Połączenia');
+            console.log(messageTime + ' reconnecting');
         });
         this.client.on('error', error => {
             /* Czas wiadomości hh:mm:ss */
