@@ -234,6 +234,7 @@ class wot {
     help(message) {
         const embed = new Discord.RichEmbed();
         embed.addField('!wot', "!wot **nick**");
+        embed.addField('!wot assign', "!wot assign **nick**");
         embed.addField('!wot search', "!wot search **nick**");
         embed.addField('!wot drwal', "!wot drwal **nick nick.. itd**");
         message.channel.send(embed);
