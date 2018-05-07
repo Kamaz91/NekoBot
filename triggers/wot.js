@@ -8,6 +8,9 @@ class wot {
             case 'drwal':
                 this.drwal(message, trigger);
                 break;
+            case 'assign':
+                this.assignProcess(message, trigger.splitTigger[2]);
+                break;
             case 'help':
                 this.help(message, trigger);
                 break;
@@ -18,6 +21,48 @@ class wot {
                 this.searchProfile(message, trigger.text);
                 break;
         }
+    }
+
+    assignProcess(message, nickname) {
+        let process = this.assignProfileToUser(message, nickname);
+        process.then((resolve) => {
+            message.reply(resolve.status);
+        });
+    }
+
+    assignProfileToUser(message, nickname) {
+        return this.getProfile(nickname).then((resolve) => {
+            if (resolve.code === 200) {
+                return knex.select().table('wot_assign').where('discordId', message.author.id).then((query) => {
+                    if (query.length > 0) {
+                        return knex('wot_assign').where('discordId', '=', message.author.id).update({
+                            wotId: resolve.data.account_id,
+                            wotName: resolve.data.nickname,
+                            timestamp: Date.now()
+                        }).then(() => {
+                            return {code: 200, status: `Updated assign from ${query[0].wotName} to ${resolve.data.nickname}`};
+                        }).catch((error) => {
+                            console.log(error);
+                            return {code: 102, status: "Database error", data: error};
+                        });
+                    } else {
+                        return knex('wot_assign').insert({
+                            discordId: message.author.id,
+                            discordName: message.author.username,
+                            wotId: resolve.data.account_id,
+                            wotName: resolve.data.nickname,
+                            timestamp: Date.now()
+                        }).then(() => {
+                            return {code: 200, status: `Assigned ${resolve.data.nickname} to your id`};
+                        }).catch((error) => {
+                            return {code: 102, status: "Database error", data: error};
+                        });
+                    }
+                });
+            } else {
+                return resolve;
+            }
+        });
     }
 
     getProfile(nickName) {
@@ -33,13 +78,14 @@ class wot {
         return request(options).then((response) => {
             if (response.status === "ok") {
                 for (var x in response.data) {
-                    if (response.data[x].nickname.toString().toLowerCase() === nickName.toString().toLowerCase())
+                    if (response.data[x].nickname.toString().toLowerCase() === nickName.toString().toLowerCase()) {
                         return {code: 200, status: "ok", data: response.data[x]};
+                    }
                 }
                 //console.log(response.data);
                 return {code: 201, status: "Not found profile", data: response};
             } else {
-                return {code: 101, status: "API error", data: response};
+                return {code: 101, status: "api error", data: response};
             }
         }).catch((error) => {
             return {code: 100, status: "error", data: error};
@@ -56,12 +102,11 @@ class wot {
             },
             json: true
         };
-
         return request(options).then((response) => {
             if (response.status === "ok") {
                 return {code: 200, status: "ok", data: response.data[account_id]};
             } else {
-                return {code: 101, status: "API error", data: response};
+                return {code: 101, status: "api error", data: response};
             }
         }).catch((error) => {
             return {code: 100, status: "error", data: error};
@@ -72,7 +117,6 @@ class wot {
         /* Usuwanie dwóch pierwszych zbędnych elementów tablicy (same nicki) */
         trigger.splitTigger.shift();
         trigger.splitTigger.shift();
-
         var embed = new Discord.RichEmbed();
         // Konfiguracja embed
         embed.setColor(0xEF017C);
@@ -82,7 +126,6 @@ class wot {
         var accountArray = [];
         // * Lista bledow
         var errorArray = [];
-
         for (var x in trigger.splitTigger) {
             promiseArray[x] = this.getProfile(trigger.splitTigger[x]);
         }
@@ -95,11 +138,11 @@ class wot {
                 switch (response[i].code) {
                     case 100:
                         /* STATUS Error */
-                        errorArray.push({name: response.name, reason: "Error"});
+                        errorArray.push({name: response.name, reason: "error"});
                         break;
                     case 101:
                         /* STATUS API error */
-                        errorArray.push({name: response.name, reason: "API error"});
+                        errorArray.push({name: response.name, reason: "api error"});
                         break;
                     case 200:
                         /* STATUS OK */
@@ -107,7 +150,7 @@ class wot {
                         break;
                     case 201:
                         /* STATUS Not Found */
-                        errorArray.push({name: response.name, reason: "Not Found"});
+                        errorArray.push({name: response.name, reason: "not found"});
                         break;
                 }
             }
