@@ -80,10 +80,7 @@ class Main {
                 guildchan = ' @ ' + message.guild.name + '->#' + message.channel.name;
             }
 
-            console.log('[' + messageTime + '] <' + message.author.username + guildchan + '> ' +
-                    message.content);
-            // Triggery
-            this.trig.checkTrigger(message);
+            console.log('[' + messageTime + '] <' + message.author.username + guildchan + '> ' + message.content);
         });
         this.client.on('ready', () => {
             /* Czas wiadomości hh:mm:ss */

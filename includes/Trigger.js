@@ -10,6 +10,10 @@ class Trigger {
         /* Lista triggerów */
         /* [name, path]    */
         this.triggers = [];
+
+        this.client.on('message', message => {
+            this.checkTrigger(message);
+        });
     }
 
     process() {
@@ -92,7 +96,6 @@ class Trigger {
     }
 
     checkTrigger(message) {
-
         if (!message.author.bot) {
             var params = {};
             /* Trigger */
