@@ -4,6 +4,7 @@ const Cfg = new require('./includes/Config.js');
 
 const userWatch = require('./includes/userWatch.js');
 const Trigger = require('./includes/Trigger.js');
+const ModulesLoader = require('./includes/ModulesLoader.js');
 //const VoiceManager = require('./includes/VoiceManager.js');
 const CLI = require('readline');
 
