@@ -63,6 +63,7 @@ class ModulesLoader {
                     console.log('------ Załadowano moduł ------');
                 } else {
                     console.log(messageTime + ' Pominięto moduł: ' + ModuleObj.name);
+                    console.log('------------------------------');
                 }
             }
         });
