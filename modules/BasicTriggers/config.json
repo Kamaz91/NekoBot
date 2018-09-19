@@ -1,4 +1,4 @@
 {
-    "enable": true,
-    "start": "basicTrigs.js"
+    "enabled": true,
+    "start": "BasicTriggers.js"
 }
