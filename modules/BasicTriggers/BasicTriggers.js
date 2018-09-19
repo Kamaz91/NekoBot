@@ -1,4 +1,4 @@
-class basicTrigs {
+class BasicTriggers {
     constructor(DiscordClient, triggerManager) {
         triggerManager.addTrigger({
             name: "xx",
@@ -7,3 +7,4 @@ class basicTrigs {
         });
     }
 }
+module.exports = BasicTriggers;
