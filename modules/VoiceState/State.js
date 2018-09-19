@@ -53,3 +53,5 @@ class voiceState {
         });
     }
 }
+
+module.exports = voiceState;
