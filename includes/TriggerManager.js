@@ -3,7 +3,7 @@ class TriggerManager {
         this.Client = Client;
     }
 
-    addtrigger() {
+    addTrigger() {
 
     }
 }
