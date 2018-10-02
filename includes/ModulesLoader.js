@@ -13,11 +13,11 @@ class ModulesLoader {
     }
     loadModules() {
         console.log("Module Loader:");
+        console.log('-----------------------------');
         fs.readdirSync(`.${modulesDir}`).forEach(moduleName => {
             // Przeszukiwanie folderu modułów
             var jsonPath = `.${modulesDir}${moduleName}${path.sep}config.json`;
             if (fs.existsSync(jsonPath)) {
-                console.log("Moduł: " + moduleName);
                 let jsonConfig = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
                 // Ładowanie konfiguracji modułu
                 let date = new Date();
@@ -41,15 +41,15 @@ class ModulesLoader {
                 // Dołączenie danych z pliku Json
 
                 if (ModuleObj.enabled) {
-                    console.log(messageTime + ' Ładowanie modułu: ' + ModuleObj.name);
+                    console.log(messageTime + ' Loading module: ' + ModuleObj.name);
                     try {
                         var mod = require(`..${modulesDir}${moduleName}${path.sep}${ModuleObj.start}`);
                     } catch (exception) {
-                        console.log('ERROR - Wystąpił błąd Podczas ładowania ');
+                        console.log('ERROR - An error occurred while loading ');
                         console.log(exception);
                     }
                     try {
-                        ModuleObj.module = new mod(this.DiscordClient, this.TriggerManager);
+                        ModuleObj.module = new mod(this.DiscordClient, this.TriggerManager, this);
                         // Inicjalizacja
                         ModuleObj.status = true;
                         // Zmiana statusu
@@ -57,13 +57,13 @@ class ModulesLoader {
                         // Dodawanie do listy
 
                     } catch (exception) {
-                        console.log('ERROR - Wystąpił błąd Podczas inicjalizacji modułu ');
+                        console.log('ERROR - An error occurred while loading ');
                         console.log(exception);
                     }
-                    console.log('------ Załadowano moduł ------');
+                    console.log('------- Module loaded -------');
                 } else {
-                    console.log(messageTime + ' Pominięto moduł: ' + ModuleObj.name);
-                    console.log('------------------------------');
+                    console.log(messageTime + ' Module skipped: ' + ModuleObj.name);
+                    console.log('-----------------------------');
                 }
             }
         });
