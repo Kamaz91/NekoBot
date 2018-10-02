@@ -38,7 +38,7 @@ class Main {
 
         this.client = new Discord.Client();
         this.client.login(new Cfg().getToken('DiscordBot'));
-        this.TriggerManager = new TriggerManager();
+        this.TriggerManager = new TriggerManager(this.client);
         this.ModulesLoader = new ModulesLoader(this.client, this.TriggerManager);
 
         this.debugLock = true;
