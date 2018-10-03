@@ -2,11 +2,8 @@
 const Discord = require('discord.js');
 const Cfg = new require('./includes/Config.js');
 
-const userWatch = require('./includes/userWatch.js');
-//const Trigger = require('./includes/Trigger.js');
 const TriggerManager = require('./includes/TriggerManager.js');
 const ModulesLoader = require('./includes/ModulesLoader.js');
-//const VoiceManager = require('./includes/VoiceManager.js');
 const CLI = require('readline');
 
 knex = require('knex')({
@@ -42,11 +39,7 @@ class Main {
         this.ModulesLoader = new ModulesLoader(this.client, this.TriggerManager);
 
         this.debugLock = true;
-        /* Ładowanie modułów*/
-        //this.PlayIt = new VoiceManager();
-        this.userWatch = new userWatch(this.client);
-        //this.trig = new Trigger(this.client);
-        //this.trig.loadTriggers();
+
         /* Listeners */
         this.initCLI();
         this.initListeners(this.trig);
