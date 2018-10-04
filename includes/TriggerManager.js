@@ -16,6 +16,8 @@ class TriggerManager {
                 moduleName: null,
                 activator: null,
                 key: null,
+                desc: null,
+                subTrigger: null,
                 content: null,
                 prefix: this.TriggerDefaultPrefix
             }
@@ -28,17 +30,18 @@ class TriggerManager {
             console.log("Registered trigger: " + x.activator);
             return true;
         } else {
+            console.log("Cannot registered trigger: " + trigger.key + " Content:" + trigger.content);
             return false;
         }
     }
 
-    MatchInTriggersList(trigger) {
-        var len = this.TriggersList.length;
-        for (var i = 0; i < len; i++) {
-            var x = new RegExp(`^${this.TriggersList[i].activator}(\\s|$)`, "i").exec(trigger)
+
+    MatchInTriggersList(trigger, triggersList) {
+        for (var i = 0; i < triggersList.length; i++) {
+            var x = new RegExp(`^${triggersList[i].activator}(\\s|$)`, "i").exec(trigger)
             if (x != null) {
                 let text = x.input.slice(x[0].length).trim();
-                return { key: x[0].trim(), raw: x.input, text: text, arguments: text.split(' ') };
+                return { key: x[0].trim(), subKey: null, raw: x.input, text: text, arguments: text.split(' ') };
             }
         }
         return null;
@@ -46,22 +49,35 @@ class TriggerManager {
 
     CheckTrigger(message) {
         if (!message.author.bot) {
-            var match = this.MatchInTriggersList(message.content)
-            if (match != null) {
+            var triggerMatch = this.MatchInTriggersList(message.content, this.TriggersList)
+            if (triggerMatch != null) {
                 this.TriggersList.find((element, index, array) => {
-                    if (element.activator == match.key) {
+                    if (element.activator == triggerMatch.key) {
+                        if (element.subTrigger != null && triggerMatch.arguments.length > 0) {
+                            var subTriggerMatch = this.MatchInTriggersList(triggerMatch.text, element.subTrigger)
+                            if (subTriggerMatch != null) {
+                                return element.subTrigger.find((element, index, array) => {
+                                    try {
+                                        if (subTriggerMatch.key == element.activator) {
+                                            triggerMatch.subKey = subTriggerMatch.key;
+                                            triggerMatch.text = subTriggerMatch.text;
+                                            triggerMatch.arguments = subTriggerMatch.arguments;
+
+                                            element.content(message, triggerMatch);
+                                            return true;
+                                        }
+                                    } catch (exception) {
+                                        console.log(exception);
+                                        return false;
+                                    }
+                                });
+                            }
+                        }
                         try {
-                            let date = new Date();
-                            let t = [
-                                `0${date.getHours()}`.slice(-2),   // Godziny
-                                `0${date.getMinutes()}`.slice(-2), // Minuty
-                                `0${date.getSeconds()}`.slice(-2)  // Sekundy
-                            ];
-                            console.log(t.join(':'));
-                            console.log(element);
-                            element.content(message, match);
+                            element.content(message, triggerMatch);
                             return true;
                         } catch (exception) {
+                            console.log(exception);
                             return false;
                         }
                     }
@@ -69,6 +85,7 @@ class TriggerManager {
                 });
             }
         }
+        return false;
     }
 }
 

@@ -7,24 +7,62 @@ class BasicTriggers {
 
         TriggerManager.RegisterTrigger({
             moduleName: "BasicTriggers",
+            desc: "",
             content: (message, trigger) => { message.reply("test") },
-            key: "test",
+            key: "test1",
             prefix: "." //optional. if not defined using default prefix
         });
         TriggerManager.RegisterTrigger({
             moduleName: "BasicTriggers",
-            content: this.test2,
+            desc: "",
+            content: (message, trigger) => { this.embed(message, trigger) },
             key: "test2",
             prefix: "." //optional. if not defined using default prefix
         });
+        TriggerManager.RegisterTrigger({
+            moduleName: "BasicTriggers",
+            desc: "",
+            content: null,
+            key: "invalid1",
+            prefix: "." //optional. if not defined using default prefix
+        });
+        TriggerManager.RegisterTrigger({
+            moduleName: "BasicTriggers",
+            desc: "",
+            content: null,
+            key: "",
+            prefix: "." //optional. if not defined using default prefix
+        });
+        TriggerManager.RegisterTrigger({
+            moduleName: "BasicTriggers",
+            content: (message, trigger) => { this.embed(message, trigger) },
+            key: "subtest1",
+            subTrigger: [
+                {
+                    activator: "t1",
+                    desc: "",
+                    content: (message, trigger) => { this.embed(message, trigger) }
+                },
+                {
+                    activator: "t2",
+                    desc: "",
+                    content: (message, trigger) => { message.channel.send(trigger.subKey) }
+                }
+            ],
+            prefix: "." //optional. if not defined using default prefix
+        });
     }
-    test2(message, trigger) {
+    embed(message, trigger) {
         var a = '';
         var x;
-        for (x = 0; x < trigger.arguments.length; x++) {
+        for (x in trigger.arguments) {
             a += '[' + x + '] => ' + trigger.arguments[x] + '\n';
         };
-        console.log(trigger.arguments);
+
+        if (a == null || a.length == 0) a = 'nothing';
+        if (trigger.text == null || trigger.text.length == 0) trigger.text = 'nothing';
+        if (trigger.subKey == null) trigger.subKey = 'nothing';
+
         var embed = {
             "embed": {
                 "color": 0x464442,
@@ -42,6 +80,10 @@ class BasicTriggers {
                         "value": trigger.key
                     },
                     {
+                        "name": "subKey",
+                        "value": trigger.subKey
+                    },
+                    {
                         "name": "Raw",
                         "value": trigger.raw
                     },
@@ -52,7 +94,6 @@ class BasicTriggers {
                 ]
             }
         };
-        message.channel.send("test2").catch(console.error);
         message.channel.send(embed).catch(console.error);
     }
 }
