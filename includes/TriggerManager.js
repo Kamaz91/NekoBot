@@ -35,6 +35,82 @@ class TriggerManager {
         }
     }
 
+    IsTriggerExist(activator) {
+        if (this.TriggersList.find((element, index) => {
+            if (element.activator == activator) {
+                return true;
+            }
+        })) return true;
+        else return false
+    }
+
+    IsTriggersExist(ModuleName) {
+        var i = 0;
+        this.TriggersList.find((element, index) => {
+            if (element.moduleName == ModuleName) {
+                i++
+            }
+        });
+        return i;
+    }
+
+    GetTriggerByKey(Key) {
+        var x = null;
+        x = this.TriggersList.find((element, index) => {
+            if (element.key == Key) {
+                return element;
+            }
+        });
+        return x;
+    }
+
+    GetTriggerByActivator(activator) {
+        var x = null;
+        x = this.TriggersList.find((element, index) => {
+            if (element.activator == activator) {
+                return element;
+            }
+        });
+        return x;
+    }
+
+    GetTriggersByModuleName(ModuleName) {
+        var elements = [];
+        this.TriggersList.find((element, index) => {
+            if (element.ModuleName == ModuleName) {
+                elements.push(element);
+            }
+        });
+        return elements;
+    }
+
+    GetTriggers(ModuleName) {
+        return this.TriggersList;
+    }
+
+    RemoveTriggers() {
+        this.TriggersList = null;
+    }
+
+    RemoveTriggersByModule(moduleName) {
+        var i = 0;
+        this.TriggersList.find((element, index) => {
+            if (element.moduleName == moduleName) {
+                this.triggersList.splice(index, 1);
+                i++
+            }
+        });
+        return i;
+    }
+
+    RemoveTriggerByActivator(Activator) {
+        return this.TriggersList.find((element, index) => {
+            if (element.Activator == Activator) {
+                this.triggersList.splice(index, 1);
+                return true;
+            }
+        });
+    }
 
     MatchInTriggersList(trigger, triggersList) {
         for (var i = 0; i < triggersList.length; i++) {
