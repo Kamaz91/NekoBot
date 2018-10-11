@@ -79,13 +79,6 @@ class Main {
             console.log(messageTime + ' error');
             console.log(error);
         });
-        this.client.on('debug', info => {
-            if (this.debugLock === false) {
-                /* Czas wiadomości hh:mm:ss */
-                var messageTime = time();
-                console.log(messageTime + ' debug {' + info + '}');
-            }
-        });
     }
 }
 
