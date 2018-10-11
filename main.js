@@ -4,7 +4,6 @@ const Cfg = new require('./includes/Config.js');
 
 const TriggerManager = require('./includes/TriggerManager.js');
 const ModulesLoader = require('./includes/ModulesLoader.js');
-const CLI = require('readline');
 
 knex = require('knex')({
     client: 'sqlite3',
@@ -40,33 +39,7 @@ class Main {
 
         this.debugLock = true;
 
-        /* Listeners */
-        this.initCLI();
         this.initListeners(this.trig);
-    }
-
-    initCLI() {
-        const rl = CLI.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-        rl.on('line', (line) => {
-            var messageTime = time();
-            if (line === 'debug on') {
-                this.debugLock = false;
-                console.log(messageTime + ' Debug mode on');
-            }
-            if (line === 'debug off') {
-                this.debugLock = true;
-                console.log(messageTime + ' Debug mode off');
-            }
-            if (line === 'reload triggers') {
-                this.trig.reloadTriggers();
-            }
-            if (line === 'rt') {
-                this.trig.reloadTriggers();
-            }
-        });
     }
 
     initListeners() {
