@@ -1,8 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const modulesDir = `${path.sep}modules${path.sep}`;
-
+const modulesDir = path.resolve('modules');
 class ModulesLoader {
 
     constructor(DiscordClient, TriggerManager) {
@@ -13,12 +12,14 @@ class ModulesLoader {
     }
     loadModules() {
         console.log("Module Loader:");
+        console.log('Modules dir: ' + modulesDir);
         console.log('-----------------------------');
-        fs.readdirSync(`.${modulesDir}`).forEach(moduleName => {
+        fs.readdirSync(modulesDir).forEach(moduleName => {
             // Przeszukiwanie folderu modułów
-            var jsonPath = `.${modulesDir}${moduleName}${path.sep}config.json`;
+            var jsonPath = path.resolve(modulesDir, moduleName, 'config.json');
             if (fs.existsSync(jsonPath)) {
                 let jsonConfig = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+
                 // Ładowanie konfiguracji modułu
                 let date = new Date();
                 let t = [
@@ -30,7 +31,7 @@ class ModulesLoader {
                 // Czas systemu hh:mm:ss
                 var ModuleObj = {
                     name: moduleName,
-                    path: `..${modulesDir}${moduleName}${path.sep}`,
+                    path: path.resolve(modulesDir, moduleName),
                     module: null,
                     enabled: false,
                     status: false,
@@ -43,7 +44,7 @@ class ModulesLoader {
                 if (ModuleObj.enabled) {
                     console.log(messageTime + ' Loading module: ' + ModuleObj.name);
                     try {
-                        var mod = require(`..${modulesDir}${moduleName}${path.sep}${ModuleObj.start}`);
+                        var mod = require(path.resolve(modulesDir, moduleName, ModuleObj.start));
                     } catch (exception) {
                         console.log('ERROR - An error occurred while loading ');
                         console.log(exception);
