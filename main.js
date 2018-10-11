@@ -85,7 +85,6 @@ class Main {
             /* Czas wiadomości hh:mm:ss */
             var messageTime = time();
             console.log(messageTime + ' Connected!');
-            this.client.user.setActivity('NekoBot alpha v.0010');
         });
         this.client.on('disconnect', closeEvent => {
             //client.destroy();

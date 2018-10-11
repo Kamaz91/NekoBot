@@ -5,6 +5,14 @@ class BasicTriggers {
         this.Client = DiscordClient;
         this.ModuleLoader = ModuleLoader;
         this.TriggerManager = TriggerManager;
+        this.Activity = {
+            text: "NekoBot alpha v.0010",
+            options: { type: "WATCHING" }
+        };
+
+        this.Client.on('ready', () => {
+            this.Client.user.setActivity(this.Activity.text, this.Activity.options.type);
+        });
 
         TriggerManager.RegisterTrigger({
             moduleName: "Fun",
@@ -189,8 +197,10 @@ class BasicTriggers {
                         break;
                 }
                 this.Client.user.setActivity(text, options);
+                this.Activity = { text: text, options: options };
             } else {
                 this.Client.user.setActivity();
+                this.Activity = null;
             }
         }
     }
