@@ -89,7 +89,7 @@ class TriggerManager {
     }
 
     RemoveTriggers() {
-        this.TriggersList = null;
+        this.TriggersList = [];
     }
 
     RemoveTriggersByModule(moduleName) {
