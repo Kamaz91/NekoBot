@@ -71,9 +71,21 @@ class ModulesLoader {
     }
 
     reloadModules() {
-        for (let module of this.modulesPath) {
-            this.removeModule(module.path);
-        }
+        let date = new Date();
+        let t = [
+            `0${date.getHours()}`.slice(-2),   // Godziny
+            `0${date.getMinutes()}`.slice(-2), // Minuty
+            `0${date.getSeconds()}`.slice(-2)  // Sekundy
+        ];
+        var messageTime = t.join(':');
+        this.TriggerManager.RemoveTriggers();
+        console.log(messageTime + " Triggers removed");
+
+        Object.keys(this.ModulesList).forEach((key) => {
+            console.log(messageTime + " Module removed: " + this.ModulesList[key].name);
+            this.removeModule(path.resolve(this.ModulesList[key].path, this.ModulesList[key].start));
+        });
+
         this.loadModules();
     }
 
