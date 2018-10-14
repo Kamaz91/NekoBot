@@ -31,29 +31,35 @@ class quotes {
 
     addQuote(message, trigger) {
         if (trigger.text.length > 0) {
-            knex('quotes').where({
-                guildId: message.guild.id
-            }).then((quote) => {
-                knex('quotes').insert({
-                    autorId: message.author.id,
-                    quoteIdByGuild: quote.length + 1,
-                    autorName: message.author.username,
-                    guildId: message.guild.id,
-                    guildName: message.guild.name,
-                    text: trigger.text,
-                    timestamp: Date.now()
-                }).then(() => {
-                    const embed = new Discord.RichEmbed()
-                        .setAuthor('Quote #' + (quote.length + 1))
-                        .setColor(0xEF017C)
-                        .setFooter('Autor: ' + message.author.username)
-                        .setTimestamp(new Date().toISOString())
-                        .addField('Cytat:', trigger.text);
+            knex('quotes').where({ guildId: message.guild.id })
+                .orderBy('quoteIdByGuild', 'desc')
+                .limit(1)
+                .then((quote) => {
+                    if (quote.length > 0) {
+                        var quoteIdByGuild = quote[0].quoteIdByGuild + 1;
+                    } else {
+                        var quoteIdByGuild = 1;
+                    }
+                    knex('quotes').insert({
+                        autorId: message.author.id,
+                        quoteIdByGuild: quoteIdByGuild,
+                        autorName: message.author.username,
+                        guildId: message.guild.id,
+                        guildName: message.guild.name,
+                        text: trigger.text,
+                        timestamp: Date.now()
+                    }).then(() => {
+                        const embed = new Discord.RichEmbed()
+                            .setAuthor('Quote #' + quoteIdByGuild)
+                            .setColor(0xEF017C)
+                            .setFooter('Autor: ' + message.author.username)
+                            .setTimestamp(new Date().toISOString())
+                            .addField('Cytat:', trigger.text);
 
-                    message.channel.send(embed);
-                    message.channel.send("Dodano cytat");
+                        message.channel.send(embed);
+                        message.channel.send("Dodano cytat");
+                    });
                 });
-            });
         } else {
             message.channel.send("Nie można dodać pustego cytatu");
         }
