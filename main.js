@@ -37,13 +37,6 @@ class Main {
         this.TriggerManager = new TriggerManager(this.client);
         this.ModulesLoader = new ModulesLoader(this.client, this.TriggerManager);
 
-        this.debugLock = true;
-
-        this.initListeners(this.trig);
-    }
-
-    initListeners() {
-
         this.client.on('message', message => {
             /* Czas wiadomości hh:mm:ss */
             var messageTime = time();
