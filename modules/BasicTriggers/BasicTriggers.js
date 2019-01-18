@@ -6,8 +6,8 @@ class BasicTriggers {
         this.ModuleLoader = ModuleLoader;
         this.TriggerManager = TriggerManager;
         this.Activity = {
-            text: "NekoBot alpha v.0010",
-            options: { type: "WATCHING" }
+            text: "NekoBot get some .help",
+            options: { type: "LISTENING" }
         };
 
         this.Client.on('ready', () => {
@@ -44,11 +44,17 @@ class BasicTriggers {
         });
         TriggerManager.RegisterTrigger({
             moduleName: "BasicTriggers",
+            desc: "dev",
             content: (message, trigger) => { this.embed(message, trigger) },
-            key: "trigger",
-            desc: "x",
-            subTrigger: [
-                {
+            key: "devtools",
+            prefix: "!" //optional. if not defined using default prefix
+        });
+        TriggerManager.RegisterTrigger({
+            moduleName: "BasicTriggers",
+            content: (message, trigger) => { this.showTriggers(message, trigger) },
+            key: "help",
+            desc: "i'm helping",
+            subTrigger: [{
                     activator: "get",
                     desc: "x",
                     content: (message, trigger) => { this.showTrigger(message, trigger); }
@@ -62,6 +68,7 @@ class BasicTriggers {
             prefix: "." //optional. if not defined using default prefix
         });
     }
+
     showTrigger(message, trigger) {
         if (this.TriggerManager.IsTriggerExist(trigger.arguments[0])) {
             var trig = this.TriggerManager.GetTriggerByActivator(trigger.arguments[0]);
@@ -73,8 +80,7 @@ class BasicTriggers {
                         "name": message.author.username,
                         "icon_url": message.author.avatarURL
                     },
-                    "fields": [
-                        {
+                    "fields": [{
                             "name": "moduleName",
                             "value": trig.moduleName
                         },
@@ -131,48 +137,49 @@ class BasicTriggers {
     }
 
     embed(message, trigger) {
-        var a = '';
-        var x;
-        for (x in trigger.arguments) {
-            a += '[' + x + '] => ' + trigger.arguments[x] + '\n';
-        };
+        if (message.author.id === new Cfg().adminId) {
+            var a = '';
+            var x;
+            for (x in trigger.arguments) {
+                a += '[' + x + '] => ' + trigger.arguments[x] + '\n';
+            };
 
-        if (a == null || a.length == 0) a = 'nothing';
-        if (trigger.text == null || trigger.text.length == 0) trigger.text = 'nothing';
-        if (trigger.subKey == null) trigger.subKey = 'nothing';
+            if (a == null || a.length == 0) a = 'nothing';
+            if (trigger.text == null || trigger.text.length == 0) trigger.text = 'nothing';
+            if (trigger.subKey == null) trigger.subKey = 'nothing';
 
-        var embed = {
-            "embed": {
-                "color": 0x464442,
-                "author": {
-                    "name": message.author.username,
-                    "icon_url": message.author.avatarURL
-                },
-                "fields": [
-                    {
-                        "name": "text",
-                        "value": trigger.text
+            var embed = {
+                "embed": {
+                    "color": 0x464442,
+                    "author": {
+                        "name": message.author.username,
+                        "icon_url": message.author.avatarURL
                     },
-                    {
-                        "name": "key",
-                        "value": trigger.key
-                    },
-                    {
-                        "name": "subKey",
-                        "value": trigger.subKey
-                    },
-                    {
-                        "name": "Raw",
-                        "value": trigger.raw
-                    },
-                    {
-                        "name": "arguments",
-                        "value": a
-                    }
-                ]
-            }
-        };
-        message.channel.send(embed).catch(console.error);
+                    "fields": [{
+                            "name": "text",
+                            "value": trigger.text
+                        },
+                        {
+                            "name": "key",
+                            "value": trigger.key
+                        },
+                        {
+                            "name": "subKey",
+                            "value": trigger.subKey
+                        },
+                        {
+                            "name": "Raw",
+                            "value": trigger.raw
+                        },
+                        {
+                            "name": "arguments",
+                            "value": a
+                        }
+                    ]
+                }
+            };
+            message.channel.send(embed).catch(console.error);
+        }
     }
 
     setActivity(message, trigger) {
@@ -267,30 +274,32 @@ class BasicTriggers {
             if (alfafbet.indexOf(char) > -1) {
                 stringBuild += ':regional_indicator_' + char.toString() + ':';
             } else
-                // Jeśli znak jest pytajnikiem 
-                if ('?' === char) {
-                    stringBuild += ':grey_question:';
-                } else
-                    // Jeśli znak jest wykrzynikiem
-                    if ('!' === char) {
-                        stringBuild += ':grey_exclamation:';
-                    } else
-                        // Jeśli znak jest odstępem podwójna spacja
-                        if (' ' === char) {
-                            stringBuild += '  ';
-                        } else {
-                            stringBuild += char;
-                        }
+            // Jeśli znak jest pytajnikiem 
+            if ('?' === char) {
+                stringBuild += ':grey_question:';
+            } else
+            // Jeśli znak jest wykrzynikiem
+            if ('!' === char) {
+                stringBuild += ':grey_exclamation:';
+            } else
+            // Jeśli znak jest odstępem podwójna spacja
+            if (' ' === char) {
+                stringBuild += '  ';
+            } else {
+                stringBuild += char;
+            }
             //console.log(val);
         }
         // Wysłanie wiadomości do kanału/użytkownika
-        message.channel.send(message.author.username + ': ' + stringBuild);
+        message.channel.send(stringBuild);
 
         // Kasowanie wiadomości aktywującej
         if (message.deletable) {
             message.delete()
-                .then(msg => console.log(`Deleted message from ${msg.author}`))
+                //.then(msg => console.log(`Deleted message from ${msg.author} ${message.content}`))
                 .catch(console.error);
+        } else {
+            console.log("cant delete message, no permissions");
         }
     }
 }

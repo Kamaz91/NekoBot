@@ -1,4 +1,3 @@
-
 const Discord = require('discord.js');
 const Cfg = new require('./includes/Config.js');
 
@@ -16,9 +15,9 @@ knex = require('knex')({
 function time() {
     let date = new Date();
     let t = [
-        `0${date.getHours()}`.slice(-2),   // Godziny
+        `0${date.getHours()}`.slice(-2), // Godziny
         `0${date.getMinutes()}`.slice(-2), // Minuty
-        `0${date.getSeconds()}`.slice(-2)  // Sekundy
+        `0${date.getSeconds()}`.slice(-2) // Sekundy
     ];
     return t.join(':');
 }
@@ -28,8 +27,7 @@ class Main {
     constructor() {
         console.log('Starting...');
         console.log('************************************');
-        console.log('*        NekoBot alpha v.0010      *');
-        console.log('* Last changes from day 19.09.2018 *');
+        console.log('*        NekoBot alpha v0010       *');
         console.log('************************************');
 
         this.client = new Discord.Client();
@@ -61,7 +59,7 @@ class Main {
             console.log(messageTime + ' ************');
             console.log(messageTime + ' End of Session');
         });
-        this.client.on('reconnecting', function () {
+        this.client.on('reconnecting', function() {
             /* Czas wiadomości hh:mm:ss */
             var messageTime = time();
             console.log(messageTime + ' reconnecting');
