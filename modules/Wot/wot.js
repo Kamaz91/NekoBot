@@ -7,10 +7,9 @@ class wot {
         TriggerManager.RegisterTrigger({
             moduleName: "WoT",
             desc: "x",
-            content: (message, trigger) => { this.help(message) },
+            content: (message, trigger) => { this.searchProfile(message, trigger.arguments[0]) },
             key: "wot",
-            subTrigger: [
-                {
+            subTrigger: [{
                     activator: "drwal",
                     desc: "x",
                     content: (message, trigger) => { this.drwal(message, trigger.arguments); }
@@ -29,6 +28,11 @@ class wot {
                     activator: "s",
                     desc: "search alias",
                     content: (message, trigger) => { this.searchProfile(message, trigger.arguments[0]); }
+                },
+                {
+                    activator: "help",
+                    desc: "help",
+                    content: (message, trigger) => { this.help(message); }
                 }
             ],
             prefix: "!" //optional. if not defined using default prefix
@@ -194,13 +198,23 @@ class wot {
                     var ll = new Date(data.logout_at * 1000);
                     var lb = new Date(data.last_battle_time * 1000);
                     var treeratio = data.statistics.trees_cut / data.statistics.all.battles;
+
+                    switch (data.client_language.toString().toLowerCase()) {
+                        case "en":
+                            var flag = "gb";
+                            break;
+                        default:
+                            var flag = data.client_language.toString().toLowerCase();
+                            break;
+                    }
+
                     const embed = new Discord.RichEmbed()
                         .setAuthor(data.nickname, 'https://www.spreadshirt.pl/image-server/v1/designs/16507080,width=178,height=178/world-of-tanks-logo.png')
                         .setColor(0xEF017C)
-                        .setFooter('Wersja Językowa Klienta: ' + data.client_language.toString().toUpperCase(), `http://flags.fmcdn.net/data/flags/h80/${data.client_language}.png`)
+                        .setFooter('Wersja Językowa Klienta: ' + data.client_language.toString().toUpperCase(), `http://flags.fmcdn.net/data/flags/h80/${flag}.png`)
                         .setURL('http://worldoftanks.eu/pl/community/accounts/' + data.account_id)
 
-                        .addField('Basic',
+                    .addField('Basic',
                             `Id: **${data.account_id}** \n` +
                             `Nick: **${data.nickname}** \n` +
                             `Exp: **${all.xp}**`)
@@ -237,7 +251,7 @@ class wot {
             } else {
                 message.channel.send("Nie znaleziono podanego gracza");
                 if (resolve.data.meta.count > 0) {
-                    message.channel.send("Podobne: " + resolve.data.data.map(function (element) {
+                    message.channel.send("Podobne: " + resolve.data.data.map(function(element) {
                         return element.nickname;
                     }).join(", "));
                 }
@@ -248,6 +262,7 @@ class wot {
     help(message) {
         const embed = new Discord.RichEmbed();
         //embed.addField('!wot assign', "!wot assign **nick**");
+        embed.addField('!wot nick', "!wot **nick**");
         embed.addField('!wot search, s', "!wot search **nick**");
         embed.addField('!wot drwal, d', "!wot drwal **nick nick.. itd**");
         message.channel.send(embed);
