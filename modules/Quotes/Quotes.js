@@ -13,8 +13,7 @@ class quotes {
             },
             key: "quote",
             desc: "Cytaty",
-            subTrigger: [
-                {
+            subTrigger: [{
                     activator: "add",
                     desc: "Dodaj cytat",
                     content: (message, trigger) => { this.addQuote(message, trigger); }
@@ -57,7 +56,6 @@ class quotes {
                             .addField('Cytat:', trigger.text);
 
                         message.channel.send(embed);
-                        message.channel.send("Dodano cytat");
                     });
                 });
         } else {
@@ -89,7 +87,7 @@ class quotes {
         knex('quotes').where({
             quoteIdByGuild: trigger.arguments[0],
             guildId: message.guild.id
-        }).then(function (quote) {
+        }).then(function(quote) {
             if (quote.length > 0) {
                 const embed = new Discord.RichEmbed()
                     .setAuthor('Quote #' + quote[0].quoteIdByGuild)
