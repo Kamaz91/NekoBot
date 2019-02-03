@@ -296,7 +296,6 @@ class BasicTriggers {
         // Kasowanie wiadomości aktywującej
         if (message.deletable) {
             message.delete()
-                //.then(msg => console.log(`Deleted message from ${msg.author} ${message.content}`))
                 .catch(console.error);
         } else {
             console.log("cant delete message, no permissions");

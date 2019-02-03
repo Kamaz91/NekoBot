@@ -51,11 +51,8 @@ class Main {
             console.log(messageTime + ' Connected!');
         });
         this.client.on('disconnect', closeEvent => {
-            //client.destroy();
-            //client.login(TOKENS.DiscordBot);
             /* Czas wiadomości hh:mm:ss */
             var messageTime = time();
-            //client.login(TOKENS.DiscordBot);
             console.log(messageTime + ' ************');
             console.log(messageTime + ' End of Session');
         });
