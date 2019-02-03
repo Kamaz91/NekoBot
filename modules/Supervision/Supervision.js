@@ -17,35 +17,42 @@ class Supervision {
                 // Jeśli istnieje w tablicy przypisany kanał do logów
                 var logsChannelId = config.logsChannels[guild.id];
 
-                let date = new Date();
-                let t = [
-                    `0${date.getHours()}`.slice(-2), // Godziny
-                    `0${date.getMinutes()}`.slice(-2), // Minuty
-                    `0${date.getSeconds()}`.slice(-2) // Sekundy
-                ];
-                var messageTime = t.join(':');
-
                 try {
+                    const embed = new Discord.RichEmbed().setTimestamp(new Date());
                     if (newMember.voiceChannelID !== oldMember.voiceChannelID && logsChannelId !== null) {
                         var logsChannel = guild.channels.get(logsChannelId);
 
                         if (oldMember.voiceChannelID === null || oldMember.voiceChannelID === undefined) {
-                            logsChannel.send('[' + messageTime + '] **' + newMember.displayName + '** (' + newMember.user.username + ')' + ' joined to **' + newMember.voiceChannel + '**');
+                            embed.setAuthor(newMember.displayName + "#" + newMember.user.discriminator, newMember.user.displayAvatarURL);
+                            embed.setDescription('Joined to **' + newMember.voiceChannel + '**');
+                            embed.setColor([79, 214, 38]);
                         } else if (newMember.voiceChannelID && oldMember.voiceChannelID) {
-                            logsChannel.send('[' + messageTime + '] **' + newMember.displayName + '** (' + newMember.user.username + ')' + ' switched from **' + oldMember.voiceChannel + '** to **' + newMember.voiceChannel + '**');
+                            embed.setAuthor(newMember.displayName + "#" + newMember.user.discriminator, newMember.user.displayAvatarURL);
+                            embed.setDescription('Switched from **' + oldMember.voiceChannel + '** to **' + newMember.voiceChannel + '**');
+                            embed.setColor([33, 108, 198]);
                         } else {
-                            logsChannel.send('[' + messageTime + '] **' + oldMember.displayName + '** (' + oldMember.user.username + ')' + ' left **' + oldMember.voiceChannel + '**');
+                            embed.setAuthor(oldMember.displayName + "#" + oldMember.user.discriminator, oldMember.user.displayAvatarURL);
+                            embed.setDescription('Left **' + oldMember.voiceChannel + '**');
+                            embed.setColor([214, 44, 38]);
                         }
+                        logsChannel.send(embed);
 
                         //serverDeaf serverMute
                     }
                     if (newMember.guild.id !== oldMember.guild.id) {
+                        const oembed = new Discord.RichEmbed().setTimestamp(new Date());
                         var ologsChannel = oldMember.guild.channels.get(config.logsChannels[oldMember.guild.id]);
-                        ologsChannel.send('[' + messageTime + '] **' + oldMember.displayName + '** (' + oldMember.user.username + ')' + ' left **' + oldMember.voiceChannel + '**');
+                        oembed.setAuthor(oldMember.displayName + "#" + oldMember.user.discriminator, oldMember.user.displayAvatarURL);
+                        oembed.setDescription('Left **' + oldMember.voiceChannel + '**');
+                        oembed.setColor([214, 44, 38]);
+                        ologsChannel.send(oembed);
 
+                        const nembed = new Discord.RichEmbed().setTimestamp(new Date());
                         var nlogsChannel = newMember.guild.channels.get(config.logsChannels[newMember.guild.id]);
-                        nlogsChannel.send('[' + messageTime + '] **' + newMember.displayName + '** (' + newMember.user.username + ')' + ' joined to **' + newMember.voiceChannel + '**');
-
+                        nembed.setAuthor(newMember.displayName + "#" + newMember.user.discriminator, newMember.user.displayAvatarURL);
+                        nembed.setDescription('Joined to **' + newMember.voiceChannel + '**');
+                        nembed.setColor([79, 214, 38]);
+                        nlogsChannel.send(nembed);
                     }
                 } catch (exception) {
                     console.log(exception);
@@ -75,9 +82,9 @@ class Supervision {
                 var urls = "";
                 try {
                     const embed = new Discord.RichEmbed()
-                        .setTitle("Deleted")
-                        .addField('User id', message.author.id)
-                        .addField('Channel', "#" + message.channel.name)
+                        .setDescription("**Deleted in **<#" + message.channel.id + ">")
+                        .setFooter("Message id: " + message.id)
+                        .setColor([214, 44, 38])
 
                     .setTimestamp(message.createdAt);
 
