@@ -19,7 +19,7 @@ class Supervision {
                     //
 
                     var timestring =
-                        `Joined: ${joined.format("DD, MM Do YYYY, HH:mm:ss")}\n` +
+                        `Joined: ${joined.format("DD/MM/YYYY, HH:mm:ss")}\n` +
                         `Spent: ` +
                         `${duration.years()} Years, ` +
                         `${duration.months()} Months, ` +
