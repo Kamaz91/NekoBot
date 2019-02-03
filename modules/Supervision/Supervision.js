@@ -1,11 +1,52 @@
 const Cfg = require('../../includes/Config.js');
 const Discord = require('discord.js'); // for embed builder
+const moment = require('moment');
 
 var config = new Cfg();
 
 class Supervision {
-    constructor(client) {
-        client.on('voiceStateUpdate', (oldMember, newMember) => {
+    constructor(DiscordClient) {
+        DiscordClient.on('guildMemberRemove', (member) => {
+            try {
+                if (config.guildLeftAdminPM.hasOwnProperty(member.guild.id)) {
+                    var guild = member.guild;
+                    var admins = config.guildLeftAdminPM[guild.id];
+
+                    // User Spent time
+                    var leftTime = moment(new Date());
+                    var joined = moment(member.joinedAt);
+                    var duration = moment.duration(leftTime.diff(joined));
+                    //
+
+                    var timestring =
+                        `Joined: ${joined.format("DD, MM Do YYYY, HH:mm:ss")}\n` +
+                        `Spent: ` +
+                        `${duration.years()} Years, ` +
+                        `${duration.months()} Months, ` +
+                        `${duration.days()} Days, ` +
+                        `${duration.hours()} Hours, ` +
+                        `${duration.minutes()} Minutes, ` +
+                        `${duration.seconds()} Seconds`;
+
+                    const embed = new Discord.RichEmbed().setTimestamp(new Date());
+                    embed.setAuthor(member.displayName + "#" + member.user.discriminator, member.user.displayAvatarURL);
+                    embed.setThumbnail(guild.iconURL);
+                    embed.setDescription('**Left** ' + guild.name);
+                    embed.addField('Time', timestring);
+                    embed.setFooter('Guild Id: ' + guild.id)
+                    embed.setColor([214, 44, 38]);
+
+                    console.log(admins);
+                    for (var id in admins) {
+                        guild.members.get(admins[id]).send(embed);
+                    }
+                }
+            } catch (exception) {
+                console.log(exception);
+            }
+
+        });
+        DiscordClient.on('voiceStateUpdate', (oldMember, newMember) => {
 
             if (newMember.voiceChannelID === null || newMember.voiceChannelID === undefined) {
                 var guild = newMember.guild;
@@ -60,7 +101,7 @@ class Supervision {
             }
         });
 
-        client.on('messageDelete', (message) => {
+        DiscordClient.on('messageDelete', (message) => {
             /* 
              * ************ ! UWAGA ! ************
              *
