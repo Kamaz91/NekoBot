@@ -23,7 +23,7 @@ class TriggerManager {
         var trigger = Object.assign(temp, data);
         trigger.activator = trigger.prefix + trigger.key;
 
-        if (trigger.content != null && trigger.key != null && IsTriggerExist(trigger.activator) == false) {
+        if (trigger.content != null && trigger.key != null && this.IsTriggerExist(trigger.activator) == false) {
             this.TriggersList.push(trigger);
             console.log("Registered trigger: " + trigger.activator);
             return true;
