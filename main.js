@@ -5,10 +5,12 @@ const TriggerManager = require('./includes/TriggerManager.js');
 const ModulesLoader = require('./includes/ModulesLoader.js');
 
 knex = require('knex')({
-    client: 'sqlite3',
-    useNullAsDefault: true,
+    client: 'mysql2',
     connection: {
-        filename: "data/database.sqlite"
+        host: new Cfg().getToken('dbhost'),
+        user: new Cfg().getToken('dbuser'),
+        password: new Cfg().getToken('dbpass'),
+        database: new Cfg().getToken('dbdata')
     }
 });
 

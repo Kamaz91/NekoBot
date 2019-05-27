@@ -6,6 +6,27 @@ var config = new Cfg();
 
 class Supervision {
     constructor(DiscordClient) {
+
+        DiscordClient.on('message', message => {
+            if (!message.author.bot) {
+                let userid = message.author.id;
+                let guildid = message.guild.id;
+                let ymd = moment().format("YYYYMMDD");
+                let hour = moment().format("H");
+
+                knex('message_counter')
+                    .where({ user_id: userid, guild_id: guildid, ymd: ymd })
+                    .increment(hour, 1)
+                    .then(i => {
+                        if (i === 0) {
+                            knex('message_counter').insert({ user_id: userid, guild_id: guildid, ymd: ymd, [hour]: 1 })
+                                .then()
+                                .catch(console.error);
+                        }
+                    })
+                    .catch(console.error);
+            }
+        });
         DiscordClient.on('guildMemberRemove', (member) => {
             try {
                 if (config.guildLeftAdminPM.hasOwnProperty(member.guild.id)) {
@@ -45,6 +66,47 @@ class Supervision {
                 console.log(exception);
             }
 
+        });
+        DiscordClient.on('presenceUpdate', (om, nm) => {
+            // om = oldMember
+            // nm = newMember
+            try {
+                if (!nm.user.bot || !om.user.bot) {
+                    var nmp = nm.presence;
+                    var omp = om.presence;
+                    var data = {};
+
+                    data.userId = nm.id;
+                    data.guildId = nm.guild.id;
+                    data.nmom = 1;
+                    data.timestamp = Date.now();
+                    data.status = nmp.status;
+                    data.ostatus = omp.status;
+
+                    if (nmp.game) {
+                        data.gameName = nmp.game.name;
+                        data.gameState = nmp.game.state;
+                        data.gameDetails = nmp.game.details;
+
+                        if (nmp.game.applicationID) {
+                            data.gameId = nmp.game.applicationID;
+                        }
+                        if (nmp.game.timestamps) {
+                            if (nmp.game.timestamps.start) {
+                                data.gameStart = new Date(nmp.game.timestamps.start).getTime();
+                            }
+                            if (nmp.game.timestamps.end) {
+                                data.gameEnd = new Date(nmp.game.timestamps.end).getTime();
+                            }
+                        }
+                        //console.log(data);
+                        knex('presenceupdate').insert(data).then();
+                    }
+                }
+            } catch (ex) {
+                console.log('Presense status log error!');
+                console.log(ex);
+            }
         });
         DiscordClient.on('voiceStateUpdate', (oldMember, newMember) => {
 
@@ -162,6 +224,44 @@ class Supervision {
             }
         });
     }
+    statusToInt(params) {
+        switch (params) {
+            case 'undefined':
+                return 0;
+                break;
+            case 'offline':
+                return 1;
+                break;
+            case 'online':
+                return 2;
+                break;
+            case 'idle':
+                return 3;
+                break;
+            case 'dnd':
+                return 4;
+                break;
+        }
+    };
+    statusToString(params) {
+        switch (params) {
+            case 0:
+                return 'undefined';
+                break;
+            case 1:
+                return 'offline';
+                break;
+            case 2:
+                return 'online';
+                break;
+            case 3:
+                return 'idle';
+                break;
+            case 4:
+                return 'dnd';
+                break;
+        }
+    };
 }
 
 module.exports = Supervision;

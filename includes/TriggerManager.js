@@ -9,38 +9,36 @@ class TriggerManager {
         });
     }
 
-    RegisterTrigger(trigger) {
-        if (trigger.content != null && trigger.key != null) {
-            // szablon obiektu wyzwalacza
-            var temp = {
-                moduleName: null,
-                activator: null,
-                key: null,
-                desc: null,
-                subTrigger: null,
-                content: null,
-                prefix: this.TriggerDefaultPrefix
-            }
-            // łączenie obiektów
-            var x = Object.assign(temp, trigger);
-            // tworzenie aktywatora
-            x.activator = x.prefix + x.key;
-            //
-            this.TriggersList.push(x);
-            console.log("Registered trigger: " + x.activator);
+    RegisterTrigger(data) {
+        // szablon obiektu wyzwalacza
+        var temp = {
+            moduleName: null,
+            activator: null,
+            key: null,
+            desc: null,
+            subTrigger: null,
+            content: null,
+            prefix: this.TriggerDefaultPrefix
+        }
+        var trigger = Object.assign(temp, data);
+        trigger.activator = trigger.prefix + trigger.key;
+
+        if (trigger.content != null && trigger.key != null && this.IsTriggerExist(trigger.activator) == false) {
+            this.TriggersList.push(trigger);
+            console.log("Registered trigger: " + trigger.activator);
             return true;
         } else {
-            console.log("Cannot registered trigger: " + trigger.key + " Content:" + trigger.content);
+            console.log("Cannot register trigger: " + trigger.key + " Content:" + trigger.content);
             return false;
         }
     }
 
     IsTriggerExist(activator) {
         if (this.TriggersList.find((element, index) => {
-            if (element.activator == activator) {
-                return true;
-            }
-        })) return true;
+                if (element.activator == activator) {
+                    return true;
+                }
+            })) return true;
         else return false
     }
 

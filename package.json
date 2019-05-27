@@ -8,6 +8,7 @@
         "discord.js": "^11.3.0",
         "knex": "^0.13.0",
         "moment": "^2.18.1",
+        "mysql2": "^1.6.5",
         "opusscript": "^0.0.3",
         "request": "^2.81.0",
         "request-promise": "^4.2.2",
