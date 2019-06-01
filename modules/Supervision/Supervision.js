@@ -9,10 +9,10 @@ class Supervision {
 
         DiscordClient.on('message', message => {
             if (!message.author.bot) {
-                let userid = message.author.id;
-                let guildid = message.guild.id;
-                let ymd = moment().format("YYYYMMDD");
-                let hour = moment().format("H");
+                var userid = message.author.id;
+                var guildid = message.guild.id;
+                var ymd = moment().format("YYYYMMDD");
+                var hour = moment().format("H");
 
                 knex('message_counter')
                     .where({ user_id: userid, guild_id: guildid, ymd: ymd })
@@ -20,6 +20,17 @@ class Supervision {
                     .then(i => {
                         if (i === 0) {
                             knex('message_counter').insert({ user_id: userid, guild_id: guildid, ymd: ymd, [hour]: 1 })
+                                .then()
+                                .catch(console.error);
+                        }
+                    })
+                    .catch(console.error);
+                knex('message_counter_guilds')
+                    .where({ guild_id: guildid, ymd: ymd })
+                    .increment(hour, 1)
+                    .then(i => {
+                        if (i === 0) {
+                            knex('message_counter_guilds').insert({ guild_id: guildid, ymd: ymd, [hour]: 1 })
                                 .then()
                                 .catch(console.error);
                         }
