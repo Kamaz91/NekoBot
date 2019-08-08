@@ -1,11 +1,33 @@
 const Cfg = require('../../includes/Config.js');
 const Discord = require('discord.js'); // for embed builder
 const moment = require('moment');
+const CronJob = require('cron').CronJob;
 
 var config = new Cfg();
 
 class Supervision {
     constructor(DiscordClient) {
+        const job = new CronJob('0 */10 * * * *', function() {
+            const guilds = DiscordClient.guilds.array();
+            const d = new Date();
+            console.log('User presence status update:', d);
+            for (var guild of guilds) {
+                var members = guild.members.array();
+                for (var member of members) {
+                    if (!member.user.bot) {
+                        knex('user_presence').insert({
+                                user_id: member.id,
+                                guild_id: member.guild.id,
+                                status: member.presence.status,
+                                microtime_timestamp: moment().valueOf()
+                            })
+                            .then()
+                            .catch(console.error);
+                    }
+                }
+            }
+        });
+        job.start();
 
         DiscordClient.on('message', message => {
             if (!message.author.bot) {
@@ -14,23 +36,72 @@ class Supervision {
                 var ymd = moment().format("YYYYMMDD");
                 var hour = moment().format("H");
 
-                knex('message_counter')
-                    .where({ user_id: userid, guild_id: guildid, ymd: ymd })
-                    .increment(hour, 1)
+                var words = message.content.split(' ').length;
+                var chars = message.content.length;
+                var attachments = 0;
+
+                // if no characters in message it's probably image or file
+                // count as a message
+                if (chars <= 0) {
+                    words = 0;
+                    attachments = 1;
+                }
+
+                knex('message_counter_user_stats')
+                    .where({
+                        user_id: userid,
+                        guild_id: guildid
+                    })
+                    .increment({
+                        total_messages: 1,
+                        total_words: words,
+                        total_chars: chars,
+                        total_attachments: attachments
+                    })
                     .then(i => {
                         if (i === 0) {
-                            knex('message_counter').insert({ user_id: userid, guild_id: guildid, ymd: ymd, [hour]: 1 })
+                            knex('message_counter_user_stats').insert({
+                                    user_id: userid,
+                                    guild_id: guildid,
+                                    random_quote_last_update: moment().valueOf(),
+                                    total_messages: 1,
+                                    total_words: words,
+                                    total_chars: chars,
+                                    total_attachments: attachments
+                                })
                                 .then()
                                 .catch(console.error);
                         }
                     })
                     .catch(console.error);
+
+                knex('message_counter')
+                    .where({ user_id: userid, guild_id: guildid, ymd: ymd })
+                    .increment(hour, 1)
+                    .then(i => {
+                        if (i === 0) {
+                            knex('message_counter').insert({
+                                    user_id: userid,
+                                    guild_id: guildid,
+                                    ymd: ymd,
+                                    [hour]: 1
+                                })
+                                .then()
+                                .catch(console.error);
+                        }
+                    })
+                    .catch(console.error);
+
                 knex('message_counter_guilds')
                     .where({ guild_id: guildid, ymd: ymd })
                     .increment(hour, 1)
                     .then(i => {
                         if (i === 0) {
-                            knex('message_counter_guilds').insert({ guild_id: guildid, ymd: ymd, [hour]: 1 })
+                            knex('message_counter_guilds').insert({
+                                    guild_id: guildid,
+                                    ymd: ymd,
+                                    [hour]: 1
+                                })
                                 .then()
                                 .catch(console.error);
                         }
