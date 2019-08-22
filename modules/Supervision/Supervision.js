@@ -44,7 +44,10 @@ class Supervision {
                 // count as a message
                 if (chars <= 0) {
                     words = 0;
-                    attachments = 1;
+
+                }
+                if (message.attachments.array().length > 0) {
+                    attachments = message.attachments.array().length;
                 }
 
                 knex('message_counter_user_stats')
@@ -60,10 +63,13 @@ class Supervision {
                     })
                     .then(i => {
                         if (i === 0) {
+                            let timestamp = moment().valueOf();
                             knex('message_counter_user_stats').insert({
                                     user_id: userid,
                                     guild_id: guildid,
-                                    random_quote_last_update: moment().valueOf(),
+                                    random_quote_last_update: timestamp,
+                                    created_timestamp: timestamp,
+                                    last_message_timestamp: timestamp,
                                     total_messages: 1,
                                     total_words: words,
                                     total_chars: chars,
