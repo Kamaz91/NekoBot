@@ -58,6 +58,7 @@ class Supervision {
                     })
                     .update({ last_message_timestamp: moment().valueOf() })
                     .then(i => {
+                        // if 0 db cant find row to update so create one
                         if (i === 0) {
                             let timestamp = moment().valueOf();
                             knex('message_counter_user_stats').insert({
@@ -81,6 +82,7 @@ class Supervision {
                     .where({ user_id: userid, guild_id: guildid, ymd: ymd })
                     .increment(hour, 1)
                     .then(i => {
+                        // if 0 db cant find row to update so create one
                         if (i === 0) {
                             knex('message_counter').insert({
                                     user_id: userid,
@@ -98,6 +100,7 @@ class Supervision {
                     .where({ guild_id: guildid, ymd: ymd })
                     .increment(hour, 1)
                     .then(i => {
+                        // if 0 db cant find row to update so create one
                         if (i === 0) {
                             knex('message_counter_guilds').insert({
                                     guild_id: guildid,
