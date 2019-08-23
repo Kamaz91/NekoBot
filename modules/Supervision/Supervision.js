@@ -40,12 +40,7 @@ class Supervision {
                 var chars = message.content.length;
                 var attachments = 0;
 
-                // if no characters in message it's probably image or file
-                // count as a message
-                if (chars <= 0) {
-                    words = 0;
-
-                }
+                // attachments counter 
                 if (message.attachments.array().length > 0) {
                     attachments = message.attachments.array().length;
                 }
@@ -61,6 +56,7 @@ class Supervision {
                         total_chars: chars,
                         total_attachments: attachments
                     })
+                    .update({ last_message_timestamp: moment().valueOf() })
                     .then(i => {
                         if (i === 0) {
                             let timestamp = moment().valueOf();
