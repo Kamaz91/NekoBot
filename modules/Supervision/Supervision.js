@@ -2,6 +2,7 @@ const Cfg = require('../../includes/Config.js');
 const Discord = require('discord.js'); // for embed builder
 const moment = require('moment');
 const CronJob = require('cron').CronJob;
+const _ = require('lodash');
 
 var config = new Cfg();
 
@@ -29,89 +30,145 @@ class Supervision {
         });
         job.start();
 
+        DiscordClient.on('guildMemberAdd', member => {
+            if (!member.user.bot) {
+                knex('users')
+                    .insert({
+                        user_id: member.id,
+                        guild_id: member.guild.id,
+                        username: member.user.username,
+                        nickname: member.nickname,
+                        joined_timestamp: member.joinedTimestamp,
+                        avatar: member.user.displayAvatarURL,
+                        account_created_timestamp: member.user.createdTimestamp,
+                        discriminator: member.user.discriminator
+                    })
+                    .then(console.log('User joined ', member.displayName, " to ", member.guild.name))
+                    .catch(console.error);
+            }
+        });
+
+        DiscordClient.on('guildMemberUpdate', (oldMember, newMember) => {
+            if (!newMember.user.bot) {
+                var diff = {};
+                oldMember.nickname !== newMember.nickname ? diff.nickname = newMember.nickname : false;
+                console.log(diff);
+                knex('users').update(diff).where({ user_id: newMember.id, guild_id: newMember.guild.id })
+                    .then()
+                    .catch(console.error);
+            }
+        });
+        DiscordClient.on('userUpdate', (oldUser, newUser) => {
+            if (!newUser.bot) {
+                var diff = {};
+                oldUser.username !== newUser.username ? diff.username = newUser.username : false;
+                oldUser.avatarURL !== newUser.avatarURL ? diff.avatar = newUser.avatarURL : false;
+                oldUser.discriminator !== newUser.discriminator ? diff.discriminator = newUser.discriminator : false;
+                console.log(diff);
+                knex('users').update(diff).where({ user_id: newUser.id })
+                    .then()
+                    .catch(console.error);
+            }
+        });
+
+        DiscordClient.on('guildUpdate', (oldGuild, newGuild) => {
+            var diff = {};
+            oldGuild.name !== newGuild.name ? diff.name = newGuild.name : false;
+            oldGuild.iconURL !== newGuild.iconURL ? diff.iconURL = newGuild.iconURL : false;
+            oldGuild.ownerID !== newGuild.ownerID ? diff.owner_Id = newGuild.ownerID : false;
+            console.log(diff);
+            knex('guilds').update(diff).where({ guild_id: newGuild.id })
+                .then()
+                .catch(console.error);
+        });
+
         DiscordClient.on('message', message => {
-            if (!message.author.bot) {
-                var userid = message.author.id;
-                var guildid = message.guild.id;
-                var ymd = moment().format("YYYYMMDD");
-                var hour = moment().format("H");
+            try {
+                if (!message.author.bot && message.guild) {
+                    var userid = message.author.id;
+                    var guildid = message.guild.id;
+                    var ymd = moment().format("YYYYMMDD");
+                    var hour = moment().format("H");
 
-                var words = message.content.split(' ').length;
-                var chars = message.content.length;
-                var attachments = 0;
+                    var words = message.content.split(' ').length;
+                    var chars = message.content.length;
+                    var attachments = 0;
 
-                // attachments counter 
-                if (message.attachments.array().length > 0) {
-                    attachments = message.attachments.array().length;
+                    // attachments counter 
+                    if (message.attachments.array().length > 0) {
+                        attachments = message.attachments.array().length;
+                    }
+
+                    knex('message_counter_user_stats')
+                        .where({
+                            user_id: userid,
+                            guild_id: guildid
+                        })
+                        .increment({
+                            total_messages: 1,
+                            total_words: words,
+                            total_chars: chars,
+                            total_attachments: attachments
+                        })
+                        .update({ last_message_timestamp: moment().valueOf() })
+                        .then(i => {
+                            // if 0 db cant find row to update so create one
+                            if (i === 0) {
+                                let timestamp = moment().valueOf();
+                                knex('message_counter_user_stats').insert({
+                                        user_id: userid,
+                                        guild_id: guildid,
+                                        random_quote_last_update: timestamp,
+                                        created_timestamp: timestamp,
+                                        last_message_timestamp: timestamp,
+                                        total_messages: 1,
+                                        total_words: words,
+                                        total_chars: chars,
+                                        total_attachments: attachments
+                                    })
+                                    .then()
+                                    .catch(console.error);
+                            }
+                        })
+                        .catch(console.error);
+
+                    knex('message_counter')
+                        .where({ user_id: userid, guild_id: guildid, ymd: ymd })
+                        .increment(hour, 1)
+                        .then(i => {
+                            // if 0 db cant find row to update so create one
+                            if (i === 0) {
+                                knex('message_counter').insert({
+                                        user_id: userid,
+                                        guild_id: guildid,
+                                        ymd: ymd,
+                                        [hour]: 1
+                                    })
+                                    .then()
+                                    .catch(console.error);
+                            }
+                        })
+                        .catch(console.error);
+
+                    knex('message_counter_guilds')
+                        .where({ guild_id: guildid, ymd: ymd })
+                        .increment(hour, 1)
+                        .then(i => {
+                            // if 0 db cant find row to update so create one
+                            if (i === 0) {
+                                knex('message_counter_guilds').insert({
+                                        guild_id: guildid,
+                                        ymd: ymd,
+                                        [hour]: 1
+                                    })
+                                    .then()
+                                    .catch(console.error);
+                            }
+                        })
+                        .catch(console.error);
                 }
-
-                knex('message_counter_user_stats')
-                    .where({
-                        user_id: userid,
-                        guild_id: guildid
-                    })
-                    .increment({
-                        total_messages: 1,
-                        total_words: words,
-                        total_chars: chars,
-                        total_attachments: attachments
-                    })
-                    .update({ last_message_timestamp: moment().valueOf() })
-                    .then(i => {
-                        // if 0 db cant find row to update so create one
-                        if (i === 0) {
-                            let timestamp = moment().valueOf();
-                            knex('message_counter_user_stats').insert({
-                                    user_id: userid,
-                                    guild_id: guildid,
-                                    random_quote_last_update: timestamp,
-                                    created_timestamp: timestamp,
-                                    last_message_timestamp: timestamp,
-                                    total_messages: 1,
-                                    total_words: words,
-                                    total_chars: chars,
-                                    total_attachments: attachments
-                                })
-                                .then()
-                                .catch(console.error);
-                        }
-                    })
-                    .catch(console.error);
-
-                knex('message_counter')
-                    .where({ user_id: userid, guild_id: guildid, ymd: ymd })
-                    .increment(hour, 1)
-                    .then(i => {
-                        // if 0 db cant find row to update so create one
-                        if (i === 0) {
-                            knex('message_counter').insert({
-                                    user_id: userid,
-                                    guild_id: guildid,
-                                    ymd: ymd,
-                                    [hour]: 1
-                                })
-                                .then()
-                                .catch(console.error);
-                        }
-                    })
-                    .catch(console.error);
-
-                knex('message_counter_guilds')
-                    .where({ guild_id: guildid, ymd: ymd })
-                    .increment(hour, 1)
-                    .then(i => {
-                        // if 0 db cant find row to update so create one
-                        if (i === 0) {
-                            knex('message_counter_guilds').insert({
-                                    guild_id: guildid,
-                                    ymd: ymd,
-                                    [hour]: 1
-                                })
-                                .then()
-                                .catch(console.error);
-                        }
-                    })
-                    .catch(console.error);
+            } catch (e) {
+                console.log(e);
             }
         });
         DiscordClient.on('guildMemberRemove', (member) => {
@@ -144,7 +201,6 @@ class Supervision {
                     embed.setFooter('Guild Id: ' + guild.id)
                     embed.setColor([214, 44, 38]);
 
-                    console.log(admins);
                     for (var id in admins) {
                         guild.members.get(admins[id]).send(embed);
                     }
@@ -152,6 +208,26 @@ class Supervision {
             } catch (exception) {
                 console.log(exception);
             }
+
+            if (!member.user.bot) {
+                // Update user data
+                knex('users').update({
+                        leave_timestamp: moment().valueOf(),
+                        left: 1
+                    })
+                    .then()
+                    .catch(console.error);
+
+                knex('users_actions').insert({
+                        user_id: member.id,
+                        guild_id: member.guild.id,
+                        type: "leave",
+                        create_timestamp: moment().valueOf()
+                    })
+                    .then()
+                    .catch(console.error);
+            }
+            console.log('User ', member.displayName, " left ", member.guild.name);
 
         });
         DiscordClient.on('presenceUpdate', (om, nm) => {
