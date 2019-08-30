@@ -44,6 +44,13 @@ class BasicTriggers {
         });
         TriggerManager.RegisterTrigger({
             moduleName: "BasicTriggers",
+            desc: "Guild statistics ",
+            content: (message, trigger) => { message.reply("http://kamazworkshop.ddns.net/nekobot/messagecounter/" + message.guild.id) },
+            key: "stats",
+            prefix: "!" //optional. if not defined using default prefix
+        });
+        TriggerManager.RegisterTrigger({
+            moduleName: "BasicTriggers",
             desc: "dev",
             content: (message, trigger) => { this.embed(message, trigger) },
             key: "devtools",
