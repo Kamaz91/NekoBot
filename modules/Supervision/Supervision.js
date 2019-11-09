@@ -8,7 +8,7 @@ var config = new Cfg();
 
 class Supervision {
     constructor(DiscordClient) {
-        const job = new CronJob('0 */10 * * * *', function() {
+        const job = new CronJob('0 */10 * * * *', function () {
             const guilds = DiscordClient.guilds.array();
             const d = new Date();
             console.log('User presence status update:', d);
@@ -17,11 +17,11 @@ class Supervision {
                 for (var member of members) {
                     if (!member.user.bot) {
                         knex('user_presence').insert({
-                                user_id: member.id,
-                                guild_id: member.guild.id,
-                                status: member.presence.status,
-                                microtime_timestamp: moment().valueOf()
-                            })
+                            user_id: member.id,
+                            guild_id: member.guild.id,
+                            status: member.presence.status,
+                            microtime_timestamp: moment().valueOf()
+                        })
                             .then()
                             .catch(console.error);
                     }
@@ -30,20 +30,52 @@ class Supervision {
         });
         job.start();
 
+        // TODO podzielić na mniejsze pliki 
+
         DiscordClient.on('guildMemberAdd', member => {
             if (!member.user.bot) {
+
+                // TODO sprawdzanie czy dana osoba istnieje już w bazie aby nie dublować rekordu
+
                 knex('users')
-                    .insert({
+                    .where({
                         user_id: member.id,
                         guild_id: member.guild.id,
-                        username: member.user.username,
-                        nickname: member.nickname,
-                        joined_timestamp: member.joinedTimestamp,
-                        avatar: member.user.displayAvatarURL,
-                        account_created_timestamp: member.user.createdTimestamp,
-                        discriminator: member.user.discriminator
                     })
-                    .then(console.log('User joined ', member.displayName, " to ", member.guild.name))
+                    .update({
+                        nickname: member.nickname,
+                        username: member.user.username,
+                        avatar: member.user.displayAvatarURL,
+                        discriminator: member.user.discriminator,
+                        left: 0
+                    })
+                    .then(i => {
+                        // if 0 db cant find row to update so create one
+                        if (i === 0) {
+                            knex('users')
+                                .insert({
+                                    user_id: member.id,
+                                    guild_id: member.guild.id,
+                                    username: member.user.username,
+                                    nickname: member.nickname,
+                                    joined_timestamp: member.joinedTimestamp,
+                                    avatar: member.user.displayAvatarURL,
+                                    account_created_timestamp: member.user.createdTimestamp,
+                                    discriminator: member.user.discriminator
+                                })
+                                .then(console.log('User joined ', member.displayName, " to ", member.guild.name))
+                                .catch(console.error);
+                        }
+                    });
+
+
+                knex('users_actions').insert({
+                    user_id: member.id,
+                    guild_id: member.guild.id,
+                    type: 'join',
+                    create_timestamp: moment().valueOf()
+                })
+                    .then()
                     .catch(console.error);
             }
         });
@@ -52,19 +84,90 @@ class Supervision {
             if (!newMember.user.bot) {
                 var diff = {};
                 oldMember.nickname !== newMember.nickname ? diff.nickname = newMember.nickname : false;
-                console.log(diff);
+
                 knex('users').update(diff).where({ user_id: newMember.id, guild_id: newMember.guild.id })
+                    .then()
+                    .catch(console.error);
+
+                knex('users_actions').insert({
+                    user_id: oldMember.id,
+                    guild_id: oldMember.guild.id,
+                    type: 'nickname',
+                    new_value: newMember.nickname,
+                    old_value: oldMember.nickname,
+                    create_timestamp: moment().valueOf()
+                })
                     .then()
                     .catch(console.error);
             }
         });
+
+        DiscordClient.on('guildMemberRemove', (member) => {
+            try {
+                if (config.guildLeftAdminPM.hasOwnProperty(member.guild.id)) {
+                    var guild = member.guild;
+                    var admins = config.guildLeftAdminPM[guild.id];
+
+                    // User Spent time
+                    var leftTime = moment(new Date());
+                    var joined = moment(member.joinedAt);
+                    var duration = moment.duration(leftTime.diff(joined));
+                    //
+
+                    var timestring =
+                        `Joined: ${joined.format("DD/MM/YYYY, HH:mm:ss")}\n` +
+                        `Spent: ` +
+                        `${duration.years()} Years, ` +
+                        `${duration.months()} Months, ` +
+                        `${duration.days()} Days, ` +
+                        `${duration.hours()} Hours, ` +
+                        `${duration.minutes()} Minutes, ` +
+                        `${duration.seconds()} Seconds`;
+
+                    const embed = new Discord.RichEmbed().setTimestamp(new Date());
+                    embed.setAuthor(member.displayName + "#" + member.user.discriminator, member.user.displayAvatarURL);
+                    embed.setThumbnail(guild.iconURL);
+                    embed.setDescription('**Left** ' + guild.name);
+                    embed.addField('Time', timestring);
+                    embed.setFooter('User Id: ' + member.id)
+                    embed.setColor([214, 44, 38]);
+
+                    for (var id in admins) {
+                        guild.members.get(admins[id]).send(embed);
+                    }
+                }
+            } catch (exception) {
+                console.log(exception);
+            }
+
+            if (!member.user.bot) {
+                // Update user data
+                knex('users').update({
+                    leave_timestamp: moment().valueOf(),
+                    left: 1
+                })
+                    .then()
+                    .catch(console.error);
+
+                knex('users_actions').insert({
+                    user_id: member.id,
+                    guild_id: member.guild.id,
+                    type: "leave",
+                    create_timestamp: moment().valueOf()
+                })
+                    .then()
+                    .catch(console.error);
+            }
+            console.log('User ', member.displayName, " left ", member.guild.name);
+        });
+
         DiscordClient.on('userUpdate', (oldUser, newUser) => {
             if (!newUser.bot) {
                 var diff = {};
                 oldUser.username !== newUser.username ? diff.username = newUser.username : false;
-                oldUser.avatarURL !== newUser.avatarURL ? diff.avatar = newUser.avatarURL : false;
+                oldUser.displayAvatarURL !== newUser.displayAvatarURL ? diff.avatar = newUser.displayAvatarURL : false;
                 oldUser.discriminator !== newUser.discriminator ? diff.discriminator = newUser.discriminator : false;
-                console.log(diff);
+
                 knex('users').update(diff).where({ user_id: newUser.id })
                     .then()
                     .catch(console.error);
@@ -76,7 +179,7 @@ class Supervision {
             oldGuild.name !== newGuild.name ? diff.name = newGuild.name : false;
             oldGuild.iconURL !== newGuild.iconURL ? diff.iconURL = newGuild.iconURL : false;
             oldGuild.ownerID !== newGuild.ownerID ? diff.owner_Id = newGuild.ownerID : false;
-            console.log(diff);
+
             knex('guilds').update(diff).where({ guild_id: newGuild.id })
                 .then()
                 .catch(console.error);
@@ -116,16 +219,16 @@ class Supervision {
                             if (i === 0) {
                                 let timestamp = moment().valueOf();
                                 knex('message_counter_user_stats').insert({
-                                        user_id: userid,
-                                        guild_id: guildid,
-                                        random_quote_last_update: timestamp,
-                                        created_timestamp: timestamp,
-                                        last_message_timestamp: timestamp,
-                                        total_messages: 1,
-                                        total_words: words,
-                                        total_chars: chars,
-                                        total_attachments: attachments
-                                    })
+                                    user_id: userid,
+                                    guild_id: guildid,
+                                    random_quote_last_update: timestamp,
+                                    created_timestamp: timestamp,
+                                    last_message_timestamp: timestamp,
+                                    total_messages: 1,
+                                    total_words: words,
+                                    total_chars: chars,
+                                    total_attachments: attachments
+                                })
                                     .then()
                                     .catch(console.error);
                             }
@@ -139,11 +242,11 @@ class Supervision {
                             // if 0 db cant find row to update so create one
                             if (i === 0) {
                                 knex('message_counter').insert({
-                                        user_id: userid,
-                                        guild_id: guildid,
-                                        ymd: ymd,
-                                        [hour]: 1
-                                    })
+                                    user_id: userid,
+                                    guild_id: guildid,
+                                    ymd: ymd,
+                                    [hour]: 1
+                                })
                                     .then()
                                     .catch(console.error);
                             }
@@ -157,10 +260,10 @@ class Supervision {
                             // if 0 db cant find row to update so create one
                             if (i === 0) {
                                 knex('message_counter_guilds').insert({
-                                        guild_id: guildid,
-                                        ymd: ymd,
-                                        [hour]: 1
-                                    })
+                                    guild_id: guildid,
+                                    ymd: ymd,
+                                    [hour]: 1
+                                })
                                     .then()
                                     .catch(console.error);
                             }
@@ -170,65 +273,6 @@ class Supervision {
             } catch (e) {
                 console.log(e);
             }
-        });
-        DiscordClient.on('guildMemberRemove', (member) => {
-            try {
-                if (config.guildLeftAdminPM.hasOwnProperty(member.guild.id)) {
-                    var guild = member.guild;
-                    var admins = config.guildLeftAdminPM[guild.id];
-
-                    // User Spent time
-                    var leftTime = moment(new Date());
-                    var joined = moment(member.joinedAt);
-                    var duration = moment.duration(leftTime.diff(joined));
-                    //
-
-                    var timestring =
-                        `Joined: ${joined.format("DD/MM/YYYY, HH:mm:ss")}\n` +
-                        `Spent: ` +
-                        `${duration.years()} Years, ` +
-                        `${duration.months()} Months, ` +
-                        `${duration.days()} Days, ` +
-                        `${duration.hours()} Hours, ` +
-                        `${duration.minutes()} Minutes, ` +
-                        `${duration.seconds()} Seconds`;
-
-                    const embed = new Discord.RichEmbed().setTimestamp(new Date());
-                    embed.setAuthor(member.displayName + "#" + member.user.discriminator, member.user.displayAvatarURL);
-                    embed.setThumbnail(guild.iconURL);
-                    embed.setDescription('**Left** ' + guild.name);
-                    embed.addField('Time', timestring);
-                    embed.setFooter('Guild Id: ' + guild.id)
-                    embed.setColor([214, 44, 38]);
-
-                    for (var id in admins) {
-                        guild.members.get(admins[id]).send(embed);
-                    }
-                }
-            } catch (exception) {
-                console.log(exception);
-            }
-
-            if (!member.user.bot) {
-                // Update user data
-                knex('users').update({
-                        leave_timestamp: moment().valueOf(),
-                        left: 1
-                    })
-                    .then()
-                    .catch(console.error);
-
-                knex('users_actions').insert({
-                        user_id: member.id,
-                        guild_id: member.guild.id,
-                        type: "leave",
-                        create_timestamp: moment().valueOf()
-                    })
-                    .then()
-                    .catch(console.error);
-            }
-            console.log('User ', member.displayName, " left ", member.guild.name);
-
         });
         DiscordClient.on('presenceUpdate', (om, nm) => {
             // om = oldMember
@@ -280,7 +324,7 @@ class Supervision {
             }
 
             if (config.logsChannels.hasOwnProperty(guild.id)) {
-                // Jeśli istnieje w tablicy przypisany kanał do logów
+                // Jeśli istnieje przypisany kanał do logów
                 var logsChannelId = config.logsChannels[guild.id];
 
                 try {
