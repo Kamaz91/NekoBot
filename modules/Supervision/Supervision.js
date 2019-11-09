@@ -377,57 +377,65 @@ class Supervision {
              *  Niestety wykrywane są usunięcia 
              *  tylko tych wiadomości które były 
              *  zamieszczone podczas działania bota,
-             *  wszystkie inne są nie zauważone
+             *  wszystkie inne są niezauważone
              *
              * ***********************************
              */
 
-            var guild = message.guild;
+            try {
+                var guild = message.guild;
 
-            if (config.activityLogChannels.hasOwnProperty(guild.id) && message.author.bot === false) {
-                // Jeśli istnieje w tablicy przypisany kanał do logów i autor nie jest botem
-                let logsChannel = guild.channels.get(config.activityLogChannels[guild.id]);
-                // 
-                var attachments = message.attachments.array();
-                var urls = "";
-                try {
-                    const embed = new Discord.RichEmbed()
-                        .setDescription("**Deleted in **<#" + message.channel.id + ">")
-                        .setFooter("Message id: " + message.id)
-                        .setColor([214, 44, 38])
+                // FIXME FIX!!!! check if message is not pm
+                // BUG: crash after delete user pm
+                if (message.guild) {
 
-                    .setTimestamp(message.createdAt);
+                    if (config.activityLogChannels.hasOwnProperty(guild.id) && message.author.bot === false) {
+                        // Jeśli istnieje przypisany kanał do logów i autor nie jest botem
+                        let logsChannel = guild.channels.get(config.activityLogChannels[guild.id]);
+                        // 
+                        var attachments = message.attachments.array();
+                        // Get all attachments in message
+                        var urls = "";
+                        // All attachments url in string
+                        const embed = new Discord.RichEmbed()
+                            .setDescription("**Deleted in **<#" + message.channel.id + ">")
+                            .setFooter("Message id: " + message.id)
+                            .setColor([214, 44, 38])
 
-                    if (message.member.id.length > 0) {
-                        embed.setAuthor(message.member.displayName + " [" + message.author.username + " #" + message.author.discriminator + "]", message.author.displayAvatarURL);
-                    } else {
-                        embed.setAuthor("[" + message.author.username + " #" + message.author.discriminator + "]", message.author.displayAvatarURL);
-                    }
+                            .setTimestamp(message.createdAt);
 
-                    if (message.content.length > 0) {
-                        embed.addField('Message', message.content);
-                    }
-
-                    if (attachments.length > 0) {
-                        for (var i in attachments) {
-                            urls += attachments[i].proxyURL + "\n";
+                        if (message.member.id.length > 0) {
+                            embed.setAuthor(message.member.displayName + " [" + message.author.username + " #" + message.author.discriminator + "]", message.author.displayAvatarURL);
+                        } else {
+                            embed.setAuthor("[" + message.author.username + " #" + message.author.discriminator + "]", message.author.displayAvatarURL);
                         }
-                        embed.addField('Attachments', urls);
+
+                        if (message.content.length > 0) {
+                            embed.addField('Message', message.content);
+                        }
+
+                        if (attachments.length > 0) {
+                            for (var i in attachments) {
+                                urls += attachments[i].proxyURL + "\n";
+                            }
+                            embed.addField('Attachments', urls);
+                        }
+                        logsChannel.send(embed);
+
+                        console.log("*******************************");
+                        console.log("Message Deletation Detected!");
+                        console.log("Message id:" + message.id);
+                        console.log("Author:" + message.author.username + " id:" + message.author.id);
+                        console.log("Guild:" + message.guild.name);
+                        console.log("Channel:" + message.channel.name);
+                        console.log("*******************************");
+                        console.log(message.cleanContent);
+                        console.log(urls);
+                        console.log("*******************************");
                     }
-                    logsChannel.send(embed);
-                } catch (error) {
-                    console.log(error);
                 }
-                console.log("*******************************");
-                console.log("Message Deletation Detected!");
-                console.log("Message id:" + message.id);
-                console.log("Author:" + message.author.username + " id:" + message.author.id);
-                console.log("Guild:" + message.guild.name);
-                console.log("Channel:" + message.channel.name);
-                console.log("*******************************");
-                console.log(message.cleanContent);
-                console.log(urls);
-                console.log("*******************************");
+            } catch (e) {
+                console.log(e);
             }
         });
     }
