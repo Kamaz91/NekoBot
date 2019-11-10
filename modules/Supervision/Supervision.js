@@ -34,9 +34,6 @@ class Supervision {
 
         DiscordClient.on('guildMemberAdd', member => {
             if (!member.user.bot) {
-
-                // TODO sprawdzanie czy dana osoba istnieje już w bazie aby nie dublować rekordu
-
                 knex('users')
                     .where({
                         user_id: member.id,
@@ -84,21 +81,22 @@ class Supervision {
             if (!newMember.user.bot) {
                 var diff = {};
                 oldMember.nickname !== newMember.nickname ? diff.nickname = newMember.nickname : false;
+                if (!_.isEmpty(diff)) {
+                    knex('users').update(diff).where({ user_id: newMember.id, guild_id: newMember.guild.id })
+                        .then()
+                        .catch(console.error);
 
-                knex('users').update(diff).where({ user_id: newMember.id, guild_id: newMember.guild.id })
-                    .then()
-                    .catch(console.error);
-
-                knex('users_actions').insert({
-                    user_id: oldMember.id,
-                    guild_id: oldMember.guild.id,
-                    type: 'nickname',
-                    new_value: newMember.nickname,
-                    old_value: oldMember.nickname,
-                    create_timestamp: moment().valueOf()
-                })
-                    .then()
-                    .catch(console.error);
+                    knex('users_actions').insert({
+                        user_id: oldMember.id,
+                        guild_id: oldMember.guild.id,
+                        type: 'nickname',
+                        new_value: newMember.nickname,
+                        old_value: oldMember.nickname,
+                        create_timestamp: moment().valueOf()
+                    })
+                        .then()
+                        .catch(console.error);
+                }
             }
         });
 
