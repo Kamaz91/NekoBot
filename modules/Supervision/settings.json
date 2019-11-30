@@ -1,0 +1,41 @@
+{
+    "eventsPath": "./events/",
+    "events": [
+        {
+            "name": "guildMemberAdd",
+            "enabled": true
+        },
+        {
+            "name": "guildMemberRemove",
+            "enabled": true
+        },
+        {
+            "name": "guildMemberUpdate",
+            "enabled": true
+        },
+        {
+            "name": "guildUpdate",
+            "enabled": true
+        },
+        {
+            "name": "message",
+            "enabled": true
+        },
+        {
+            "name": "messageDelete",
+            "enabled": true
+        },
+        {
+            "name": "presenceUpdate",
+            "enabled": true
+        },
+        {
+            "name": "userUpdate",
+            "enabled": true
+        },
+        {
+            "name": "voiceStateUpdate",
+            "enabled": true
+        }
+    ]
+}
