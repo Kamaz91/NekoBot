@@ -5,7 +5,7 @@ class joinUserAction {
         this.member = args[0];
 
         try {
-            knex('users_actions').insert({
+            knex('members_actions').insert({
                 user_id: this.member.id,
                 guild_id: this.member.guild.id,
                 type: 'join',

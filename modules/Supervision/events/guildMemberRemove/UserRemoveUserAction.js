@@ -7,14 +7,14 @@ class UserRemoveUserAction {
         try {
             if (!this.member.user.bot) {
                 // Update user data
-                knex('users').update({
+                knex('members').update({
                     leave_timestamp: moment().valueOf(),
                     left: 1
                 })
                     .then()
                     .catch(console.error);
 
-                knex('users_actions').insert({
+                knex('members_actions').insert({
                     user_id: this.member.id,
                     guild_id: this.member.guild.id,
                     type: "leave",

@@ -1,11 +1,8 @@
-const Cfg = require('../../includes/Config.js');
 const CronJob = require('cron').CronJob;
 const fs = require('fs');
 const moment = require('moment');
 const path = require('path');
 const _ = require('lodash');
-
-var config = new Cfg();
 
 class Supervision {
     constructor(DiscordClient, TriggerManager, ModuleLoader) {
@@ -71,7 +68,7 @@ class Supervision {
                 var members = guild.members.array();
                 for (var member of members) {
                     if (!member.user.bot) {
-                        knex('user_presence').insert({
+                        knex('members_presence').insert({
                             user_id: member.id,
                             guild_id: member.guild.id,
                             status: member.presence.status,

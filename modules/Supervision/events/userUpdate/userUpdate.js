@@ -10,7 +10,7 @@ class userUpdate {
                 this.oldUser.displayAvatarURL !== this.newUser.displayAvatarURL ? diff.avatar = this.newUser.displayAvatarURL : false;
                 this.oldUser.discriminator !== this.newUser.discriminator ? diff.discriminator = this.newUser.discriminator : false;
 
-                knex('users').update(diff).where({ user_id: this.newUser.id })
+                knex('members').update(diff).where({ user_id: this.newUser.id })
                     .then()
                     .catch(console.error);
             }

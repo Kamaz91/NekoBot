@@ -4,7 +4,7 @@ class guildMemberAdd {
 
         if (!this.member.user.bot) {
             // if user exist in db update
-            knex('users')
+            knex('members')
                 .where({
                     user_id: this.member.id,
                     guild_id: this.member.guild.id,
@@ -19,7 +19,7 @@ class guildMemberAdd {
                 .then(i => {
                     // if 0 db cant find row to update so create one
                     if (i === 0) {
-                        knex('users')
+                        knex('members')
                             .insert({
                                 user_id: this.member.id,
                                 guild_id: this.member.guild.id,

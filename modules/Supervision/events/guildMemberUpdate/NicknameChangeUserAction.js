@@ -12,7 +12,7 @@ class NicknameChangeUserAction {
                 this.oldMember.nickname !== this.newMember.nickname ? diff.nickname = this.newMember.nickname : false;
                 if (!_.isEmpty(diff)) {
 
-                    knex('users_actions').insert({
+                    knex('members_actions').insert({
                         user_id: this.oldMember.id,
                         guild_id: this.oldMember.guild.id,
                         type: 'nickname',

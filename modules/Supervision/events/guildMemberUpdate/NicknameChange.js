@@ -10,7 +10,7 @@ class NicknameChange {
                 var diff = {};
                 this.oldMember.nickname !== this.newMember.nickname ? diff.nickname = this.newMember.nickname : false;
                 if (!_.isEmpty(diff)) {
-                    knex('users').update(diff).where({ user_id: this.newMember.id, guild_id: this.newMember.guild.id })
+                    knex('members').update(diff).where({ user_id: this.newMember.id, guild_id: this.newMember.guild.id })
                         .then()
                         .catch(console.error);
                 }
