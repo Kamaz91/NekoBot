@@ -27,7 +27,7 @@
         },
         {
             "name": "presenceUpdate",
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "userUpdate",
