@@ -58,19 +58,26 @@ class BasicTriggers {
         });
         TriggerManager.RegisterTrigger({
             moduleName: "BasicTriggers",
+            desc: "dev",
+            content: (message, trigger) => { this.react(message, trigger) },
+            key: "react",
+            prefix: "!" //optional. if not defined using default prefix
+        });
+        TriggerManager.RegisterTrigger({
+            moduleName: "BasicTriggers",
             content: (message, trigger) => { this.showTriggers(message, trigger) },
             key: "help",
             desc: "i'm helping",
             subTrigger: [{
-                    activator: "get",
-                    desc: "x",
-                    content: (message, trigger) => { this.showTrigger(message, trigger); }
-                },
-                {
-                    activator: "all",
-                    desc: "x",
-                    content: (message, trigger) => { this.showTriggers(message, trigger) }
-                }
+                activator: "get",
+                desc: "x",
+                content: (message, trigger) => { this.showTrigger(message, trigger); }
+            },
+            {
+                activator: "all",
+                desc: "x",
+                content: (message, trigger) => { this.showTriggers(message, trigger) }
+            }
             ],
             prefix: "." //optional. if not defined using default prefix
         });
@@ -88,25 +95,25 @@ class BasicTriggers {
                         "icon_url": message.author.avatarURL
                     },
                     "fields": [{
-                            "name": "moduleName",
-                            "value": trig.moduleName
-                        },
-                        {
-                            "name": "key",
-                            "value": trig.key
-                        },
-                        {
-                            "name": "prefix",
-                            "value": trig.prefix
-                        },
-                        {
-                            "name": "activator",
-                            "value": trig.activator
-                        },
-                        {
-                            "name": "description",
-                            "value": trig.desc
-                        }
+                        "name": "moduleName",
+                        "value": trig.moduleName
+                    },
+                    {
+                        "name": "key",
+                        "value": trig.key
+                    },
+                    {
+                        "name": "prefix",
+                        "value": trig.prefix
+                    },
+                    {
+                        "name": "activator",
+                        "value": trig.activator
+                    },
+                    {
+                        "name": "description",
+                        "value": trig.desc
+                    }
                     ]
                 }
             };
@@ -163,29 +170,46 @@ class BasicTriggers {
                         "icon_url": message.author.avatarURL
                     },
                     "fields": [{
-                            "name": "text",
-                            "value": trigger.text
-                        },
-                        {
-                            "name": "key",
-                            "value": trigger.key
-                        },
-                        {
-                            "name": "subKey",
-                            "value": trigger.subKey
-                        },
-                        {
-                            "name": "Raw",
-                            "value": trigger.raw
-                        },
-                        {
-                            "name": "arguments",
-                            "value": a
-                        }
+                        "name": "text",
+                        "value": trigger.text
+                    },
+                    {
+                        "name": "key",
+                        "value": trigger.key
+                    },
+                    {
+                        "name": "subKey",
+                        "value": trigger.subKey
+                    },
+                    {
+                        "name": "Raw",
+                        "value": trigger.raw
+                    },
+                    {
+                        "name": "arguments",
+                        "value": a
+                    }
                     ]
                 }
             };
             message.channel.send(embed).catch(console.error);
+        }
+    }
+
+    react(message, trigger) {
+        message.delete();
+        if (message.member.hasPermission('ADMINISTRATOR') || message.author.id === new Cfg().adminId) {
+            let channelHandle = this.Client.channels.get(message.channel.id);
+            let messageHandle = channelHandle.messages.get(trigger.arguments[0]);
+            let match = trigger.arguments[1].match(/[0-9]+[^>]/g);
+
+            // FIXME shit can pass through trigger.arguments[1] to react and Unknown Emoji error appears
+            if (match != null) {
+                var emoji = match[0];
+            } else {
+                var emoji = trigger.arguments[1];
+            }
+            messageHandle.react(emoji);
         }
     }
 
@@ -281,20 +305,20 @@ class BasicTriggers {
             if (alfafbet.indexOf(char) > -1) {
                 stringBuild += ':regional_indicator_' + char.toString() + ':';
             } else
-            // Jeśli znak jest pytajnikiem 
-            if ('?' === char) {
-                stringBuild += ':grey_question:';
-            } else
-            // Jeśli znak jest wykrzynikiem
-            if ('!' === char) {
-                stringBuild += ':grey_exclamation:';
-            } else
-            // Jeśli znak jest odstępem podwójna spacja
-            if (' ' === char) {
-                stringBuild += '  ';
-            } else {
-                stringBuild += char;
-            }
+                // Jeśli znak jest pytajnikiem 
+                if ('?' === char) {
+                    stringBuild += ':grey_question:';
+                } else
+                    // Jeśli znak jest wykrzynikiem
+                    if ('!' === char) {
+                        stringBuild += ':grey_exclamation:';
+                    } else
+                        // Jeśli znak jest odstępem podwójna spacja
+                        if (' ' === char) {
+                            stringBuild += '  ';
+                        } else {
+                            stringBuild += char;
+                        }
             //console.log(val);
         }
         // Wysłanie wiadomości do kanału/użytkownika
