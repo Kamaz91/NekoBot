@@ -1,3 +1,4 @@
+const Discord = require('discord.js'); // for embed builder
 const moment = require('moment');
 const Cfg = require('../../../../includes/Config.js');
 var config = new Cfg();
