@@ -10,7 +10,10 @@ class UserRemoveUserAction {
                 knex('members')
                     .update({
                         leave_timestamp: moment().valueOf(),
-                        left: 1
+                        left: 1,
+                        is_admin: 0,
+                        avatar_id: null,
+                        is_vip: 0
                     })
                     .where({
                         user_id: this.member.id,

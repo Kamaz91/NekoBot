@@ -12,7 +12,7 @@ class guildMemberAdd {
                 .update({
                     nickname: this.member.nickname,
                     username: this.member.user.username,
-                    avatar: this.member.user.displayAvatarURL,
+                    avatar_id: this.member.user.avatar,
                     discriminator: this.member.user.discriminator,
                     left: 0
                 })
@@ -25,7 +25,8 @@ class guildMemberAdd {
                                 guild_id: this.member.guild.id,
                                 nickname: this.member.nickname,
                                 username: this.member.user.username,
-                                avatar: this.member.user.displayAvatarURL,
+                                avatar: this.member.user.defaultAvatarURL,
+                                avatar_id: this.member.user.avatar,
                                 discriminator: this.member.user.discriminator,
                                 is_bot: this.member.user.bot,
                                 account_created_timestamp: this.member.user.createdTimestamp,

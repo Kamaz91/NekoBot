@@ -7,7 +7,7 @@ class userUpdate {
             if (!this.newUser.bot) {
                 var diff = {};
                 this.oldUser.username !== this.newUser.username ? diff.username = this.newUser.username : false;
-                this.oldUser.displayAvatarURL !== this.newUser.displayAvatarURL ? diff.avatar = this.newUser.displayAvatarURL : false;
+                this.oldUser.avatar !== this.newUser.avatar ? diff.avatar_id = this.newUser.avatar : false;
                 this.oldUser.discriminator !== this.newUser.discriminator ? diff.discriminator = this.newUser.discriminator : false;
 
                 knex('members').update(diff).where({ user_id: this.newUser.id })
