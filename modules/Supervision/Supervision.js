@@ -13,6 +13,7 @@ class Supervision {
         this.EventJobs = {};
 
         this.startCron();
+        this.startCleanCron();
         this.loadSettings();
         this.loadEventJobs();
         this.initEvents();
@@ -80,7 +81,30 @@ class Supervision {
                 }
             }
         });
+        console.log("User Presence job started");
         UserPresenceJob.start();
+    }
+    startCleanCron() {
+        const DC = this.DiscordClient;
+        const CleanJob = new CronJob('0 0 1 * * *', function () {
+            // TODO Temoporary testing for PFA Voice chat channel
+            var channel = DC.guilds.get("166913928746500097").channels.get("730185677487997088");
+            var messages = channel.messages.array();
+            var time = moment().subtract(12, 'h').valueOf();
+            var msgArray = [];
+
+            for (const msg of messages) {
+                if (time > msg.createdTimestamp) {
+                    msgArray.push(msg);
+                }
+            }
+            if (msgArray.length > 0) {
+                console.log("Bulk Delete");
+                channel.bulkDelete(msgArray);
+            }
+        });
+        console.log("Clean channels job started");
+        CleanJob.start();
     }
     statusToInt(params) {
         switch (params) {
