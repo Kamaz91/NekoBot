@@ -86,7 +86,7 @@ class Supervision {
     }
     startCleanCron() {
         const DC = this.DiscordClient;
-        const CleanJob = new CronJob('0 0 1 * * *', function () {
+        const CleanJob = new CronJob('0 0 */1 * * *', function () {
             // TODO Temoporary testing for PFA Voice chat channel
             var channel = DC.guilds.get("166913928746500097").channels.get("730185677487997088");
             var messages = channel.messages.array();
