@@ -1,8 +1,21 @@
-const Discord = require('discord.js');
-const Cfg = new require('./includes/Config.js');
+console.log('Starting...');
+console.log('****************************');
+console.log('*        NekoBot v11       *');
+console.log('****************************');
 
+require('console-stamp')(console, 'dd/mm/yyyy HH:MM:ss');
+const Cfg = require('./includes/Config.js');
+const client = require('./includes/Discord/connection.js');
+const { events } = require('./includes/config/config.js');
 const TriggerManager = require('./includes/TriggerManager.js');
 const ModulesLoader = require('./includes/ModulesLoader.js');
+
+console.info("Loading config");
+events.once('config-ready', function () {
+    console.info("Config Loaded");
+    var TM = new TriggerManager(client);
+    var ML = new ModulesLoader(client, TM);
+});
 
 knex = require('knex')({
     client: 'mysql2',
@@ -13,63 +26,3 @@ knex = require('knex')({
         database: new Cfg().getToken('dbdata')
     }
 });
-
-function time() {
-    let date = new Date();
-    let t = [
-        `0${date.getHours()}`.slice(-2), // Godziny
-        `0${date.getMinutes()}`.slice(-2), // Minuty
-        `0${date.getSeconds()}`.slice(-2) // Sekundy
-    ];
-    return t.join(':');
-}
-
-class Main {
-
-    constructor() {
-        console.log('Starting...');
-        console.log('************************************');
-        console.log('*        NekoBot alpha v0010       *');
-        console.log('************************************');
-
-        this.client = new Discord.Client();
-        this.client.login(new Cfg().getToken('DiscordBot'));
-        this.TriggerManager = new TriggerManager(this.client);
-        this.ModulesLoader = new ModulesLoader(this.client, this.TriggerManager);
-
-        this.client.on('message', message => {
-            /* Czas wiadomości hh:mm:ss */
-            var messageTime = time();
-            var guildchan = '';
-            if (message.guild && message.channel) {
-                guildchan = ' @ ' + message.guild.name + '->#' + message.channel.name;
-            }
-
-            console.log('[' + messageTime + '] <' + message.author.username + guildchan + '> ' + message.content);
-        });
-        this.client.on('ready', () => {
-            /* Czas wiadomości hh:mm:ss */
-            var messageTime = time();
-            console.log(messageTime + ' Connected!');
-        });
-        this.client.on('disconnect', closeEvent => {
-            /* Czas wiadomości hh:mm:ss */
-            var messageTime = time();
-            console.log(messageTime + ' ************');
-            console.log(messageTime + ' End of Session');
-        });
-        this.client.on('reconnecting', function() {
-            /* Czas wiadomości hh:mm:ss */
-            var messageTime = time();
-            console.log(messageTime + ' reconnecting');
-        });
-        this.client.on('error', error => {
-            /* Czas wiadomości hh:mm:ss */
-            var messageTime = time();
-            console.log(messageTime + ' error');
-            console.log(error);
-        });
-    }
-}
-
-new Main();

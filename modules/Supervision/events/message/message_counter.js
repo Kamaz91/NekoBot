@@ -32,7 +32,7 @@ class message_counter {
                     .catch(console.error);
             }
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
     }
 }

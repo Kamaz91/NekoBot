@@ -25,10 +25,10 @@ class TriggerManager {
 
         if (trigger.content != null && trigger.key != null && this.IsTriggerExist(trigger.activator) == false) {
             this.TriggersList.push(trigger);
-            console.log("Registered trigger: " + trigger.activator);
+            console.info("Registered trigger: " + trigger.activator);
             return true;
         } else {
-            console.log("Cannot register trigger: " + trigger.key + " Content:" + trigger.content);
+            console.warn("Cannot register trigger: " + trigger.key + " Content:" + trigger.content);
             return false;
         }
     }
@@ -141,7 +141,7 @@ class TriggerManager {
                                             return true;
                                         }
                                     } catch (exception) {
-                                        console.log(exception);
+                                        console.error(exception);
                                         return false;
                                     }
                                 });
@@ -151,7 +151,7 @@ class TriggerManager {
                             element.content(message, triggerMatch);
                             return true;
                         } catch (exception) {
-                            console.log(exception);
+                            console.error(exception);
                             return false;
                         }
                     }

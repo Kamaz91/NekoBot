@@ -11,9 +11,9 @@ class ModulesLoader {
         this.loadModules();
     }
     loadModules() {
-        console.log("Module Loader:");
-        console.log('Modules dir: ' + modulesDir);
-        console.log('-----------------------------');
+        console.info("Module Loader:");
+        console.info('Modules dir: ' + modulesDir);
+        console.info('-----------------------------');
         fs.readdirSync(modulesDir).forEach(moduleName => {
             // Przeszukiwanie folderu modułów
             var jsonPath = path.resolve(modulesDir, moduleName, 'config.json');
@@ -21,14 +21,6 @@ class ModulesLoader {
                 let jsonConfig = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
 
                 // Ładowanie konfiguracji modułu
-                let date = new Date();
-                let t = [
-                    `0${date.getHours()}`.slice(-2),   // Godziny
-                    `0${date.getMinutes()}`.slice(-2), // Minuty
-                    `0${date.getSeconds()}`.slice(-2)  // Sekundy
-                ];
-                var messageTime = t.join(':');
-                // Czas systemu hh:mm:ss
                 var ModuleObj = {
                     name: moduleName,
                     path: path.resolve(modulesDir, moduleName),
@@ -42,12 +34,12 @@ class ModulesLoader {
                 // Dołączenie danych z pliku Json
 
                 if (ModuleObj.enabled) {
-                    console.log(messageTime + ' Loading module: ' + ModuleObj.name);
+                    console.info('Loading module: ' + ModuleObj.name);
                     try {
                         var mod = require(path.resolve(modulesDir, moduleName, ModuleObj.start));
                     } catch (exception) {
-                        console.log('ERROR - An error occurred while loading ');
-                        console.log(exception);
+                        console.error('ERROR - An error occurred while loading ');
+                        console.error(exception);
                     }
                     try {
                         ModuleObj.module = new mod(this.DiscordClient, this.TriggerManager, this);
@@ -58,31 +50,24 @@ class ModulesLoader {
                         // Dodawanie do listy
 
                     } catch (exception) {
-                        console.log('ERROR - An error occurred while loading ');
-                        console.log(exception);
+                        console.error('ERROR - An error occurred while loading ');
+                        console.error(exception);
                     }
-                    console.log('------- Module loaded -------');
+                    console.info('------- Module loaded -------');
                 } else {
-                    console.log(messageTime + ' Module skipped: ' + ModuleObj.name);
-                    console.log('-----------------------------');
+                    console.info('Module skipped: ' + ModuleObj.name);
+                    console.info('-----------------------------');
                 }
             }
         });
     }
 
     reloadModules() {
-        let date = new Date();
-        let t = [
-            `0${date.getHours()}`.slice(-2),   // Godziny
-            `0${date.getMinutes()}`.slice(-2), // Minuty
-            `0${date.getSeconds()}`.slice(-2)  // Sekundy
-        ];
-        var messageTime = t.join(':');
         this.TriggerManager.RemoveTriggers();
-        console.log(messageTime + " Triggers removed");
+        console.info("Triggers removed");
 
         Object.keys(this.ModulesList).forEach((key) => {
-            console.log(messageTime + " Module removed: " + this.ModulesList[key].name);
+            console.info("Module removed: " + this.ModulesList[key].name);
             this.removeModule(path.resolve(this.ModulesList[key].path, this.ModulesList[key].start));
         });
 

@@ -37,8 +37,8 @@ class presenceUpdate {
                 }
             }
         } catch (e) {
-            console.log('Presense status log error!');
-            console.log(e);
+            console.error('Presense status log error!');
+            console.error(e);
         }
 
     }
