@@ -5,6 +5,8 @@ const moment = require('moment');
 const path = require('path');
 const _ = require('lodash');
 
+const ap = require('./includes/autoPurge.js');
+
 class Supervision {
     constructor(DiscordClient, TriggerManager, ModuleLoader) {
         this.ModuleLoader = ModuleLoader;
