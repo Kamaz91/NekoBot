@@ -1,29 +1,36 @@
 const CronJob = require('cron').CronJob;
 const { config } = require('../../../includes/config/config.js');
+const db = require('../../../includes/database/index.js');
 const DiscordClient = require('../../../includes/Discord/connection.js');
 const moment = require('moment');
 
-const autoPurge = new CronJob('0 0 */1 * * *', function () {
-    var guilds = DiscordClient.guilds.array();
-    for (const guild of guilds) {
-        let cGuild = config.guilds.get(guild.id);
+const autoPurge = new CronJob('0 0 */1 * * *', async function () {
+    var msgArray = new Object;
+    var guildsKeys = DiscordClient.guilds.keyArray();
+    var autoPurge = db.connection('auto_purge_messages');
+    for (const guild_id of guildsKeys) {
+        let cGuild = config.guilds.get(guild_id);
         if (cGuild.modules.autoPurge.enabled) {
-            var cChannels = cGuild.modules.autoPurge.channels.array();
-            for (const cChannel of cChannels) {
-                let channel = DiscordClient.guilds.get(cGuild.id).channels.get(cChannel.id);
-                var messages = channel.messages.array();
-                var time = moment().subtract(12, 'h').valueOf();
-                var msgArray = [];
-
-                for (const msg of messages) {
-                    if (time > msg.createdTimestamp) {
-                        msgArray.push(msg);
-                    }
-                }
-                if (msgArray.length > 0) {
-                    channel.bulkDelete(msgArray);
-                }
+            msgArray[guild_id] = { channels: new Object };
+            for (const channel of cGuild.modules.autoPurge.channels.array()) {
+                msgArray[guild_id].channels[channel.id] = new Array;
+                autoPurge.orWhere(function () {
+                    this.andWhere({ guild_id: guild_id });
+                    this.andWhere({ channel_id: channel.id });
+                    this.andWhere("create_timestamp", "<", moment().subtract(channel.time, 'h').valueOf());
+                });
             }
+        }
+    }
+    var messages = await autoPurge.then((rows) => { return rows });
+    for (const msg of messages) {
+        msgArray[msg.guild_id].channels[msg.channel_id].push(msg.message_id);
+    }
+    for (const [guild_id, guild] of Object.entries(msgArray)) {
+        for (const [channel_id, messages] of Object.entries(guild.channels)) {
+            let channel = DiscordClient.guilds.get(guild_id).channels.get(channel_id);
+            channel.bulkDelete(messages);
+            db.guildManagment.modules.autoPurge.deleteMessagesArray(messages);
         }
     }
 });
