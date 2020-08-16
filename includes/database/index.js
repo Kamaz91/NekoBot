@@ -34,7 +34,8 @@ module.exports = {
             get: require('./includes/users/account/select.js')(dbConnection),
             insert: require('./includes/users/account/insert.js')(dbConnection),
             update: require('./includes/users/account/update.js')(dbConnection)
-        }
+        },
+        memento: require('./includes/users/memento/memento.js')(dbConnection)
     },
     guilds: {
         channels: {
@@ -59,6 +60,7 @@ module.exports = {
         },
         modules: {
             autoPurge: require('./includes/guildManagment/modules/autoPurge.js')(dbConnection),
+            quotes: require('./includes/guildManagment/modules/quotes.js')(dbConnection)
         }
     },
     messageCounter: {
