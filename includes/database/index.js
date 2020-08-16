@@ -1,6 +1,4 @@
-const fs = require('fs');
-
-var config = JSON.parse(fs.readFileSync('./config/db.json'));
+const config = require('../../config/db.json');
 
 var dbConnection = require('knex')({
     client: config.client,
