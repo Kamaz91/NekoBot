@@ -18,7 +18,6 @@ class Supervision {
         this.loadSettings();
         this.loadEventJobs();
         this.initEvents();
-        // TODO podzielić na mniejsze pliki 
     }
     initEvents() {
         for (var event of this.Settings.events) {
