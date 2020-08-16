@@ -13,7 +13,7 @@ class message_autoPurge {
 
             var guild = config.guilds.get(guild_id);
 
-            if (guild.modules.autoPurge.channels.get(channel_id))
+            if (guild.modules.autoPurge.channels.get(channel_id) && guild.modules.autoPurge.enabled)
                 db.guildManagment.modules.autoPurge.insertMessage(guild_id, channel_id, message_id);
         }
     }
