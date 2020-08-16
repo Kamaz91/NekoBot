@@ -43,7 +43,9 @@ module.exports = {
             update: require('./includes/guilds/channels/select.js')(dbConnection)  // TODO
         },
         members: {
-            get: require('./includes/guilds/members/select.js')(dbConnection)
+            get: require('./includes/guilds/members/select.js')(dbConnection),
+            insert: require('./includes/guilds/members/insert.js')(dbConnection),
+            update: require('./includes/guilds/members/update.js')(dbConnection)
         },
         data: {
             get: require('./includes/guilds/data/select.js')(dbConnection)
