@@ -24,8 +24,9 @@ client.on('reconnecting', function () {
     console.log('reconnecting');
 });
 client.on('error', error => {
-    console.log('error');
-    console.log(error);
+    console.error('Discord js error');
+    console.error(error.message);
+    console.error(error);
 });
 
 async function init() {
