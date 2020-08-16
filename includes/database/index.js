@@ -57,6 +57,7 @@ module.exports = {
         settings: {
             logsChannels: require('./includes/guildManagment/settings/logschannels.js')(dbConnection),
             autoPurge: require('./includes/guildManagment/settings/autoPurge.js')(dbConnection),
+            notifier: require('./includes/guildManagment/settings/notifier.js')(dbConnection),
             modules: require('./includes/guildManagment/settings/modules.js')(dbConnection),
         },
         modules: {
