@@ -25,7 +25,7 @@ class Config {
 
     async loadGuildConfig() {
         // GET ids of all connected guilds
-        var guildsKeys = client.guilds.keyArray();
+        var guildsKeys = client.guilds.cache.keyArray();
         this.TemplateGuilds = await this.loadModulesSettings(guildsKeys);
         await this.loadAutoPurge(guildsKeys);
         await this.loadNotifier(guildsKeys);

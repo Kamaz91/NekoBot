@@ -60,10 +60,10 @@ class Supervision {
     }
     startCron() {
         const UserPresenceJob = new CronJob('0 */10 * * * *', function () {
-            const guilds = DiscordClient.guilds.array();
+            const guilds = DiscordClient.guilds.cache.array();
             console.info('User presence status update!');
             for (var guild of guilds) {
-                var members = guild.members.array();
+                var members = guild.members.cache.array();
                 for (var member of members) {
                     if (!member.user.bot) {
                         knex('members_presence').insert({

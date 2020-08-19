@@ -2,15 +2,15 @@ const _ = require('lodash');
 
 class NicknameChange {
     constructor(args) {
-        this.oldMember = args[0];
-        this.newMember = args[1];
+        var oldMember = args[0];
+        var newMember = args[1];
 
         try {
-            if (!this.newMember.user.bot) {
+            if (!newMember.user.bot) {
                 var diff = {};
-                this.oldMember.nickname !== this.newMember.nickname ? diff.nickname = this.newMember.nickname : false;
+                oldMember.nickname !== newMember.nickname ? diff.nickname = newMember.nickname : false;
                 if (!_.isEmpty(diff)) {
-                    knex('members').update(diff).where({ user_id: this.newMember.id, guild_id: this.newMember.guild.id })
+                    knex('members').update(diff).where({ user_id: newMember.id, guild_id: newMember.guild.id })
                         .then()
                         .catch(console.error);
                 }

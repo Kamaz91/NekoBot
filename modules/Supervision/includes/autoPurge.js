@@ -6,7 +6,7 @@ const moment = require('moment');
 
 const autoPurge = new CronJob('0 0 */1 * * *', async function () {
     var msgArray = new Object;
-    var guildsKeys = DiscordClient.guilds.keyArray();
+    var guildsKeys = DiscordClient.guilds.cache.keyArray();
     var autoPurge = db.connection('auto_purge_messages');
     for (const guild_id of guildsKeys) {
         let cGuild = config.guilds.get(guild_id);
@@ -28,7 +28,7 @@ const autoPurge = new CronJob('0 0 */1 * * *', async function () {
     }
     for (const [guild_id, guild] of Object.entries(msgArray)) {
         for (const [channel_id, messages] of Object.entries(guild.channels)) {
-            let channel = DiscordClient.guilds.get(guild_id).channels.get(channel_id);
+            let channel = DiscordClient.guilds.resolve(guild_id).channels.resolve(channel_id);
             channel.bulkDelete(messages);
             db.guildManagment.modules.autoPurge.deleteMessagesArray(messages);
         }

@@ -1,107 +1,89 @@
 const CronJob = require('cron').CronJob;
-const Discord = require('discord.js'); // for embed builder
+const { MessageEmbed } = require('discord.js'); // for embed builder
+const discordClient = require('../../includes/Discord/connection.js');
 const moment = require('moment');
+const db = require('../../includes/database/index.js');
 
 class memento {
     constructor(DiscordClient, TriggerManager, ModuleLoader) {
-        this.DC = DiscordClient;
         var that = this;
-        this.mementoLoop = new CronJob('0 */1 * * * *', function () { that.process(that) });
+        this.mementoLoop = new CronJob('0 */1 * * * *', function () { that.process() });
 
         this.mementoLoop.start();
 
         TriggerManager.RegisterTrigger({
             moduleName: "memento",
-            desc: "Remind me, !rm DD/MM/YYYY,HH:mm",
+            desc: "Remind me, ``!rm DD/MM/YYYY,HH:mm text``",
             content: (message, trigger) => this.trigger(message, trigger),
             key: "rm",
             prefix: "!" //optional. if not defined using default prefix
         });
     }
-    async process(that) {
-        var data = await that.fetchData();
+    async process() {
+        var data = await db.users.memento.fetchActiveData();
         if (data.status) {
             for (let el of data.elements) {
                 var reminderString = `https://discordapp.com/channels/${el.guild_id}/${el.channel_id}/${el.message_id}`;
-                that.DC.fetchUser(el.user_id).then((user) => { user.send(reminderString) });
-                that.updateReminded(el.id);
-                console.log('Reminder send');
+                var user = discordClient.users.resolve(el.user_id);
+
+                const embed = new MessageEmbed()
+                    .setTimestamp()
+                    .setDescription('Reminder')
+                    .addField('Link to the message', reminderString)
+                    .setColor([37, 154, 72]) //#259A48
+                    .addField('Text:', el.additional_text);
+
+                user.send(embed);
+
+                db.users.memento.updateReminded(el.id);
             }
         }
     }
 
-    trigger(message, trigger) {
+    async trigger(message, trigger) {
         if (!message.channel.type == 'text') {
-            message.reply('Not avaible here');
+            message.member.send('Not available here');
             return;
         }
 
         var time = trigger.arguments[0];
         var momtime = moment(time, 'DD/MM/YYYY,HH:mm', true);
 
+        // Delete first argument 
+        trigger.arguments.splice(0, 1);
+
         if (!momtime.isValid()) {
-            message.reply('Not valid format, DD/MM/YYYY,HH:mm');
+            message.reply('Invalid format, ``DD/MM/YYYY,HH:mm text``');
             return;
         }
 
         if (momtime.valueOf() < moment().valueOf()) {
-            message.reply('Cannot be past');
+            message.reply('Cannot be in the past');
             return;
         }
-        this.addReminder({
+        var text = trigger.arguments.join(" ");
+
+        var query = await db.users.memento.addReminder({
             user_id: message.author.id,
             guild_id: message.guild.id,
             channel_id: message.channel.id,
             message_id: message.id,
-            additional_text: 'null',
+            additional_text: text,
             fulfillment_timestamp: momtime.valueOf()
         });
-        const embed = new Discord.RichEmbed().setTimestamp(new Date());
-        embed.setAuthor(message.member.displayName + "#" + message.member.user.discriminator, message.member.user.displayAvatarURL);
-        embed.setDescription('Reminder set');
-        embed.addField('Time', momtime.format('DD/MM/YYYY HH:mm:ss'));
-        embed.setFooter('Message id: ' + message.id)
-        embed.setColor([37, 154, 72]);
+        if (!query.status) {
+            return;
+        }
+        const embed = new MessageEmbed()
+            .setTimestamp()
+            .setAuthor(message.member.displayName + "#" + message.member.user.discriminator, message.member.user.displayAvatarURL)
+            .setDescription('The reminder has been set!')
+            .addField('Time', momtime.format('DD/MM/YYYY HH:mm:ss'))
+            .setFooter('Message id: ' + message.id)
+            .setColor([37, 154, 72]) //#259A48
+            .addField('Text:', text);
 
         message.channel.send(embed);
-    }
-
-    addReminder(data) {
-        return knex('memento_data').insert({
-            user_id: data.user_id,
-            guild_id: data.guild_id,
-            channel_id: data.channel_id,
-            message_id: data.message_id,
-            additional_text: data.additional_text,
-            created_timestamp: moment().valueOf(),
-            fulfillment_timestamp: data.fulfillment_timestamp
-        })
-            .then()
-            .catch(console.error);
-    }
-    updateReminded(id) {
-        return knex('memento_data').update({
-            is_active: 1
-        }).where({
-            id: id
-        })
-            .then()
-            .catch(console.error);
-    }
-    fetchData() {
-        return knex('memento_data').where({
-            is_active: 0
-        }).andWhere(
-            'fulfillment_timestamp', '<', moment().valueOf()
-        )
-            .then((rows) => {
-                if (rows.length > 0) {
-                    return { status: 1, elements: rows };
-                } else {
-                    return { status: 0, elements: "no data" }
-                }
-            })
-            .catch(console.error);
     }
 }
 module.exports = memento;

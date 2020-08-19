@@ -38,7 +38,7 @@ class userLeftNotification {
             embed.setColor([214, 44, 38]);
 
             for (var recipient of recipients) {
-                member.guild.members.get(recipient.id).send(embed);
+                member.guild.members.resolve(recipient.id).send(embed);
             }
         }
         console.log('User ', member.displayName, " left ", member.guild.name);
