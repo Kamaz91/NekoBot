@@ -16,6 +16,25 @@ module.exports = (Connection) => {
                     left: 0
                 })
                 .then((rows) => {
+                    if (rows > 0) {
+                        return { status: true, error: false, request: rows[0] };
+                    } else {
+                        return { status: false, error: false, request: "Cant update" }
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                    return { status: false, error: true, request: error }
+                });
+        },
+        memberNickname(nickname, user_id, guild_id) {
+            return Connection('members')
+                .update({ nickname: nickname })
+                .where({
+                    user_id: user_id,
+                    guild_id: guild_id
+                })
+                .then((rows) => {
                     if (rows.length > 0) {
                         return { status: true, error: false, request: rows[0] };
                     } else {
@@ -23,6 +42,7 @@ module.exports = (Connection) => {
                     }
                 })
                 .catch((error) => {
+                    console.error(error);
                     return { status: false, error: true, request: error }
                 });
         },
@@ -47,6 +67,7 @@ module.exports = (Connection) => {
                     }
                 })
                 .catch((error) => {
+                    console.error(error);
                     return { status: false, error: true, request: error }
                 });
         }
