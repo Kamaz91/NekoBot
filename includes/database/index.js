@@ -53,7 +53,8 @@ module.exports = {
             update: require('./includes/guilds/members/update.js')(dbConnection)
         },
         data: {
-            get: require('./includes/guilds/data/select.js')(dbConnection)
+            get: require('./includes/guilds/data/select.js')(dbConnection),
+            update: require('./includes/guilds/data/update.js')(dbConnection)
         }
     },
     guildManagment: {
