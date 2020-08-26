@@ -1,23 +1,21 @@
+const db = require("../../../../includes/database/index.js");
+
 class userUpdate {
     constructor(args) {
-        this.oldUser = args[0];
-        this.newUser = args[1];
+        var oldUser = args[0];
+        var newUser = args[1];
 
-        try {
-            if (!this.newUser.bot) {
-                var diff = {};
-                this.oldUser.username !== this.newUser.username ? diff.username = this.newUser.username : false;
-                this.oldUser.avatar !== this.newUser.avatar ? diff.avatar_id = this.newUser.avatar : false;
-                this.oldUser.discriminator !== this.newUser.discriminator ? diff.discriminator = this.newUser.discriminator : false;
-
-                knex('members').update(diff).where({ user_id: this.newUser.id })
-                    .then()
-                    .catch(console.error);
-            }
-        } catch (e) {
-            console.log(e);
+        if (oldUser.username !== newUser.username ||
+            oldUser.avatar !== newUser.avatar ||
+            oldUser.discriminator !== newUser.discriminator
+        ) {
+            var data = {
+                username: newUser.username,
+                avatar_id: newUser.avatar,
+                discriminator: newUser.discriminator
+            };
+            db.guilds.members.update.userPersonalData(newUser.id, data);
         }
-
     }
 }
 
