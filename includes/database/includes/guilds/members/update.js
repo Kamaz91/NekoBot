@@ -2,6 +2,28 @@ const moment = require('moment');
 
 module.exports = (Connection) => {
     return {
+        userPersonalData(user_id, data) {
+            return Connection('members')
+                .where({
+                    user_id: user_id
+                })
+                .update({
+                    username: data.username,
+                    avatar_id: data.avatar_id,
+                    discriminator: data.discriminator
+                })
+                .then((rows) => {
+                    if (rows > 0) {
+                        return { status: true, error: false, request: rows[0] };
+                    } else {
+                        return { status: false, error: false, request: "Cant update" }
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                    return { status: false, error: true, request: error }
+                });
+        },
         memberPersonalData(user_id, guild_id, data) {
             return Connection('members')
                 .where({
