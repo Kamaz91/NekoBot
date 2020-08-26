@@ -1,4 +1,4 @@
-const Discord = require('discord.js'); // for embed builder
+const { MessageEmbed } = require('discord.js');
 const moment = require('moment');
 const { config } = require('../../../../includes/config/config.js');
 
@@ -29,13 +29,14 @@ class userLeftNotification {
                 `${duration.minutes()} Minutes, ` +
                 `${duration.seconds()} Seconds`;
 
-            const embed = new Discord.RichEmbed().setTimestamp(new Date());
-            embed.setAuthor(member.displayName + "#" + member.user.discriminator, member.user.displayAvatarURL);
-            embed.setThumbnail(member.guild.iconURL);
-            embed.setDescription('**Left** ' + member.guild.name);
-            embed.addField('Time', timestring);
-            embed.setFooter('User Id: ' + member.id)
-            embed.setColor([214, 44, 38]);
+            const embed = new MessageEmbed()
+                .setTimestamp(new Date())
+                .setAuthor(member.displayName + "#" + member.user.discriminator, member.user.displayAvatarURL)
+                .setThumbnail(member.guild.iconURL)
+                .setDescription('**Left** ' + member.guild.name)
+                .addField('Time', timestring)
+                .setFooter('User Id: ' + member.id)
+                .setColor([214, 44, 38]);
 
             for (var recipient of recipients) {
                 member.guild.members.resolve(recipient.id).send(embed);

@@ -1,5 +1,5 @@
 const Cfg = require('../../../../includes/Config.js');
-const Discord = require('discord.js'); // for embed builder
+const { MessageEmbed } = require('discord.js'); // embed builder
 var config = new Cfg();
 
 class messageDeleteNotifier {
@@ -23,13 +23,13 @@ class messageDeleteNotifier {
                 config.activityLogChannels.hasOwnProperty(guild.id)
             ) {
                 // Logs channel 
-                var logsChannel = guild.channels.get(config.activityLogChannels[guild.id]);
+                var logsChannel = guild.channels.resolve(config.activityLogChannels[guild.id]);
                 // Get all attachments from the message
                 var attachments = message.attachments.array();
                 // All attachments url in string
                 var urls = "";
 
-                const embed = new Discord.RichEmbed()
+                const embed = new MessageEmbed()
                     .setDescription("**Deleted in **<#" + message.channel.id + ">")
                     .setFooter("Message id: " + message.id)
                     .setColor([214, 44, 38])
