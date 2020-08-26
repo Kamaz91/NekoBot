@@ -11,7 +11,7 @@ class Config {
         this.guilds = null;
         this.TemplateGuilds = null;
         this.configJob = new CronJob('0 */5 * * * *', async () => {
-            console.log('Synchronization with database');
+            console.info('Synchronization with database');
             await this.loadGuildConfig();
             Emitter.emit('config-updated');
         });
