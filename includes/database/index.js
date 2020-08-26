@@ -36,7 +36,9 @@ module.exports = {
         memento: require('./includes/users/memento/memento.js')(dbConnection)
     },
     guilds: {
-        actions: null, // TODO
+        actions: {
+            insert: require('./includes/guilds/actions/insert.js')(dbConnection)
+        },
         channels: {
             get: require('./includes/guilds/channels/select.js')(dbConnection),
             insert: null, // TODO
