@@ -68,7 +68,7 @@ module.exports = {
     },
     messageCounter: {
         get: require('./includes/messageCounter/select.js')(dbConnection),
-        insert: null, //TODO
-        update: null  //TODO
+        insert: require('./includes/messageCounter/insert.js')(dbConnection),
+        update: require('./includes/messageCounter/update.js')(dbConnection),
     }
 }
