@@ -34,7 +34,7 @@ module.exports = (Connection) => {
                     id: id
                 })
                 .then((rows) => {
-                    if (rows.length > 0) {
+                    if (rows > 0) {
                         return { status: true, error: false, request: rows[0] };
                     } else {
                         return { status: false, error: false, request: "Cant update" }
