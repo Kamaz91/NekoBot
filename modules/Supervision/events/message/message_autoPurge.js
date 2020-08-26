@@ -4,6 +4,7 @@ const { config } = require('../../../../includes/config/config.js');
 class message_autoPurge {
     constructor(args) {
         var message = args[0];
+
         if (message.channel.type == "text" &&
             message.guild
         ) {
@@ -13,8 +14,11 @@ class message_autoPurge {
 
             var guild = config.guilds.get(guild_id);
 
-            if (guild.modules.autoPurge.channels.get(channel_id) && guild.modules.autoPurge.enabled)
+            if (guild.modules.autoPurge.channels.get(channel_id) &&
+                guild.modules.autoPurge.enabled
+            ) {
                 db.guildManagment.modules.autoPurge.insertMessage(guild_id, channel_id, message_id);
+            }
         }
     }
 }
