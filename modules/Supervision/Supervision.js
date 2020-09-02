@@ -29,7 +29,12 @@ class Supervision {
     initListener(eventName) {
         DiscordClient.on(eventName, (...args) => {
             for (var [jobName, job] of Object.entries(this.EventJobs[eventName])) {
-                let x = new job(args);
+                try {
+                    let x = new job(args);
+                } catch (error) {
+                    console.log("Job:", jobName);
+                    console.error(error);
+                }
             }
         });
     }
