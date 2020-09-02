@@ -28,7 +28,9 @@ class Config {
         var guildsKeys = client.guilds.cache.keyArray();
         this.TemplateGuilds = await this.loadModulesSettings(guildsKeys);
         await this.loadAutoPurge(guildsKeys);
+        await this.loadMC(guildsKeys);
         await this.loadNotifier(guildsKeys);
+        await this.loadLogsChannels(guildsKeys);
 
         this.saveGuildsSettings();
     }
@@ -55,14 +57,19 @@ class Config {
                     },
                     messageCounter: {
                         enabled: false,
-                        data: null
+                        bots: 0,
+                        is_hidden: 0,
+                        listing: {
+                            type: "all", // whitelist, blacklist, all
+                            channels: new Discord.Collection()
+                        }
                     },
                     quotes: {
                         enabled: false
                     },
                     logsChannels: {
                         enabled: false,
-                        action: null,
+                        activity: null,
                         voice: null
                     },
                     notifier: {
@@ -96,12 +103,37 @@ class Config {
             }
     }
 
+    async loadMC(guildsKeys) {
+        var channels = await db.guildManagment.settings.messageCounter.getChannelsBulk(guildsKeys);
+        var messageCounter = await db.guildManagment.settings.messageCounter.getBulk(guildsKeys);
+
+        if (channels.status)
+            for (const el of channels.request) {
+                this.TemplateGuilds[el.guild_id].modules.messageCounter.listing.channels.set(el.channel_id, { id: el.channel_id });
+            }
+        if (messageCounter.status)
+            for (const el of messageCounter.request) {
+                this.TemplateGuilds[el.guild_id].modules.messageCounter.bots = el.bots;
+                this.TemplateGuilds[el.guild_id].modules.messageCounter.listing.type = el.listing;
+                this.TemplateGuilds[el.guild_id].modules.messageCounter.is_hidden = el.is_hidden;
+            }
+    }
+
     async loadNotifier(guildsKeys) {
         var notifier = await db.guildManagment.settings.notifier.getBulk(guildsKeys);
 
         if (notifier.status)
             for (const el of notifier.request) {
                 this.TemplateGuilds[el.guild_id].modules.notifier[el.type].users.set(el.user_id, { id: el.user_id });
+            }
+    }
+
+    async loadLogsChannels(guildsKeys) {
+        var logsChannels = await db.guildManagment.settings.logsChannels.getBulk(guildsKeys);
+
+        if (logsChannels.status)
+            for (const el of logsChannels.request) {
+                this.TemplateGuilds[el.guild_id].modules.logsChannels[el.type] = el.channel_id;
             }
     }
 }
