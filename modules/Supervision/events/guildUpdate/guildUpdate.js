@@ -1,8 +1,8 @@
 const db = require("../../../../includes/database/index.js");
 class guildUpdate {
     constructor(args) {
-        oldGuild = args[0];
-        newGuild = args[1];
+        var oldGuild = args[0];
+        var newGuild = args[1];
 
         if (oldGuild.name !== newGuild.name) {
             db.guilds.data.update.name(newGuild.name, newGuild.id);
