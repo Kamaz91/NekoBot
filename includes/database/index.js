@@ -59,11 +59,11 @@ module.exports = {
     },
     guildManagment: {
         settings: {
-            logsChannels: require('./includes/guildManagment/settings/logschannels.js')(dbConnection),
             autoPurge: require('./includes/guildManagment/settings/autoPurge.js')(dbConnection),
-            notifier: require('./includes/guildManagment/settings/notifier.js')(dbConnection),
+            logsChannels: require('./includes/guildManagment/settings/logschannels.js')(dbConnection),
             messageCounter: require('./includes/guildManagment/settings/messageCounter.js')(dbConnection),
             modules: require('./includes/guildManagment/settings/modules.js')(dbConnection),
+            notifier: require('./includes/guildManagment/settings/notifier.js')(dbConnection)
         },
         modules: {
             autoPurge: require('./includes/guildManagment/modules/autoPurge.js')(dbConnection),
