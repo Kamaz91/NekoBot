@@ -30,7 +30,7 @@ class userLeftNotification {
                 `${duration.seconds()} Seconds`;
 
             const embed = new MessageEmbed()
-                .setTimestamp(new Date())
+                .setTimestamp()
                 .setAuthor(member.displayName + "#" + member.user.discriminator, member.user.displayAvatarURL)
                 .setThumbnail(member.guild.iconURL)
                 .setDescription('**Left** ' + member.guild.name)
