@@ -7,7 +7,7 @@ module.exports = (Connection) => {
          * @param {string} guildsArray - The ids of the guilds.
          * @returns {Promise} Connection Promise object
          */
-        getBulkByid: (guildsArray) => {
+        getBulk: (guildsArray) => {
             return Connection('auto_purge_settings')
                 .select()
                 .whereIn('guild_id', guildsArray)
@@ -19,7 +19,6 @@ module.exports = (Connection) => {
                     }
                 })
                 .catch(err => { return { status: 0, request: err } });
-        },
-        
+        }
     }
 }

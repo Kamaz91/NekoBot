@@ -7,7 +7,7 @@ module.exports = (Connection) => {
          * @param {string} guildsArray - The ids of the guilds.
          * @returns {Promise} Connection Promise object
          */
-        getBulkByid: (guildsArray) => {
+        getBulk: (guildsArray) => {
             return Connection('modules_settings')
                 .select()
                 .whereIn('guild_id', guildsArray)
