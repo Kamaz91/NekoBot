@@ -14,7 +14,7 @@ module.exports = (Connection) => {
                 })
                 .then((rows) => {
                     if (rows > 0) {
-                        return { status: true, error: false, request: rows[0] };
+                        return { status: true, error: false, request: rows };
                     } else {
                         return { status: false, error: false, request: "Cant update" }
                     }
@@ -39,7 +39,7 @@ module.exports = (Connection) => {
                 })
                 .then((rows) => {
                     if (rows > 0) {
-                        return { status: true, error: false, request: rows[0] };
+                        return { status: true, error: false, request: rows };
                     } else {
                         return { status: false, error: false, request: "Cant update" }
                     }
@@ -57,8 +57,8 @@ module.exports = (Connection) => {
                     guild_id: guild_id
                 })
                 .then((rows) => {
-                    if (rows.length > 0) {
-                        return { status: true, error: false, request: rows[0] };
+                    if (rows > 0) {
+                        return { status: true, error: false, request: rows };
                     } else {
                         return { status: false, error: false, request: "Cant update" }
                     }
@@ -82,8 +82,8 @@ module.exports = (Connection) => {
                     is_vip: 0
                 })
                 .then((rows) => {
-                    if (rows.length > 0) {
-                        return { status: true, error: false, request: rows[0] };
+                    if (rows > 0) {
+                        return { status: true, error: false, request: rows };
                     } else {
                         return { status: false, error: false, request: "Cant update" }
                     }

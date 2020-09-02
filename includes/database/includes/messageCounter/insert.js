@@ -20,8 +20,8 @@ module.exports = (Connection) => {
                     [hour]: 1
                 })
                 .then((rows) => {
-                    if (rows.length > 0) {
-                        return { status: true, error: false, request: rows[0] };
+                    if (rows > 0) {
+                        return { status: true, error: false, request: rows };
                     } else {
                         return { status: false, error: false, request: "Cant insert" }
                     }

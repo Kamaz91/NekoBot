@@ -11,8 +11,8 @@ module.exports = (Connection) => {
                     create_timestamp: moment().valueOf()
                 })
                 .then((rows) => {
-                    if (rows.length > 0) {
-                        return { status: true, error: false, request: rows[0] };
+                    if (rows > 0) {
+                        return { status: true, error: false, request: rows };
                     } else {
                         return { status: false, error: false, request: "Cant add action" }
                     }
@@ -31,8 +31,8 @@ module.exports = (Connection) => {
                     create_timestamp: moment().valueOf()
                 })
                 .then((rows) => {
-                    if (rows.length > 0) {
-                        return { status: true, error: false, request: rows[0] };
+                    if (rows > 0) {
+                        return { status: true, error: false, request: rows };
                     } else {
                         return { status: false, error: false, request: "Cant add action" }
                     }
@@ -53,8 +53,8 @@ module.exports = (Connection) => {
                     create_timestamp: moment().valueOf()
                 })
                 .then((rows) => {
-                    if (rows.length > 0) {
-                        return { status: true, error: false, request: rows[0] };
+                    if (rows > 0) {
+                        return { status: true, error: false, request: rows };
                     } else {
                         return { status: false, error: false, request: "Cant add action" }
                     }
