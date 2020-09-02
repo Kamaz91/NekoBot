@@ -79,7 +79,7 @@ class Config {
 
     async loadModulesSettings(guildsKeys) {
         var template = this.settingsTemplate(guildsKeys);
-        var modules = await db.guildManagment.settings.modules.getBulkByid(guildsKeys);
+        var modules = await db.guildManagment.settings.modules.getBulk(guildsKeys);
         if (modules.status)
             for (const el of modules.request) {
                 template[el.guild_id].modules[el.module_name].enabled = el.enabled ? true : false
@@ -88,7 +88,7 @@ class Config {
     }
 
     async loadAutoPurge(guildsKeys) {
-        var autoPurge = await db.guildManagment.settings.autoPurge.getBulkByid(guildsKeys);
+        var autoPurge = await db.guildManagment.settings.autoPurge.getBulk(guildsKeys);
 
         if (autoPurge.status)
             for (const el of autoPurge.request) {
@@ -97,7 +97,7 @@ class Config {
     }
 
     async loadNotifier(guildsKeys) {
-        var notifier = await db.guildManagment.settings.notifier.getBulkByid(guildsKeys);
+        var notifier = await db.guildManagment.settings.notifier.getBulk(guildsKeys);
 
         if (notifier.status)
             for (const el of notifier.request) {
