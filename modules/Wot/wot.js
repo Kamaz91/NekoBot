@@ -39,48 +39,6 @@ class wot {
         });
     }
 
-    assignProcess(message, nickname) {
-        let process = this.assignProfileToUser(message, nickname);
-        process.then((resolve) => {
-            message.reply(resolve.status);
-        });
-    }
-
-    assignProfileToUser(message, nickname) {
-        return this.getProfile(nickname).then((resolve) => {
-            if (resolve.code === 200) {
-                return knex.select().table('wot_assign').where('discordId', message.author.id).then((query) => {
-                    if (query.length > 0) {
-                        return knex('wot_assign').where('discordId', '=', message.author.id).update({
-                            wotId: resolve.data.account_id,
-                            wotName: resolve.data.nickname,
-                            timestamp: Date.now()
-                        }).then(() => {
-                            return { code: 200, status: `Updated assign from ${query[0].wotName} to ${resolve.data.nickname}` };
-                        }).catch((error) => {
-                            console.log(error);
-                            return { code: 102, status: "Database error", data: error };
-                        });
-                    } else {
-                        return knex('wot_assign').insert({
-                            discordId: message.author.id,
-                            discordName: message.author.username,
-                            wotId: resolve.data.account_id,
-                            wotName: resolve.data.nickname,
-                            timestamp: Date.now()
-                        }).then(() => {
-                            return { code: 200, status: `Assigned ${resolve.data.nickname} to your id` };
-                        }).catch((error) => {
-                            return { code: 102, status: "Database error", data: error };
-                        });
-                    }
-                });
-            } else {
-                return resolve;
-            }
-        });
-    }
-
     getProfile(nickName) {
         var options = {
             method: 'POST',
