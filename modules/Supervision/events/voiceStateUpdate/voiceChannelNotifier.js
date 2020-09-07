@@ -19,8 +19,7 @@ class voiceChannelNotifier {
             var logsChannel = guild.channels.resolve(guildConfig.modules.logsChannels.voice);
             // Check if the log channel exists in config
             if (newState.channelID !== oldState.channelID && logsChannel != null) {
-
-                if (oldState.channelID === null) {
+                if (oldState.channelID == null) {
                     //* Joined to voice channel
                     var author = `${newState.member.displayName}#${newState.member.user.discriminator}`;
                     var img = newState.member.user.displayAvatarURL;
