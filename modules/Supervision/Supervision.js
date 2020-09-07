@@ -14,7 +14,6 @@ class Supervision {
         this.Settings = null;
         this.EventJobs = {};
 
-        this.startCron();
         this.loadSettings();
         this.loadEventJobs();
         this.initEvents();
@@ -62,29 +61,6 @@ class Supervision {
     }
     loadSettings() {
         this.Settings = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'settings.json'), 'utf8'));
-    }
-    startCron() {
-        const UserPresenceJob = new CronJob('0 */10 * * * *', function () {
-            const guilds = DiscordClient.guilds.cache.array();
-            console.info('User presence status update!');
-            for (var guild of guilds) {
-                var members = guild.members.cache.array();
-                for (var member of members) {
-                    if (!member.user.bot) {
-                        knex('members_presence').insert({
-                            user_id: member.id,
-                            guild_id: member.guild.id,
-                            status: member.presence.status,
-                            microtime_timestamp: moment().valueOf()
-                        })
-                            .then()
-                            .catch(console.error);
-                    }
-                }
-            }
-        });
-        console.info("User Presence job started");
-        UserPresenceJob.start();
     }
     statusToInt(params) {
         switch (params) {
