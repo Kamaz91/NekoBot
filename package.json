@@ -16,7 +16,6 @@
         "opusscript": "^0.0.3",
         "request": "^2.81.0",
         "request-promise": "^4.2.5",
-        "sqlite3": "^3.1.9",
         "youtube-audio-stream": "^0.0.48",
         "ytdl-core": "^0.14.0"
     },
