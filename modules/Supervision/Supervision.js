@@ -1,7 +1,5 @@
-const CronJob = require('cron').CronJob;
 const fs = require('fs');
 const DiscordClient = require('../../includes/Discord/connection.js');
-const moment = require('moment');
 const path = require('path');
 const _ = require('lodash');
 
