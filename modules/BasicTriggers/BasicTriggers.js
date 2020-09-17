@@ -1,8 +1,7 @@
-const Discord = require('discord.js');
-const Cfg = require('../../includes/Config.js');
+const Client = require('../../includes/Discord/connection.js');
+
 class BasicTriggers {
     constructor(DiscordClient, TriggerManager, ModuleLoader) {
-        this.Client = DiscordClient;
         this.ModuleLoader = ModuleLoader;
         this.TriggerManager = TriggerManager;
         this.Activity = {
@@ -10,8 +9,8 @@ class BasicTriggers {
             options: { type: "LISTENING" }
         };
 
-        this.Client.on('ready', () => {
-            this.Client.user.setActivity(this.Activity.text, this.Activity.options.type);
+        Client.on('ready', () => {
+            Client.user.setActivity(this.Activity.text, this.Activity.options.type);
         });
 
         TriggerManager.RegisterTrigger({
@@ -151,7 +150,7 @@ class BasicTriggers {
     }
 
     embed(message, trigger) {
-        if (message.author.id === new Cfg().adminId) {
+        if (message.author.id == "166956114154356736") {
             var a = '';
             var x;
             for (x in trigger.arguments) {
@@ -198,8 +197,8 @@ class BasicTriggers {
 
     react(message, trigger) {
         message.delete();
-        if (message.member.hasPermission('ADMINISTRATOR') || message.author.id === new Cfg().adminId) {
-            let channelHandle = this.Client.channels.get(message.channel.id);
+        if (message.member.hasPermission('ADMINISTRATOR')) {
+            let channelHandle = Client.channels.get(message.channel.id);
             let messageHandle = channelHandle.messages.get(trigger.arguments[0]);
             let match = trigger.arguments[1].match(/[0-9]+[^>]/g);
 
@@ -214,7 +213,7 @@ class BasicTriggers {
     }
 
     setActivity(message, trigger) {
-        if (message.author.id === new Cfg().adminId) {
+        if (message.author.id == "166956114154356736") {
             if (trigger.text.length > 1) {
                 switch (trigger.arguments[0]) {
                     case "ST":
@@ -229,16 +228,17 @@ class BasicTriggers {
                         var options = { type: "WATCHING" };
                         var text = trigger.text.substr(trigger.arguments[0].length).trim();
                         break;
+                    case "del":
+                        var options = null;
+                        var text = null;
+                        break;
                     default:
                         var options = { type: "PLAYING" };
                         var text = trigger.text;
                         break;
                 }
-                this.Client.user.setActivity(text, options);
+                Client.user.setActivity(text, options);
                 this.Activity = { text: text, options: options };
-            } else {
-                this.Client.user.setActivity();
-                this.Activity = null;
             }
         }
     }
