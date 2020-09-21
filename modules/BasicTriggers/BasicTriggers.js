@@ -245,12 +245,12 @@ class BasicTriggers {
 
     avatar(message, trigger) {
         if (trigger.text.length == 0) {
-            message.channel.send(message.author.displayAvatarURL);
+            message.channel.send(message.author.displayAvatarURL({ format: 'png', dynamic: true, size: 2048 }));
         } else {
             if (message.channel.type !== "dm") {
-                var guildMember = message.guild.members.get(trigger.arguments[0].replace(/<|!|>|@/gi, ''));
+                var guildMember = message.guild.members.resolve(trigger.arguments[0].replace(/<|!|>|@/gi, ''));
                 if (guildMember) {
-                    message.channel.send(guildMember.user.displayAvatarURL);
+                    message.channel.send(guildMember.user.displayAvatarURL({ format: 'png', dynamic: true, size: 2048 }));
                 } else {
                     message.reply("User not found");
                 }
