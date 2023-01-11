@@ -9,7 +9,7 @@
         "console-stamp": "^0.2.9",
         "cron": "^1.7.2",
         "discord.js": "^12",
-        "knex": "^0.19.5",
+        "knex": "^2.4.0",
         "lodash": "^4.17.19",
         "moment": "^2.24.0",
         "mysql2": "^1.7.0",
