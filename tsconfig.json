@@ -1,0 +1,59 @@
+{
+  "noImplicitThis": false,
+  "include": [
+    "./src/*.ts",
+    "./src/*.json"
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "@types"
+  ],
+  "tsc-alias": {
+    "resolveFullPaths": true
+  },
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "target": "ESNext",
+    "lib": [
+      "ESNext"
+    ],
+    "baseUrl": "./",
+    "outDir": "./build/",
+    "typeRoots": [
+      "./nodemodules/@types",
+      "./@types"
+    ],
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@src/*": [
+        "./src/*"
+      ],
+      "@core/*": [
+        "./src/core/*"
+      ],
+      "@config/*": [
+        "./src/config/*"
+      ],
+      "@commands/*": [
+        "./src/commands/*"
+      ],
+      "@modules/*": [
+        "./src/modules/*"
+      ],
+      "@includes/*": [
+        "./src/includes/*"
+      ],
+      "@type/*": [
+        "./@types/*"
+      ]
+    }
+  }
+}
