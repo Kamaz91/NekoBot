@@ -3,6 +3,7 @@ import Client from "@core/Connection";
 import EM from "@includes/EventsManager";
 import IM from "@includes/InteractionManager"
 import { Database } from '@includes/database';
+import config from "@includes/config";
 
 var InteractionManager = new IM(Client);
 var EventsManager = new EM(Client);
@@ -52,4 +53,4 @@ async function GetToken() {
     return query.token;
 }
 
-export { Client, InteractionManager, EventsManager };
+export { Client, config, InteractionManager, EventsManager };
