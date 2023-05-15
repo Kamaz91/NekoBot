@@ -1,6 +1,6 @@
 import { Knex } from 'knex';
 
-import { ApiTokens, User, GuildMember, Guild, GuildChannel, MessageCounterUserStats, AutoPurgeSettings, AutoPurgeMessage } from './database'
+import { ApiTokens, User, GuildMember, Guild, GuildChannel, MessageCounterUserStats, AutoPurgeSettings, AutoPurgeMessage, Quote } from './database'
 
 declare module 'knex/types/tables' {
     interface Tables {
@@ -27,5 +27,7 @@ declare module 'knex/types/tables' {
         auto_purge_messages_composite: Knex.CompositeTableType<AutoPurgeMessage>;
         auto_purge_settings: AutoPurgeSettings;
         auto_purge_settings_composite: Knex.CompositeTableType<AutoPurgeSettings>;
+        quotes: Quote;
+        quotes_composite: Knex.CompositeTableType<Quote>;
     }
 }
