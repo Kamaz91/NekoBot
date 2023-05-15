@@ -1,22 +1,11 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, SlashCommandBuilder, SnowflakeUtil } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, SnowflakeUtil } from "discord.js";
+import { InteractionBuilder } from "@src/utils";
+import InteractionManager from "@core/InteractionManager";
 
 interface Player {
     user: string | null;
     option: number | null;
 }
-
-const name = "rock";
-
-var def = new SlashCommandBuilder()
-    .setName(name)
-    .setDescription('Rock Paper Scisors')
-    .setDMPermission(false)
-    .addUserOption((Option) => {
-        return Option
-            .setName('user')
-            .setDescription('The user you want to battle!')
-            .setRequired(true);
-    });
 
 /*const
     ROCK = formatEmoji('1054889270642483301'),
@@ -115,6 +104,7 @@ async function execute(interaction: CommandInteraction) {
     interaction.reply({ content: "", components: [row] });
 }
 
-export default {
-    def, execute, name
-}
+const name = "rock";
+const Command = new InteractionBuilder(name).SlashCommand(execute, "infinite");
+
+InteractionManager.addGlobalInteraction(Command);
