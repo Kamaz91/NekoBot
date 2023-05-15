@@ -1,5 +1,4 @@
 import { AutoPurgeSettings, GuildMember, LogsType } from "./database";
-
 export interface ConfigModule {
     enabled: boolean;
 }
