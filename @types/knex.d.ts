@@ -5,9 +5,7 @@ import { ApiTokens, User, GuildMember, Guild, GuildChannel, MessageCounterUserSt
 declare module 'knex/types/tables' {
     interface Tables {
         api_tokens: ApiTokens;
-        api_tokens_composite: Knex.CompositeTableType<
-            ApiTokens
-        >;
+        api_tokens_composite: Knex.CompositeTableType<ApiTokens>;
         users: User;
         users_composite: Knex.CompositeTableType<
             User,
@@ -24,7 +22,7 @@ declare module 'knex/types/tables' {
         guilds_channels: GuildChannel;
         guilds_channels_composite: Knex.CompositeTableType<GuildChannel>;
         message_counter_user_stats: MessageCounterUserStats;
-        message_counter_user_stats_guilds_channels_composite: Knex.CompositeTableType<MessageCounterUserStats>;
+        message_counter_user_stats_composite: Knex.CompositeTableType<MessageCounterUserStats>;
         auto_purge_messages: AutoPurgeMessage;
         auto_purge_messages_composite: Knex.CompositeTableType<AutoPurgeMessage>;
         auto_purge_settings: AutoPurgeSettings;
