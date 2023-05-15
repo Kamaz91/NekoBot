@@ -9,11 +9,9 @@ export default class EventsManager {
     constructor(Client) {
         this.Client = Client;
         this.Events = new Map();
-
-        this.setEventListeners();
     }
 
-    private setEventListeners() {
+    setEventListeners() {
         for (const [, eventName] of Object.entries(Events)) {
 
             logger.info("Set event listener:" + eventName);
@@ -44,10 +42,11 @@ export default class EventsManager {
 
         for (const name of Events) {
             if (this.Events.has(name)) {
+                logger.info("EventManager: Event: " + name + " Task added");
                 let tasks = this.Events.get(name);
                 tasks.push(newTask);
             } else {
-                logger.error("Event:" + name + " doesn't exists");
+                logger.error("EventManager: Event: " + name + " doesn't exists");
             }
         }
     }

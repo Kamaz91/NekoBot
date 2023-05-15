@@ -1,15 +1,18 @@
 import logger from "@includes/logger";
 import Client from "@core/Connection";
-import EM from "@includes/EventsManager";
-import IM from "@includes/InteractionManager"
-import { Database } from '@includes/database';
-import config from "@includes/config";
+import { Database, Disconnect } from '@includes/database';
 
-var InteractionManager = new IM(Client);
-var EventsManager = new EM(Client);
+import ModuleManager from "@core/ModuleManager";
+import "@core/EventsManager";
+import "@core/InteractionManager"
+
+import Config from "@core/config";
+
+import "@src/EnabledModules";
+import "@src/EnabledCommands";
 
 Client.on('ready', () => {
-    InteractionManager.setGuilds();
+    ModuleManager.setConfigReadyListener(Config);
     logger.info('Connected!');
 });
 Client.on('reconnecting', function () {
@@ -20,9 +23,18 @@ Client.on('disconnect', closeEvent => {
     logger.info('End of Session');
 });
 Client.on('error', error => {
+    console.log(error);
     logger.error('Discord error');
     logger.error(error);
-    logger.error(error.message);
+});
+Client.on('debug', message => {
+    logger.debug(message);
+});
+
+process.on("SIGINT", () => {
+    logger.info("Caught SIGINT.");
+    Disconnect();
+    Client.destroy();
 });
 /*client.on('message', message => {
     var guildchan = '';
@@ -53,4 +65,4 @@ async function GetToken() {
     return query.token;
 }
 
-export { Client, config, InteractionManager, EventsManager };
+export { Client };
