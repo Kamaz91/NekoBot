@@ -1,5 +1,7 @@
 import { BaseImageURLOptions, CommandInteraction, SlashCommandBuilder, User } from "discord.js";
+import InteractionManager from "@core/InteractionManager";
 import { Client } from "@core/Bot"
+import { InteractionBuilder } from "@utils/index";
 
 function getUsersFromMention(mention) {
     // The id is the first and only match found by the RegEx.
@@ -21,19 +23,7 @@ function getUsersFromMention(mention) {
     return Users;
 }
 
-
 const name = "avatar";
-var def = new SlashCommandBuilder()
-    .setName(name)
-    .setDescription('Show user avatar image')
-    .setDMPermission(false)
-    .addStringOption((option) => {
-        return option
-            .setName('users')
-            .setDescription('The users you want to see avatars, max 10. Use mentions with @')
-            // Ensure the text will fit in an embed description, if the user chooses that option
-            .setMaxLength(2000)
-    });
 
 async function execute(interaction: CommandInteraction) {
     const MaxAvatars = 10;
@@ -59,6 +49,6 @@ async function execute(interaction: CommandInteraction) {
     interaction.reply({ content: interaction.user.avatarURL(Options), ephemeral: true }).catch(console.error);
 }
 
-export default {
-    def, execute, name
-}
+let Command = new InteractionBuilder(name).SlashCommand(execute, "infinite");
+
+InteractionManager.addGlobalInteraction(Command);

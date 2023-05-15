@@ -1,13 +1,13 @@
-import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-const name = "pong";
-var def = new SlashCommandBuilder()
-    .setName(name)
-    .setDescription('Ping Pong!');
+import { CommandInteraction } from "discord.js";
+import InteractionManager from "@core/InteractionManager";
+import { InteractionBuilder } from "@utils/index";
+
+const name = "ping";
 
 async function execute(interaction: CommandInteraction) {
     interaction.reply("Pong!");
 }
 
-export default {
-    def, execute, name
-}
+let Command = new InteractionBuilder(name).SlashCommand(execute, "infinite");
+
+InteractionManager.addGlobalInteraction(Command);
