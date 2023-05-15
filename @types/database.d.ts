@@ -123,3 +123,14 @@ export interface NotifierUsersDM {
   enabled: boolean;
   created_timestamp: number;
 }
+
+export interface Quote {
+  id: number;
+  quote_guild_position: number;
+  user_id: string;
+  user_name: string;
+  guild_id: string;
+  text: string;
+  created_timestamp: number;
+  data: Record<any, any>
+}
