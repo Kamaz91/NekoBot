@@ -1,5 +1,7 @@
 import axios from "axios";
-import { CommandInteraction, SlashCommandBuilder, AttachmentBuilder } from "discord.js";
+import { CommandInteraction, AttachmentBuilder } from "discord.js";
+import InteractionManager from "@core/InteractionManager";
+import { InteractionBuilder } from "@src/utils";
 
 async function execute(interaction: CommandInteraction) {
     const User = interaction.options.get("username");
@@ -24,19 +26,5 @@ async function execute(interaction: CommandInteraction) {
     interaction.reply({ files: [imgAttachment] });
 }
 
-const name = "tapmusic";
-
-var def = new SlashCommandBuilder()
-    .setName(name)
-    .setDescription('TapMusic image')
-    .setDMPermission(true)
-    .addStringOption((Option) =>
-        Option
-            .setName('username')
-            .setDescription('The lastFM username you want image')
-            .setRequired(true)
-    );
-
-export default {
-    def, execute, name
-}
+const Command = new InteractionBuilder("tapmusic").SlashCommand(execute, "infinite");
+InteractionManager.addGlobalInteraction(Command);
