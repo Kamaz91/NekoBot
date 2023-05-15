@@ -1,15 +1,17 @@
 import cfg from "./config";
-import { EventsManager, config } from "@core/Bot";
+import EventsManager from "@core/EventsManager";
+import ModuleManager from "@core/ModuleManager";
+import config from "@core/config";
 import { Events, Message } from "discord.js";
 import { Database } from "@includes/database";
 import moment from "moment";
 import { StartCron } from "./cronJob";
 import logger from "@includes/logger";
 
-export default { cfg, execute };
+ModuleManager.addModule("AutoPurge", cfg, execute);
 
 function execute() {
-    logger.info("Auto Purge");
+    logger.info("AutoPurge: Started");
     EventsManager.addEventTask(Events.MessageCreate, processMessage);
     StartCron();
 }

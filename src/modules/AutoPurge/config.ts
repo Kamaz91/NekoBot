@@ -1,18 +1,18 @@
 import { AutoPurgeSettings, ModuleSettings } from "@/@types/database";
 import { Database } from "@includes/database";
-import { AutoPurge } from "@type/config";
+import { AutoPurge } from "@/@types/config";
 
-const template = {
+const Template = {
     enabled: false,
     channels: new Map()
 }
 
-const sql = [
+const SQL = [
     (guildsArray) => Database().from("auto_purge_settings").whereIn('guild_id', guildsArray),
-    (guildsArray) => Database().from("modules_settings").whereIn('guild_id', guildsArray).andWhere("Module_name", "autoPurge")
+    (guildsArray) => Database().from("modules_settings").whereIn('guild_id', guildsArray).andWhere("module_name", "autoPurge")
 ];
 
-function prepareData(GuildsIds: string[], data: [AutoPurgeSettings[], ModuleSettings[]]) {
+function PrepareData(GuildsIds: string[], data: [AutoPurgeSettings[], ModuleSettings[]]) {
     var GuildsSettings = new Map();
 
     for (const GuildId of GuildsIds) {
@@ -33,5 +33,5 @@ function prepareData(GuildsIds: string[], data: [AutoPurgeSettings[], ModuleSett
 }
 
 export default {
-    template, sql, prepareData
+    Template, SQL, PrepareData
 }

@@ -1,15 +1,16 @@
-import { Client, config } from "@core/Bot";
+import { Client } from "@core/Bot";
+import Config from "@core/config";
 import { EmbedBuilder, Message, GuildChannel, Collection, VoiceState, GuildMember, ColorResolvable } from "discord.js";
 import Logger from "@includes/logger";
 import moment from "moment";
 
 //! Pamiętać o dodaniu powiadomień dla użytkowników na DM dla każdego typu 
 export function MessageDelete(Message: Message) {
-    if (!config.hasGuild(Message.guildId)) {
+    if (!Config.hasGuild(Message.guildId)) {
         return;
     }
 
-    let GuildData = config.getGuildConfig(Message.guildId);
+    let GuildData = Config.getGuildConfig(Message.guildId);
     let LogsChannel = Client.channels.resolve(GuildData.Notifier.messageDelete.channelId);
 
     if (!LogsChannel.isTextBased()) {
@@ -40,11 +41,11 @@ export function MessageDelete(Message: Message) {
 }
 
 export function MessageBulkDelete(Messages: Collection<string, Message>, Channel: GuildChannel) {
-    if (!config.hasGuild(Channel.guildId)) {
+    if (!Config.hasGuild(Channel.guildId)) {
         return;
     }
 
-    let GuildData = config.getGuildConfig(Channel.guildId);
+    let GuildData = Config.getGuildConfig(Channel.guildId);
     let LogsChannel = Client.channels.resolve(GuildData.Notifier.messageDelete.channelId);
 
     if (!LogsChannel.isTextBased()) {
@@ -76,11 +77,11 @@ export function MessageBulkDelete(Messages: Collection<string, Message>, Channel
 export function VoiceStateChange(OldState: VoiceState, NewState: VoiceState) {
     // Discord.js always brings OldState and NewState data
     let GuildId = OldState.guild.id;
-    if (!config.hasGuild(GuildId)) {
+    if (!Config.hasGuild(GuildId)) {
         return;
     }
 
-    let GuildData = config.getGuildConfig(GuildId);
+    let GuildData = Config.getGuildConfig(GuildId);
 
     if (GuildData.Notifier.voiceChange.channelId == null) {
         return;
@@ -103,7 +104,7 @@ export function VoiceStateChange(OldState: VoiceState, NewState: VoiceState) {
         data = {
             author: NewState.member,
             action: "Joined",
-            channel: `<#${NewState.channel.name}>`,
+            channel: `<#${NewState.channel.id}>`,
             color: [79, 214, 38]
         }
     } else if (NewState.channelId && OldState.channelId) {
@@ -132,11 +133,11 @@ export function VoiceStateChange(OldState: VoiceState, NewState: VoiceState) {
 }
 
 export function MemberRemoved(Member: GuildMember) {
-    if (!config.hasGuild(Member.guild.id)) {
+    if (!Config.hasGuild(Member.guild.id)) {
         return;
     }
 
-    let GuildData = config.getGuildConfig(Member.guild.id);
+    let GuildData = Config.getGuildConfig(Member.guild.id);
     let LogsChannel = Client.channels.resolve(GuildData.Notifier.guildLeft.channelId);
 
     if (!LogsChannel.isTextBased() || GuildData.Notifier.guildLeft.usersDM.length > 0) {

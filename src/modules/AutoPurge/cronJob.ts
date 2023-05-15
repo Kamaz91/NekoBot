@@ -1,13 +1,14 @@
 import { CronJob } from "cron";
-import { config, Client } from "@core/Bot";
+import Config from "@core/config";
+import Client from "@core/Connection";
 import { Database } from "@includes/database";
 import moment from "moment";
-import { AutoPurgeMessage } from "@type/database";
+import { AutoPurgeMessage } from "@/@types/database";
 import logger from "@includes/logger";
 
 export function StartCron() {
     const autoPurge = new CronJob('0 0 */1 * * *', CronTask);
-    logger.info("AutoPurge channels job started");
+    logger.info("AutoPurge: channels job started");
     autoPurge.start();
 }
 
@@ -22,7 +23,7 @@ async function prepareData() {
     var query = Database()('auto_purge_messages');
 
     for (const GuildId of GuildsKeys) {
-        let AutoPurgeSettings = config.getGuildConfig(GuildId).AutoPurge;
+        let AutoPurgeSettings = Config.getGuildConfig(GuildId).AutoPurge;
         if (!AutoPurgeSettings.enabled) {
             break;
         }
