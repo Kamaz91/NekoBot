@@ -6,6 +6,5 @@ logger.info('*       NekoBot v12.0       *');
 logger.info('*****************************');
 
 import { login } from '@core/Bot';
-import "@core/commands";
 
 login();

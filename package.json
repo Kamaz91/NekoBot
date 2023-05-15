@@ -2,7 +2,7 @@
     "name": "nekobot",
     "version": "12.0.0",
     "description": "discord bot",
-    "main": "./build/main.js",
+    "main": "./build/NekoBot.js",
     "type": "module",
     "dependencies": {
         "@discordjs/rest": "^1.3.0",
@@ -26,8 +26,8 @@
         "buildnc": "tsc --build && tsc-alias",
         "buildrun": "npm run build && npm run start",
         "buildrun-debug": "npm run build && npm run start-debug",
-        "start-debug": "node --experimental-json-modules --inspect-brk ./build/main.js",
-        "start": "node --experimental-json-modules ./build/main.js",
+        "start-debug": "node --experimental-json-modules --inspect-brk ./build/NekoBot.js",
+        "start": "node --experimental-json-modules ./build/NekoBot.js",
         "test": "echo \"Error: no test specified\" && exit 1",
         "register": "cd ./build/ && node RegisterCommands.js"
     },
