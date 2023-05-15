@@ -1,6 +1,6 @@
 import knex from "knex";
 import { Knex } from "knex";
-import logger from "../logger";
+import logger from "@includes/logger";
 
 let knexConnection: Knex;
 
@@ -39,25 +39,23 @@ export function connect({
     .on("connection-error", (e) => {
       logger.error("Knex database connection-error");
       logger.error(e);
+      console.log(e);
     });
 
-  return knexConnection.schema
-    .hasTable("users")
-    .then((exists) => {
-      return { status: true, message: "Database Connected" };
-    })
-    .catch((error) => {
-      console.log("Connection Error:");
-      console.error(error);
-      return { status: false, message: error.toString() };
-    });
+  return isConnectionEstablished(knexConnection);
 }
 
 export function disconnect(): void {
-  console.log(`Database successfully disconnected`);
+  logger.info(`Database successfully disconnected`);
   knexConnection.destroy();
 }
 
 export function getConnection(): Knex {
   return knexConnection;
+}
+
+function isConnectionEstablished(connecting: Knex) {
+  return connecting.raw('SELECT 1+1 AS result')
+    .then((result) => { console.log("DB result should be 2=", result[0]); return { status: true, message: "Database Connected" } })
+    .catch((error) => { console.log(error); return { status: false, message: error.toString() } });
 }
