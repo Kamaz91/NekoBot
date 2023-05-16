@@ -12,10 +12,9 @@ const logLevels = {
         debug: 3,
     }
 };
-const locale = 'pl-PL';
 
-let Date = moment();
-Date.locale(locale);
+let Date = moment().local(true);
+//Date.locale(locale);
 
 // Create logs directory if it doesn't exist
 const logDir = 'logs';
@@ -34,12 +33,12 @@ const logger = winston.createLogger({
     levels: logLevels.levels,
     format: winston.format.combine(
         winston.format.printf(({ level, message }) => {
-            let timestamp = moment().format('YYYY-MM-DD hh:mm:ss.SSS').trim();
+            let timestamp = moment().format('YYYY-MM-DD HH:mm:ss.SSS').trim();
             return `[${timestamp}] [${level.toUpperCase()}] ${message}`;
         }),
     ),
     transports: [
-        new winston.transports.Console({ handleExceptions: true }),
+        new winston.transports.Console({ handleExceptions: false }),
         new winston.transports.File({ filename: errorLogPath, level: 'error' }),
         new winston.transports.File({ filename: allLogPath }),
     ],
