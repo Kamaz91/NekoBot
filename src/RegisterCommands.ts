@@ -16,6 +16,11 @@ const commandsDefs = {
             .setName("quote")
             .setDescription("Quotes")
             .setDMPermission(false)
+            .addNumberOption((Option) =>
+                Option
+                    .setName('quote-position')
+                    .setDescription('Quote number')
+            )
             .toJSON()],
     Avatar: new SlashCommandBuilder()
         .setName("avatar")
