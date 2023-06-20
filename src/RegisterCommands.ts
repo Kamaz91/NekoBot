@@ -40,6 +40,55 @@ const commandsDefs = {
                 .setRequired(true);
         })
         .toJSON(),
+    Reminder: new SlashCommandBuilder()
+        .setName("reminder")
+        .setDescription('Set Remider')
+        .setDMPermission(true)
+        .addNumberOption((Option) =>
+            Option
+                .setName('year')
+                .setDescription('4 digits e.g. 2023')
+                .setRequired(true)
+        )
+        .addNumberOption((Option) =>
+            Option
+                .setName('month')
+                .setDescription('Month in range from 1 to 12')
+                .setMinValue(1)
+                .setMaxValue(12)
+                .setRequired(true)
+        )
+        .addNumberOption((Option) =>
+            Option
+                .setName('day')
+                .setDescription('Day in range from 1 to 31')
+                .setMinValue(1)
+                .setMaxValue(31)
+                .setRequired(true)
+        )
+        .addNumberOption((Option) =>
+            Option
+                .setName('hour')
+                .setDescription('Hour in range from 0 to 23')
+                .setMinValue(0)
+                .setMaxValue(23)
+                .setRequired(true)
+        )
+        .addNumberOption((Option) =>
+            Option
+                .setName('minute')
+                .setDescription('Minute in range from 0 to 59')
+                .setMinValue(0)
+                .setMaxValue(59)
+                .setRequired(true)
+        )
+        .addStringOption((Option) =>
+            Option
+                .setName('text')
+                .setDescription('Text to remind')
+                .setRequired(true)
+        )
+        .toJSON(),
     Tapmusic: new SlashCommandBuilder()
         .setName("tapmusic")
         .setDescription('TapMusic image')
@@ -50,11 +99,7 @@ const commandsDefs = {
                 .setDescription('The lastFM username you want image')
                 .setRequired(true)
         )
-        .toJSON(),
-    Test: new SlashCommandBuilder()
-        .setName("test")
-        .setDescription('Test Test!')
-        .toJSON(),
+        .toJSON()
 };
 (async () => {
     const Tokens = await GetTokens();
