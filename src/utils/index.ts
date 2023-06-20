@@ -2,12 +2,12 @@ import InteractionBuilder from "./InteractionBuilder";
 import ModuleBuilder from "./ModuleBuilder";
 import Timer from "./Timer";
 
-function wait(timeout, callback) {
+function wait(timeout, callback?) {
     return new Promise<any>((resolve) => {
         return setTimeout(() => {
-            resolve(callback());
+            callback ? resolve(callback()) : resolve(true);
         }, timeout);
     });
 }
 
-export { InteractionBuilder, ModuleBuilder, Timer, wait }
+export { InteractionBuilder, ModuleBuilder, Timer, wait };
