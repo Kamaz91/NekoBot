@@ -1,5 +1,3 @@
-import { QuoteTemplate } from "./core";
-
 type TokenType = "discord";
 type LogsType = "message_delete" | "voice_change" | "guild_left";
 
@@ -130,9 +128,9 @@ export interface Quote {
   id: number;
   quote_guild_position: number;
   user_id: string;
+  user_name: string;
   guild_id: string;
   text: string;
   created_timestamp: number;
-  data: QuoteTemplate;
-  hidden: boolean;
+  data: Record<any, any>
 }
