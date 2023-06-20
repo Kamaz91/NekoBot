@@ -74,7 +74,6 @@ export default class Config extends EventEmitter {
     async loadGuildConfig(guildsKeys: string[]) {
         logger.info("Config: Loading modules data");
         for (const [moduleName, module] of ModuleManager.RegisteredModules) {
-            logger.info("Config: module " + moduleName);
             let data = await this.getModuleSettingsFromDB(guildsKeys, module.Data.SQL);
             this.prepareModuleData(guildsKeys, moduleName, data, module.Data.PrepareData);
         }
@@ -86,16 +85,50 @@ export default class Config extends EventEmitter {
             let guild = this.guilds.get(key);
             let PreparedData = { [moduleName]: GuildPreparedData };
             if (guild == undefined) {
-                guild = {
-                    AutoPurge: undefined,
-                    MessageCounter: undefined,
-                    Quotes: undefined,
-                    LogsChannels: undefined,
-                    Notifier: undefined
-                };
+                guild = this.createEmptyGuildModules();
             }
             Object.assign(guild, PreparedData);
             this.guilds.set(key, guild);
+        }
+    }
+
+    createEmptyGuildModules(): ConfigModules {
+        return {
+            AutoPurge: {
+                enabled: false,
+                channels: new Map()
+            },
+            MessageCounter: {
+                enabled: false,
+                bots: false,
+                is_hidden: false,
+                listing: {
+                    channels: new Map(),
+                    type: "all"
+                }
+            },
+            Quotes: {
+                enabled: false
+            },
+            LogsChannels: {
+                enabled: false,
+                activity: undefined,
+                voice: undefined
+            },
+            Notifier: {
+                guildLeft: {
+                    channelId: undefined,
+                    usersDM: new Array()
+                },
+                messageDelete: {
+                    channelId: undefined,
+                    usersDM: new Array()
+                },
+                voiceChange: {
+                    channelId: undefined,
+                    usersDM: new Array()
+                },
+            }
         }
     }
 
