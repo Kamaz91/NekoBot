@@ -1,7 +1,7 @@
 import axios from "axios";
-import { CommandInteraction, AttachmentBuilder } from "discord.js";
+import { CommandInteraction, AttachmentBuilder, CommandInteractionOption } from "discord.js";
 import InteractionManager from "@core/InteractionManager";
-import { InteractionBuilder } from "@src/utils";
+import { InteractionBuilder, wait } from "@src/utils";
 import logger from "@includes/logger";
 
 async function execute(interaction: CommandInteraction) {
@@ -11,41 +11,51 @@ async function execute(interaction: CommandInteraction) {
         interaction.reply({ content: "User not specified", ephemeral: true });
         return;
     }
-    await axios.get('https://tapmusic.net/lastfm/collage.php', {
+    await getImage(User.value.toString())
+        .then(async response => {
+            await interaction.deferReply();
+            await wait(2000);
+            if (response.headers["content-type"] == "image/jpeg") {
+                let content = "";
+                var imgAttachment = new AttachmentBuilder(Buffer.from(response.data, 'binary'), { name: "3x3.jpg" });
+                if (!imgAttachment) content = ".";
+                interaction.editReply({ content: content, files: [imgAttachment] })
+                    .catch(e => {
+                        interaction.user.send({ content: "Something went wrong, try again" });
+                        logger.error(`TapMusic: Image success, cant reply`);
+                        logger.error(JSON.stringify(e));
+                    });
+            } else {
+                interaction.editReply({ content: `User:${User.value} not found` })
+                    .catch(e => {
+                        logger.error(`TapMusic: User:${User.value} not found, cant reply`);
+                        logger.error(JSON.stringify(e));
+                    });
+            }
+        })
+        .catch(e => {
+            interaction.editReply({ content: "Something went wrong, try again" })
+                .catch(e => {
+                    interaction.user.send({ content: "Something went wrong, try again" });
+                    logger.error("TapMusic: axios error, cant reply");
+                    logger.error(JSON.stringify(e));
+                });
+            logger.error("Tapmusic: axios error");
+            logger.error(JSON.stringify(e));
+        });
+}
+
+async function getImage(User: string) {
+    return axios.get('https://tapmusic.net/lastfm/collage.php', {
         responseType: 'arraybuffer',
         params: {
-            user: encodeURIComponent(User.value),
+            user: encodeURIComponent(User),
             type: "7day",
             size: "3x3",
             caption: "true",
             playcount: "true"
         }
     })
-        .then(response => {
-            if (response.headers["content-type"] == "image/jpeg") {
-                var imgAttachment = new AttachmentBuilder(Buffer.from(response.data, 'binary'), { name: "3x3.jpg" });
-                interaction.reply({ files: [imgAttachment] })
-                    .catch(e => {
-                        logger.error(`TapMusic: Image success, cant reply`);
-                        console.log(e);
-                    });
-            } else {
-                interaction.reply({ content: `User:${User.value} not found`, ephemeral: true })
-                    .catch(e => {
-                        logger.error(`TapMusic: User:${User.value} not found, cant reply`);
-                        console.log(e);
-                    });
-            }
-        })
-        .catch(e => {
-            interaction.reply({ content: "Something went wrong", ephemeral: true })
-                .catch(e => {
-                    logger.error("TapMusic: axios error, cant reply");
-                    console.log(e);
-                });
-            logger.error("Tapmusic: axios error");
-            console.log(e);
-        });
 }
 
 const Command = new InteractionBuilder("tapmusic").SlashCommand(execute, "infinite");
