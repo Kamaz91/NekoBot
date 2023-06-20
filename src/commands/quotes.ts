@@ -1,25 +1,18 @@
-import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, EmbedBuilder, Interaction, MessageContextMenuCommandInteraction, ModalBuilder, Snowflake, SnowflakeUtil, TextInputBuilder, TextInputStyle, User } from "discord.js";
+import { Quote } from "@/@types/database"
+import { CommandType, QuoteTemplate } from "@/@types/core";
+import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, EmbedBuilder, MessageContextMenuCommandInteraction, ModalBuilder, Snowflake, SnowflakeUtil, TextInputBuilder, TextInputStyle, User } from "discord.js";
+import { Client } from "@core/Bot";
+import Config from "@core/config";
+import InteractionManager from "@core/InteractionManager";
+import { Database } from "@includes/database";
 import logger from "@includes/logger";
 import { InteractionBuilder, Timer } from "@src/utils";
-import InteractionManager from "@core/InteractionManager";
-import Config from "@core/config";
-import { Database } from "@includes/database";
-import { Quote } from "@/@types/database"
-import { CommandType } from "@/@types/core";
 
 interface QuoteTemplateHolder {
+    ButtonsId: string[];
     Interaction: MessageContextMenuCommandInteraction;
     Quote: QuoteTemplate;
     Timeout: Timer;
-    ButtonsId: string[];
-}
-
-interface QuoteTemplate {
-    fields: Array<{
-        name: string,
-        content: string
-    }>;
-    title: string;
 }
 
 type guildId = string | Snowflake;
@@ -37,7 +30,7 @@ interface ButtonTemplate {
     execute: (interaction: ButtonInteraction) => void;
 }
 
-const Timeout = 60 * 5;
+const Timeout = 60 * 15;
 
 const Store: DataStore = {
     Quotes: new Map(),
@@ -75,39 +68,70 @@ const Buttons: ButtonTemplate[] = [
     }
 ];
 
-function embedBuild(data: QuoteTemplateHolder) {
+function embedBuildFields(data: QuoteTemplate, messageLink: string, iconURL: string, timestamp?: number | Date) {
     var embed = new EmbedBuilder()
-        .setAuthor({ name: data.Quote.title, iconURL: 'https://i.imgur.com/AfFp7pu.png' })
-        .setDescription('Some description here')
-        .setTimestamp(new Date());
+        .setAuthor({ name: data.title, iconURL: iconURL, url: messageLink })
+        .setTimestamp(timestamp ? timestamp : new Date());
 
-    for (const field of data.Quote.fields) {
+    for (const field of data.fields) {
         if (field.name && field.content) {
             embed.addFields({ name: field.name, value: field.content });
         } else {
             logger.error(`Quotes: Fields are wrong`);
-            console.log(field);
+            logger.error(JSON.stringify(field));
         }
     }
-
     return embed;
 }
 
+async function getGuildMember(userId, guildId) {
+    let user = await (await Client.guilds.fetch(guildId)).members.fetch(userId);
+    if (user) {
+        return { nickname: user.nickname, avatar: user.displayAvatarURL({ size: 64 }) };
+    }
+    return { nickname: "User not found", avatar: Client.user.displayAvatarURL({ size: 64 }) };
+}
+
 async function SlashCommandExecute(interaction: CommandInteraction) {
-    interaction.reply({ content: "Work in progress", ephemeral: true })
-        .catch((e) => logger.error("Quotes: " + e));
     const Settings = Config.getGuildConfig(interaction.guildId).Quotes;
-    logger.info("Quotes:" + JSON.stringify(await randomQuote(interaction.guildId)));
-    logger.info("Quotes:" + JSON.stringify(Settings));
+    const quotePosition = interaction.options.get("quote-position");
+    let quote: Quote;
+
+    if (!Settings.enabled) {
+        interaction.reply({ content: "Quotes not enabled on this server", ephemeral: true })
+            .catch((e) => logger.error("Quotes: " + e));
+        return;
+    }
+
+    if (quotePosition?.value) {
+        quote = await getQuote(interaction.guildId, quotePosition.value);
+    } else {
+        quote = await getQuote(interaction.guildId);
+    }
+
+    let quoteAuthor = await getGuildMember(quote.user_id, interaction.guildId);
+    let embed = embedBuildFields(quote.data, quote.data.messageLink, quoteAuthor.avatar, quote.created_timestamp);
+    embed.setDescription("Quote by: " + quoteAuthor.nickname);
+    embed.setFooter({ text: "Quote No. " + quote.quote_guild_position });
+    interaction.reply({ embeds: [embed] })
+        .catch((e) => logger.error("Quotes: " + e));
 }
 
 async function ContextMenuExecute(interaction: MessageContextMenuCommandInteraction) {
+    const Settings = Config.getGuildConfig(interaction.guildId).Quotes;
     var UserQuote: QuoteTemplateHolder;
+
+    if (!Settings.enabled) {
+        interaction.reply({ content: "Quotes not enabled on this server", ephemeral: true })
+            .catch((e) => logger.error("Quotes: " + e));
+        return;
+    }
+
     if (interaction.targetMessage.content.length == 0 && interaction.targetMessage.attachments.size == 0) {
         interaction.reply({ content: "Message is somehow empty", ephemeral: true })
             .catch(e => {
                 logger.error("Quotes: Cant reply! " + interaction.commandName);
-                console.log(e);
+                logger.error(JSON.stringify(e));
             });
         return;
     }
@@ -126,12 +150,12 @@ async function ContextMenuExecute(interaction: MessageContextMenuCommandInteract
         interaction.reply({ content: "Added!", ephemeral: true })
             .catch(e => {
                 logger.error("Quotes: Cant reply! " + interaction.commandName);
-                console.log(e);
+                logger.error(JSON.stringify(e));
             });
         interaction.deleteReply()
             .catch(e => {
                 logger.error("Quotes: Cant deleteReply! " + interaction.commandName);
-                console.log(e);
+                logger.error(JSON.stringify(e));
             });
     } else {
         // if user is not set
@@ -145,38 +169,23 @@ async function ContextMenuExecute(interaction: MessageContextMenuCommandInteract
 
     if (UserQuote.Quote.fields.length > 1) {
         // if quote have more than 1 field
-        let embed = embedBuild(UserQuote);
+        let embed = embedBuildFields(UserQuote.Quote, UserQuote.Quote.messageLink, interaction.user.displayAvatarURL({ size: 64 }));
         UserQuote.Interaction.editReply({ embeds: [embed] })
             .catch(e => {
                 logger.error("Quotes: Cant editReply! " + interaction.commandName);
-                console.log(e);
+                logger.error(JSON.stringify(e));
             });
     } else {
         // if quote fields size is 1 
         let components = buildInteractionComponents(interaction, UserQuote);
-        let embed = embedBuild(UserQuote);
+        let embed = embedBuildFields(UserQuote.Quote, UserQuote.Quote.messageLink, interaction.user.displayAvatarURL({ size: 64 }));
 
         UserQuote.Interaction.reply({ embeds: [embed], components: [components], ephemeral: true })
             .catch(e => {
                 logger.error("Quotes: Cant reply! " + interaction.commandName);
-                console.log(e);
+                logger.error(JSON.stringify(e));
             });
     }
-}
-
-const SlashCommand = new InteractionBuilder("quote").SlashCommand(SlashCommandExecute, "infinite");
-const ContextMenu = new InteractionBuilder("quote-create").MessageContextMenuCommand(ContextMenuExecute, "infinite");
-
-InteractionManager.addGlobalInteraction(SlashCommand);
-InteractionManager.addGlobalInteraction(ContextMenu);
-
-//! Wyświetlanie quota jako embed z możliwością przewijania przyciskami (następny, poprzedni) wszystko jako ukryte
-//* dodawanie quota prawym klikiem z menu Aplikacje (łączenie kilku wiadomości w ten sposób)
-//! sprawdzanie czy wiadomość jest pusta, zakaz (embedów, wiadomości botów?, obrazków)
-//! przy wyświetlaniu quote przycisk na dole skocz do pierwszej wiadomości (message url)
-
-function randomQuote(guildId): Promise<Quote> {
-    return Database().select("*").from("quotes").where({ guild_id: guildId }).orderByRaw("RAND()").first();
 }
 
 function DeleteQuoteTemplate(Interaction: ButtonInteraction, message: string) {
@@ -184,7 +193,7 @@ function DeleteQuoteTemplate(Interaction: ButtonInteraction, message: string) {
         DeleteQuoteTemplateData(Interaction.guildId, Interaction.user.id, message);
     } catch (e) {
         logger.error("Quotes: Cant Delete TemplateData");
-        console.log(e);
+        logger.error(JSON.stringify(e));
     }
 }
 
@@ -202,16 +211,16 @@ function DeleteQuoteTemplateData(guildId: guildId, userId: string, message: stri
     GuildData.delete(userId);
 }
 
-function SaveQuoteTemplateToDatabase(Interaction: ButtonInteraction) {
+async function SaveQuoteTemplateToDatabase(Interaction: ButtonInteraction) {
     try {
         let GuildQuotes = Store.Quotes.get(Interaction.guildId);
         let UserQuote = GuildQuotes.get(Interaction.user.id);
 
-        AddQuoteToDatabase(Interaction.guildId, Interaction.user.id, Interaction.user.username, UserQuote.Quote);
-        DeleteQuoteTemplateData(Interaction.guildId, Interaction.user.id, "Quote Saved!");
+        let quotePos = await AddQuoteToDatabase(Interaction.guildId, Interaction.user.id, UserQuote.Quote);
+        DeleteQuoteTemplateData(Interaction.guildId, Interaction.user.id, `Quote No. ${quotePos} Saved!`);
     } catch (e) {
         logger.error("Quotes: Error While saving quote");
-        console.log(e);
+        logger.error(JSON.stringify(e));
     }
 }
 
@@ -234,7 +243,7 @@ function SendModal(Interaction: ButtonInteraction) {
     const Modals = {
         Title: {
             id: SnowflakeUtil.generate().toString(),
-            name: "My Modal"
+            name: "Quote Modal"
         }
     }
     var Modal = new ModalBuilder()
@@ -256,27 +265,24 @@ function SendModal(Interaction: ButtonInteraction) {
         let UserData = GuildData.get(Interaction.user.id)
 
         UserData.Quote.title = title;
-        UserData.Interaction.editReply({ embeds: [embedBuild(UserData)] });
+        UserData.Interaction.editReply({ embeds: [embedBuildFields(UserData.Quote, UserData.Quote.messageLink, interaction.user.displayAvatarURL({ size: 64 }))] });
 
         interaction.reply({ content: "Title Changed to " + title, ephemeral: true });
-        setTimeout(() => {
-            interaction.deleteReply();
-        }, 3000);
-
     }, "Once", Timeout), Interaction.guildId);
     Interaction.showModal(Modal);
 }
 
-async function AddQuoteToDatabase(guild_id: guildId, user_id: string, user_name: string, Data: QuoteTemplate) {
-    let quotePosition = await GetQuoteLastPosition(guild_id);
+async function AddQuoteToDatabase(guild_id: guildId, user_id: string, Data: QuoteTemplate) {
+    let quotePosition = await GetQuoteLastPosition(guild_id) + 1;
     let timestamp = new Date().getTime();
     Database()
         .table("quotes")
-        .insert({ guild_id: guild_id, quote_guild_position: quotePosition + 1, user_id: user_id, user_name: user_name, data: JSON.stringify(Data), created_timestamp: timestamp })
+        .insert({ guild_id: guild_id, quote_guild_position: quotePosition, user_id: user_id, data: JSON.stringify(Data), created_timestamp: timestamp })
         .catch(e => {
-            console.log(e);
+            logger.error(JSON.stringify(e));
             logger.error("Quotes: Cant add quote to Database");
         });
+    return quotePosition;
 }
 
 function GetQuoteLastPosition(guild_id: guildId) {
@@ -288,8 +294,9 @@ function GetQuoteLastPosition(guild_id: guildId) {
         .limit(1)
         .then((rows) => { return rows.length > 0 ? rows[0].quote_guild_position : 0 })
         .catch(e => {
-            console.log(e);
+            logger.error(JSON.stringify(e));
             logger.error("Quotes: Cant gather quote position");
+            return 0;
         });
 }
 
@@ -299,7 +306,7 @@ function createQuoteDataTimeout(guildId: string, userId: string) {
             DeleteQuoteTemplateData(guildId, userId, "TimeOut! 5 minute inactivity, quote template removed");
         } catch (e) {
             logger.error("Quotes: Quote Data Timeout error " + e);
-            console.log(e);
+            logger.error(JSON.stringify(e));
         }
     }, Timeout * 1000);
 }
@@ -314,7 +321,7 @@ function createQuoteTemplateHolder(interaction: MessageContextMenuCommandInterac
     if (field) {
         fields.push(field);
     }
-    return { Interaction: interaction, ButtonsId: [], Timeout: timer, Quote: { title: "Untitled quote", fields: fields } };
+    return { Interaction: interaction, ButtonsId: [], Timeout: timer, Quote: { title: "Untitled quote", messageLink: interaction.targetMessage.url, fields: fields } };
 }
 
 function createFieldTemplate(username: string, userId: string, text: string): {
@@ -361,12 +368,48 @@ function createUser(guildId, userId, data: { interaction: MessageContextMenuComm
 
 function removeLastLine(interaction: ButtonInteraction) {
     let UserQuote = Store.Quotes.get(interaction.guildId).get(interaction.user.id);
-    UserQuote.Quote.fields.pop();
-
     resetButtons(UserQuote.ButtonsId, interaction.guildId);
-    let embed = embedBuild(UserQuote);
+    if (UserQuote.Quote.fields.length < 2) {
+        interaction.reply({ content: "Cant remove First line", ephemeral: true })
+            .catch(e => {
+                logger.error(JSON.stringify(e));
+                logger.error("Quotes: cant reply, removeLastLine");
+                return 0;
+            });
+        return;
+    }
+    interaction.reply({ content: "Removed last Line", ephemeral: true })
+        .catch(e => {
+            logger.error(JSON.stringify(e));
+            logger.error("Quotes: cant reply, removeLastLine");
+            return 0;
+        });
+    UserQuote.Quote.fields.pop();
+    let embed = embedBuildFields(UserQuote.Quote, UserQuote.Quote.messageLink, interaction.user.displayAvatarURL({ size: 64 }));
     UserQuote.Interaction.editReply({ embeds: [embed] })
+        .catch(e => {
+            logger.error(JSON.stringify(e));
+            logger.error("Quotes: cant editReply, removeLastLine");
+            return 0;
+        });
 }
 
+function randomQuote(guildId): Promise<Quote> {
+    return Database().select("*").from("quotes").where({ guild_id: guildId, hidden: 0 }).orderByRaw("RAND()").first();
+}
+
+function getQuote(guildId, quotePosition?): Promise<Quote> {
+    if (quotePosition) {
+        return Database().select("*").from("quotes").where({ guild_id: guildId, hidden: 0, quote_guild_position: quotePosition }).first();
+    } else {
+        return randomQuote(guildId);
+    }
+}
+
+const SlashCommand = new InteractionBuilder("quote").SlashCommand(SlashCommandExecute, "infinite");
+const ContextMenu = new InteractionBuilder("quote-create").MessageContextMenuCommand(ContextMenuExecute, "infinite");
+
+InteractionManager.addGlobalInteraction(SlashCommand);
+InteractionManager.addGlobalInteraction(ContextMenu);
 
 export default Store;
