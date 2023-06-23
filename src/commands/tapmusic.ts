@@ -58,5 +58,7 @@ async function getImage(User: string) {
     })
 }
 
-const Command = new InteractionBuilder("tapmusic").SlashCommand(execute, "infinite");
+const Command = new InteractionBuilder("tapmusic")
+    .setExecute(execute)
+    .SlashCommand("infinite");
 InteractionManager.addGlobalInteraction(Command);
