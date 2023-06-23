@@ -49,6 +49,8 @@ async function execute(interaction: CommandInteraction) {
     interaction.reply({ content: interaction.user.avatarURL(Options), ephemeral: true }).catch(console.error);
 }
 
-let Command = new InteractionBuilder(name).SlashCommand(execute, "infinite");
+let Command = new InteractionBuilder(name)
+    .setExecute(execute)
+    .SlashCommand("infinite");
 
 InteractionManager.addGlobalInteraction(Command);

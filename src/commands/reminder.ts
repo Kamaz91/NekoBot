@@ -5,9 +5,6 @@ import { Database } from "@includes/database";
 import moment from "moment";
 import logger from "../includes/logger";
 
-const Command = new InteractionBuilder("reminder").SlashCommand(execute, "infinite");
-InteractionManager.addGlobalInteraction(Command);
-
 async function execute(interaction: CommandInteraction) {
     const options = {
         year: Number.parseInt(interaction.options.get("year").value.toString()),
@@ -61,7 +58,7 @@ async function execute(interaction: CommandInteraction) {
     await interaction.reply({ content: "Preparing data...", embeds: [embed], ephemeral: true })
         .catch();
     let replyMessage = await interaction.fetchReply();
-    
+
     if (await addReminder({
         user_id: interaction.user.id,
         channel_id: interaction.channelId,
@@ -127,3 +124,8 @@ function isUserReachActiveReminderLimit(user_id, Limit) {
             return false;
         });
 }
+
+const Command = new InteractionBuilder("reminder")
+    .setExecute(execute)
+    .SlashCommand("infinite");
+InteractionManager.addGlobalInteraction(Command);

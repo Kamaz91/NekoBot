@@ -8,6 +8,8 @@ async function execute(interaction: CommandInteraction) {
     interaction.reply("Pong!");
 }
 
-let Command = new InteractionBuilder(name).SlashCommand(execute, "infinite");
+let Command = new InteractionBuilder(name)
+    .setExecute(execute)
+    .SlashCommand("infinite");
 
 InteractionManager.addGlobalInteraction(Command);

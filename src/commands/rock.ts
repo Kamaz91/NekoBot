@@ -13,8 +13,10 @@ interface Player {
     SCISSORS = formatEmoji('1054890020999278622');*/
 
 function getWinner(Players: Map<string, Player>): string | null {
+    // Players Map to Array
     const player1 = [...Players][0];
     const player2 = [...Players][1];
+
     if ((player1[1].option + 1) % 3 == player2[1].option)
         // PLAYER 2 WIN
         return player2[1].user;
@@ -105,6 +107,8 @@ async function execute(interaction: CommandInteraction) {
 }
 
 const name = "rock";
-const Command = new InteractionBuilder(name).SlashCommand(execute, "infinite");
+const Command = new InteractionBuilder(name)
+    .setExecute(execute)
+    .SlashCommand("infinite");
 
-InteractionManager.addGlobalInteraction(Command);
+InteractionManager.addGlobalInteraction(Command); 

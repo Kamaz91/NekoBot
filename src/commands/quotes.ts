@@ -1,6 +1,6 @@
 import { Quote } from "@/@types/database"
 import { CommandType, QuoteTemplate } from "@/@types/core";
-import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, EmbedBuilder, MessageContextMenuCommandInteraction, ModalBuilder, Snowflake, SnowflakeUtil, TextInputBuilder, TextInputStyle, User } from "discord.js";
+import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, EmbedBuilder, Interaction, MessageContextMenuCommandInteraction, ModalBuilder, ModalSubmitInteraction, Snowflake, SnowflakeUtil, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import { Client } from "@core/Bot";
 import Config from "@core/config";
 import InteractionManager from "@core/InteractionManager";
@@ -229,7 +229,10 @@ function buildInteractionComponents(Interaction: MessageContextMenuCommandIntera
     let rowComponents: ButtonBuilder[] = new Array();
 
     for (const [, button] of Object.entries(Buttons)) {
-        let builder = new InteractionBuilder(button.id).ButtonInteraction(button.execute, button.type, Timeout);
+        let builder = new InteractionBuilder(button.id)
+            .setTimeout(Timeout)
+            .setExecute(button.execute)
+            .ButtonInteraction(button.type);
         let buttonBuilder = new ButtonBuilder().setCustomId(button.id).setStyle(button.style).setLabel(button.name);
         InteractionManager.addGuildInteraction(builder, Interaction.guildId);
         rowComponents.push(buttonBuilder);
@@ -257,18 +260,22 @@ function SendModal(Interaction: ButtonInteraction) {
 
     Modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents([QuoteTitleInput]));
 
+    var modalInteraction = new InteractionBuilder(Modals.Title.id)
+        .setExecute((interaction: ModalSubmitInteraction) => {
+            let title = interaction.fields.getTextInputValue("title")
+            let GuildData = Store.Quotes.get(Interaction.guildId);
+            let UserData = GuildData.get(Interaction.user.id)
+
+            UserData.Quote.title = title;
+            UserData.Interaction.editReply({ embeds: [embedBuildFields(UserData.Quote, UserData.Quote.messageLink, interaction.user.displayAvatarURL({ size: 64 }))] });
+
+            interaction.reply({ content: "Title Changed to " + title, ephemeral: true });
+        })
+        .setTimeout(Timeout)
+        .ModalSubmit("Once");
+
     InteractionManager.resetGuildInteractionTimer(Interaction.customId, "Button", Interaction.guildId);
-    InteractionManager.addGuildInteraction(new InteractionBuilder(Modals.Title.id).ModalSubmit((interaction) => {
-
-        let title = interaction.fields.getTextInputValue("title")
-        let GuildData = Store.Quotes.get(Interaction.guildId);
-        let UserData = GuildData.get(Interaction.user.id)
-
-        UserData.Quote.title = title;
-        UserData.Interaction.editReply({ embeds: [embedBuildFields(UserData.Quote, UserData.Quote.messageLink, interaction.user.displayAvatarURL({ size: 64 }))] });
-
-        interaction.reply({ content: "Title Changed to " + title, ephemeral: true });
-    }, "Once", Timeout), Interaction.guildId);
+    InteractionManager.addGuildInteraction(modalInteraction, Interaction.guildId);
     Interaction.showModal(Modal);
 }
 
@@ -406,8 +413,12 @@ function getQuote(guildId, quotePosition?): Promise<Quote> {
     }
 }
 
-const SlashCommand = new InteractionBuilder("quote").SlashCommand(SlashCommandExecute, "infinite");
-const ContextMenu = new InteractionBuilder("quote-create").MessageContextMenuCommand(ContextMenuExecute, "infinite");
+const SlashCommand = new InteractionBuilder("quote")
+    .setExecute(SlashCommandExecute)
+    .SlashCommand("infinite");
+const ContextMenu = new InteractionBuilder("quote-create")
+    .setExecute(ContextMenuExecute)
+    .MessageContextMenuCommand("infinite");
 
 InteractionManager.addGlobalInteraction(SlashCommand);
 InteractionManager.addGlobalInteraction(ContextMenu);
