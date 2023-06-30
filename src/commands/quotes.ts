@@ -294,7 +294,7 @@ function changeTitle(Interaction: ModalSubmitInteraction, id) {
     let UserData = GuildData.get(Interaction.user.id)
 
     UserData.Quote.title = title;
-    UserData.Interaction.editReply({ embeds: [embedBuildTable(UserData.Quote, UserData.Quote.messageLink, Interaction.user.displayAvatarURL({ size: 64 }))] });
+    UserData.Interaction.editReply({ embeds: [embedBuildFields(UserData.Quote, UserData.Quote.messageLink, Interaction.user.displayAvatarURL({ size: 64 }))] });
 
     Interaction.reply({ content: "Title Changed to " + title, ephemeral: true });
 }
@@ -410,7 +410,7 @@ function removeLastLine(Interaction: ButtonInteraction, id: string) {
             return 0;
         });
     UserQuote.Quote.fields.pop();
-    let embed = embedBuildFields(UserQuote.Quote, UserQuote.Quote.messageLink, interaction.user.displayAvatarURL({ size: 64 }));
+    let embed = embedBuildFields(UserQuote.Quote, UserQuote.Quote.messageLink, Interaction.user.displayAvatarURL({ size: 64 }));
     UserQuote.Interaction.editReply({ embeds: [embed] })
         .catch(e => {
             logger.error(JSON.stringify(e));
