@@ -51,6 +51,6 @@ async function execute(interaction: CommandInteraction) {
 
 let Command = new InteractionBuilder(name)
     .setExecute(execute)
-    .SlashCommand("infinite");
+    .SlashCommand();
 
-InteractionManager.addGlobalInteraction(Command);
+InteractionManager.addInteraction(Command);

@@ -1,4 +1,4 @@
-import { CommandType, InteractionsType, ManagerInteractionTemplate } from "@/@types/core";
+import { CommandType, InteractionsType, ManagerInteraction } from "@/@types/core";
 import { ButtonInteraction, CommandInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, ModalSubmitInteraction } from "discord.js";
 
 // Interaction Events type
@@ -19,57 +19,58 @@ import { ButtonInteraction, CommandInteraction, ContextMenuCommandInteraction, M
 
 export default class InteractionBuilder {
     name: string;
-    execute: (interaction: CommandInteraction | ButtonInteraction | ContextMenuCommandInteraction | ModalSubmitInteraction | MessageContextMenuCommandInteraction) => void;
-    timeout: number;
+    execute: (interaction: CommandInteraction | ButtonInteraction | ContextMenuCommandInteraction | ModalSubmitInteraction | MessageContextMenuCommandInteraction, id?: string) => void;
+    guildId: string;
+    isGuild: boolean;
 
     constructor(name: string) {
         this.name = name;
-        this.timeout = null;
+        this.guildId = null;
+        this.isGuild = false;
+    }
+    setGuildOnly(guildId: string) {
+        this.guildId = guildId;
+        this.isGuild = true;
     }
 
-    setTimeout(timeout: number) {
-        this.timeout = timeout;
-        return this;
-    }
-
-    setExecute(execute: (interaction: CommandInteraction | ButtonInteraction | ContextMenuCommandInteraction | ModalSubmitInteraction | MessageContextMenuCommandInteraction) => void) {
+    setExecute(execute: (interaction: CommandInteraction | ButtonInteraction | ContextMenuCommandInteraction | ModalSubmitInteraction | MessageContextMenuCommandInteraction, id?: string) => void) {
         this.execute = execute;
         return this;
     }
 
-    ButtonInteraction(type: CommandType): { name: string, type: InteractionsType, data: ManagerInteractionTemplate } {
+    ButtonInteraction(): { name: string, type: InteractionsType, data: ManagerInteraction } {
         return {
             name: this.name,
             type: "Button",
-            data: { execute: this.execute, type: type, timeout: this.timeout }
+            data: { guildId: this.guildId, isGuild: this.isGuild, execute: this.execute }
         }
     }
-    SlashCommand(type: CommandType): { name: string, type: InteractionsType, data: ManagerInteractionTemplate } {
+    SlashCommand(): { name: string, type: InteractionsType, data: ManagerInteraction } {
         return {
             name: this.name,
             type: "Command",
-            data: { execute: this.execute, type: type, timeout: this.timeout }
+            data: { guildId: this.guildId, isGuild: this.isGuild, execute: this.execute }
         }
     }
-    ContextMenuCommand(type: CommandType): { name: string, type: InteractionsType, data: ManagerInteractionTemplate } {
+    ContextMenuCommand(): { name: string, type: InteractionsType, data: ManagerInteraction } {
         return {
             name: this.name,
             type: "ContextMenuCommand",
-            data: { execute: this.execute, type: type, timeout: this.timeout }
+            data: { guildId: this.guildId, isGuild: this.isGuild, execute: this.execute }
         }
     }
-    MessageContextMenuCommand(type: CommandType): { name: string, type: InteractionsType, data: ManagerInteractionTemplate } {
+    MessageContextMenuCommand(): { name: string, type: InteractionsType, data: ManagerInteraction } {
         return {
             name: this.name,
             type: "MessageContextMenuCommand",
-            data: { execute: this.execute, type: type, timeout: this.timeout }
+            data: { guildId: this.guildId, isGuild: this.isGuild, execute: this.execute }
         }
     }
-    ModalSubmit(type: CommandType): { name: string, type: InteractionsType, data: ManagerInteractionTemplate } {
+    ModalSubmit(): { name: string, type: InteractionsType, data: ManagerInteraction } {
         return {
             name: this.name,
             type: "ModalSubmit",
-            data: { execute: this.execute, type: type, timeout: this.timeout }
+            data: { guildId: this.guildId, isGuild: this.isGuild, execute: this.execute }
         }
     }
 }

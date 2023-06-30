@@ -127,5 +127,5 @@ function isUserReachActiveReminderLimit(user_id, Limit) {
 
 const Command = new InteractionBuilder("reminder")
     .setExecute(execute)
-    .SlashCommand("infinite");
-InteractionManager.addGlobalInteraction(Command);
+    .SlashCommand();
+InteractionManager.addInteraction(Command);

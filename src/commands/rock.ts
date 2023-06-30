@@ -109,6 +109,6 @@ async function execute(interaction: CommandInteraction) {
 const name = "rock";
 const Command = new InteractionBuilder(name)
     .setExecute(execute)
-    .SlashCommand("infinite");
+    .SlashCommand();
 
-InteractionManager.addGlobalInteraction(Command); 
+InteractionManager.addInteraction(Command); 

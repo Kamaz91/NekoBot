@@ -1,6 +1,6 @@
 import { Quote } from "@/@types/database"
 import { CommandType, QuoteTemplate } from "@/@types/core";
-import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, EmbedBuilder, Interaction, MessageContextMenuCommandInteraction, ModalBuilder, ModalSubmitInteraction, Snowflake, SnowflakeUtil, TextInputBuilder, TextInputStyle, User } from "discord.js";
+import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, EmbedBuilder, Guild, Interaction, MessageContextMenuCommandInteraction, ModalBuilder, ModalSubmitInteraction, Snowflake, SnowflakeUtil, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import { Client } from "@core/Bot";
 import Config from "@core/config";
 import InteractionManager from "@core/InteractionManager";
@@ -9,7 +9,7 @@ import logger from "@includes/logger";
 import { InteractionBuilder, Timer } from "@src/utils";
 
 interface QuoteTemplateHolder {
-    ButtonsId: string[];
+    Id: Snowflake;
     Interaction: MessageContextMenuCommandInteraction;
     Quote: QuoteTemplate;
     Timeout: Timer;
@@ -19,52 +19,40 @@ type guildId = string | Snowflake;
 
 interface DataStore {
     Quotes: Map<guildId, Map<string, QuoteTemplateHolder>>;
-    Timers: Timer[];
 }
 
 interface ButtonTemplate {
     id: Snowflake | string;
     name: string;
     style: ButtonStyle;
-    type: CommandType;
-    execute: (interaction: ButtonInteraction) => void;
 }
 
 const Timeout = 60 * 15;
 
 const Store: DataStore = {
-    Quotes: new Map(),
-    Timers: new Array()
+    Quotes: new Map()
 };
 
 const Buttons: ButtonTemplate[] = [
     {
-        id: SnowflakeUtil.generate().toString(),
+        id: "quote:delete-button",
         name: "Delete Quote",
-        style: ButtonStyle.Danger,
-        type: "Once",
-        execute: (interaction) => { DeleteQuoteTemplate(interaction, "Quote Aborted") }
+        style: ButtonStyle.Danger
     },
     {
-        id: SnowflakeUtil.generate().toString(),
+        id: "quote:save-button",
         name: "Save Quote!",
-        style: ButtonStyle.Primary,
-        type: "Once",
-        execute: (interaction) => { SaveQuoteTemplateToDatabase(interaction) }
+        style: ButtonStyle.Primary
     },
     {
-        id: SnowflakeUtil.generate().toString(),
+        id: "quote:remove-button",
         name: "Remove last quote line",
-        style: ButtonStyle.Secondary,
-        type: "infinite",
-        execute: (interaction) => { removeLastLine(interaction) }
+        style: ButtonStyle.Secondary
     },
     {
-        id: SnowflakeUtil.generate().toString(),
+        id: "quote:title-button",
         name: "Change Quote Title",
-        style: ButtonStyle.Secondary,
-        type: "infinite",
-        execute: (interaction) => { SendModal(interaction) }
+        style: ButtonStyle.Secondary
     }
 ];
 
@@ -108,6 +96,11 @@ async function SlashCommandExecute(interaction: CommandInteraction) {
     } else {
         quote = await getQuote(interaction.guildId);
     }
+    if (!quote) {
+        interaction.reply({ content: "Quote Not exist", ephemeral: true })
+            .catch((e) => logger.error("Quotes: " + e));
+        return;
+    }
 
     let quoteAuthor = await getGuildMember(quote.user_id, interaction.guildId);
     let embed = embedBuildFields(quote.data, quote.data.messageLink, quoteAuthor.avatar, quote.created_timestamp);
@@ -145,7 +138,6 @@ async function ContextMenuExecute(interaction: MessageContextMenuCommandInteract
         UserQuote = guild.get(interaction.user.id);
         UserQuote.Quote.fields.push(createFieldTemplate(interaction.targetMessage.author.username, interaction.targetMessage.author.id, Content));
         UserQuote.Timeout.reset();
-        resetButtons(UserQuote.ButtonsId, interaction.guildId);
 
         interaction.reply({ content: "Added!", ephemeral: true })
             .catch(e => {
@@ -177,8 +169,8 @@ async function ContextMenuExecute(interaction: MessageContextMenuCommandInteract
             });
     } else {
         // if quote fields size is 1 
-        let components = buildInteractionComponents(interaction, UserQuote);
         let embed = embedBuildFields(UserQuote.Quote, UserQuote.Quote.messageLink, interaction.user.displayAvatarURL({ size: 64 }));
+        let components = buildInteractionComponents(UserQuote);
 
         UserQuote.Interaction.reply({ embeds: [embed], components: [components], ephemeral: true })
             .catch(e => {
@@ -188,7 +180,33 @@ async function ContextMenuExecute(interaction: MessageContextMenuCommandInteract
     }
 }
 
-function DeleteQuoteTemplate(Interaction: ButtonInteraction, message: string) {
+function getGuildData(guildId, userId) {
+    let GuildData: Map<guildId, QuoteTemplateHolder>;
+    if (!Store.Quotes.has(guildId)) {
+        throw new Error("Not found guild in Store Quotes guildId" + guildId);
+    }
+    GuildData = Store.Quotes.get(guildId);
+    if (!GuildData.has(userId)) {
+        throw new Error("Not found user in Store Quotes userId:" + userId);
+    }
+
+    return GuildData.get(userId);
+}
+
+function isInteractionIdValid(interaction: ButtonInteraction | ModalSubmitInteraction, id) {
+    try {
+        let GuildData = getGuildData(interaction.guildId, interaction.user.id);
+        return GuildData.Id == id ? true : false;
+    } catch (error) {
+        return false;
+    }
+}
+
+function DeleteQuoteTemplate(Interaction: ButtonInteraction, id, message: string) {
+    if (!isInteractionIdValid(Interaction, id)) {
+        InteractionManager.sendInteractionNotExecutable(Interaction);
+        return;
+    }
     try {
         DeleteQuoteTemplateData(Interaction.guildId, Interaction.user.id, message);
     } catch (e) {
@@ -211,7 +229,11 @@ function DeleteQuoteTemplateData(guildId: guildId, userId: string, message: stri
     GuildData.delete(userId);
 }
 
-async function SaveQuoteTemplateToDatabase(Interaction: ButtonInteraction) {
+async function SaveQuoteTemplateToDatabase(Interaction: ButtonInteraction, id: string) {
+    if (!isInteractionIdValid(Interaction, id)) {
+        InteractionManager.sendInteractionNotExecutable(Interaction);
+        return;
+    }
     try {
         let GuildQuotes = Store.Quotes.get(Interaction.guildId);
         let UserQuote = GuildQuotes.get(Interaction.user.id);
@@ -224,28 +246,27 @@ async function SaveQuoteTemplateToDatabase(Interaction: ButtonInteraction) {
     }
 }
 
-function buildInteractionComponents(Interaction: MessageContextMenuCommandInteraction, UserStore: QuoteTemplateHolder) {
+function buildInteractionComponents(UserStore: QuoteTemplateHolder) {
     let row = new ActionRowBuilder<ButtonBuilder>();
     let rowComponents: ButtonBuilder[] = new Array();
 
     for (const [, button] of Object.entries(Buttons)) {
-        let builder = new InteractionBuilder(button.id)
-            .setTimeout(Timeout)
-            .setExecute(button.execute)
-            .ButtonInteraction(button.type);
-        let buttonBuilder = new ButtonBuilder().setCustomId(button.id).setStyle(button.style).setLabel(button.name);
-        InteractionManager.addGuildInteraction(builder, Interaction.guildId);
+        let buttonBuilder = new ButtonBuilder().setCustomId(`${button.id}:<${UserStore.Id}>`).setStyle(button.style).setLabel(button.name);
         rowComponents.push(buttonBuilder);
-        UserStore.ButtonsId.push(button.id);
     }
 
     return row.addComponents(rowComponents);
 }
 
-function SendModal(Interaction: ButtonInteraction) {
+function SendModal(Interaction: ButtonInteraction, id) {
+    if (!isInteractionIdValid(Interaction, id)) {
+        InteractionManager.sendInteractionNotExecutable(Interaction);
+        return;
+    }
+
     const Modals = {
         Title: {
-            id: SnowflakeUtil.generate().toString(),
+            id: `quote:modal-submit:<${id}>`,
             name: "Quote Modal"
         }
     }
@@ -254,29 +275,28 @@ function SendModal(Interaction: ButtonInteraction) {
         .setTitle(Modals.Title.name);
 
     var QuoteTitleInput = new TextInputBuilder()
-        .setCustomId("title")
+        .setCustomId(`title`)
         .setLabel("Quote Title")
         .setStyle(TextInputStyle.Short);
 
     Modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents([QuoteTitleInput]));
 
-    var modalInteraction = new InteractionBuilder(Modals.Title.id)
-        .setExecute((interaction: ModalSubmitInteraction) => {
-            let title = interaction.fields.getTextInputValue("title")
-            let GuildData = Store.Quotes.get(Interaction.guildId);
-            let UserData = GuildData.get(Interaction.user.id)
-
-            UserData.Quote.title = title;
-            UserData.Interaction.editReply({ embeds: [embedBuildFields(UserData.Quote, UserData.Quote.messageLink, interaction.user.displayAvatarURL({ size: 64 }))] });
-
-            interaction.reply({ content: "Title Changed to " + title, ephemeral: true });
-        })
-        .setTimeout(Timeout)
-        .ModalSubmit("Once");
-
-    InteractionManager.resetGuildInteractionTimer(Interaction.customId, "Button", Interaction.guildId);
-    InteractionManager.addGuildInteraction(modalInteraction, Interaction.guildId);
     Interaction.showModal(Modal);
+}
+
+function changeTitle(Interaction: ModalSubmitInteraction, id) {
+    if (!isInteractionIdValid(Interaction, id)) {
+        InteractionManager.sendInteractionNotExecutable(Interaction);
+        return;
+    }
+    let title = Interaction.fields.getTextInputValue("title")
+    let GuildData = Store.Quotes.get(Interaction.guildId);
+    let UserData = GuildData.get(Interaction.user.id)
+
+    UserData.Quote.title = title;
+    UserData.Interaction.editReply({ embeds: [embedBuildTable(UserData.Quote, UserData.Quote.messageLink, Interaction.user.displayAvatarURL({ size: 64 }))] });
+
+    Interaction.reply({ content: "Title Changed to " + title, ephemeral: true });
 }
 
 async function AddQuoteToDatabase(guild_id: guildId, user_id: string, Data: QuoteTemplate) {
@@ -319,6 +339,7 @@ function createQuoteDataTimeout(guildId: string, userId: string) {
 }
 
 function createQuoteTemplateHolder(interaction: MessageContextMenuCommandInteraction, timer: Timer, text: string, userId: string, username: string): QuoteTemplateHolder {
+    let id = SnowflakeUtil.generate().toString();
     let fields: {
         name: string,
         content: string
@@ -328,7 +349,7 @@ function createQuoteTemplateHolder(interaction: MessageContextMenuCommandInterac
     if (field) {
         fields.push(field);
     }
-    return { Interaction: interaction, ButtonsId: [], Timeout: timer, Quote: { title: "Untitled quote", messageLink: interaction.targetMessage.url, fields: fields } };
+    return { Interaction: interaction, Id: id, Timeout: timer, Quote: { title: "Untitled quote", messageLink: interaction.targetMessage.url, fields: fields } };
 }
 
 function createFieldTemplate(username: string, userId: string, text: string): {
@@ -339,12 +360,6 @@ function createFieldTemplate(username: string, userId: string, text: string): {
         return { name: `${username}`, content: text };
     } else {
         return null;
-    }
-}
-
-function resetButtons(ButtonsId: string[], guildId: guildId) {
-    for (const ButtonId of ButtonsId) {
-        InteractionManager.resetGuildInteractionTimer(ButtonId, "Button", guildId);
     }
 }
 
@@ -373,11 +388,14 @@ function createUser(guildId, userId, data: { interaction: MessageContextMenuComm
     return template;
 }
 
-function removeLastLine(interaction: ButtonInteraction) {
-    let UserQuote = Store.Quotes.get(interaction.guildId).get(interaction.user.id);
-    resetButtons(UserQuote.ButtonsId, interaction.guildId);
+function removeLastLine(Interaction: ButtonInteraction, id: string) {
+    if (!isInteractionIdValid(Interaction, id)) {
+        InteractionManager.sendInteractionNotExecutable(Interaction);
+        return;
+    }
+    let UserQuote = Store.Quotes.get(Interaction.guildId).get(Interaction.user.id);
     if (UserQuote.Quote.fields.length < 2) {
-        interaction.reply({ content: "Cant remove First line", ephemeral: true })
+        Interaction.reply({ content: "Cant remove First line", ephemeral: true })
             .catch(e => {
                 logger.error(JSON.stringify(e));
                 logger.error("Quotes: cant reply, removeLastLine");
@@ -385,7 +403,7 @@ function removeLastLine(interaction: ButtonInteraction) {
             });
         return;
     }
-    interaction.reply({ content: "Removed last Line", ephemeral: true })
+    Interaction.reply({ content: "Removed last Line", ephemeral: true })
         .catch(e => {
             logger.error(JSON.stringify(e));
             logger.error("Quotes: cant reply, removeLastLine");
@@ -415,12 +433,32 @@ function getQuote(guildId, quotePosition?): Promise<Quote> {
 
 const SlashCommand = new InteractionBuilder("quote")
     .setExecute(SlashCommandExecute)
-    .SlashCommand("infinite");
+    .SlashCommand();
 const ContextMenu = new InteractionBuilder("quote-create")
     .setExecute(ContextMenuExecute)
-    .MessageContextMenuCommand("infinite");
+    .MessageContextMenuCommand();
+const ButtonDelete = new InteractionBuilder("quote:delete-button")
+    .setExecute((interaction: ButtonInteraction, id) => { DeleteQuoteTemplate(interaction, id, "Quote Aborted") })
+    .ButtonInteraction();
+const ButtonSave = new InteractionBuilder("quote:save-button")
+    .setExecute(SaveQuoteTemplateToDatabase)
+    .ButtonInteraction();
+const ButtonRemove = new InteractionBuilder("quote:remove-button")
+    .setExecute(removeLastLine)
+    .ButtonInteraction();
+const ButtonTitle = new InteractionBuilder("quote:title-button")
+    .setExecute(SendModal)
+    .ButtonInteraction();
+var ModalInteraction = new InteractionBuilder("quote:modal-submit")
+    .setExecute(changeTitle)
+    .ModalSubmit();
 
-InteractionManager.addGlobalInteraction(SlashCommand);
-InteractionManager.addGlobalInteraction(ContextMenu);
+InteractionManager.addInteraction(ModalInteraction);
+InteractionManager.addInteraction(SlashCommand);
+InteractionManager.addInteraction(ContextMenu);
+InteractionManager.addInteraction(ButtonDelete);
+InteractionManager.addInteraction(ButtonSave);
+InteractionManager.addInteraction(ButtonRemove);
+InteractionManager.addInteraction(ButtonTitle);
 
 export default Store;

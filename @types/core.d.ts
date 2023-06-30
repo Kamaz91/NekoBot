@@ -1,15 +1,7 @@
-import { Timer } from "@/src/utils";
-
 export type ManagerInteraction = {
-    type: CommandType;
-    execute: (Interaction) => void;
-    timeout?: Timer;
-}
-
-export type ManagerInteractionTemplate = {
-    type: CommandType;
-    execute: (Interaction) => void;
-    timeout?: number;
+    isGuild: boolean;
+    guildId?: string;
+    execute: (Interaction, id: string | null) => void;
 }
 
 export type CommandType = 'Once' | 'infinite';
