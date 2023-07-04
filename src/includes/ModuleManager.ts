@@ -25,8 +25,12 @@ export default class ModuleManager {
     }
 
     addModule(Name: string, Data: ModuleData, Execute: Function) {
-        this.RegisteredModules.set(Name, { Data, Execute });
-        logger.info("ModuleManager: Registered Module " + Name)
+        if (this.RegisteredModules.has(Name)) {
+            logger.error("ModuleManager: Can't register Module:" + Name + " already exists")
+        } else {
+            this.RegisteredModules.set(Name, { Data, Execute });
+            logger.info("ModuleManager: Registered Module " + Name)
+        }
     }
 
     setConfigReadyListener(config: Config) {
