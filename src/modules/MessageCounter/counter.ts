@@ -1,5 +1,5 @@
 import { Message } from "discord.js";
-import config from "@core/config";
+import config from "@core/Config";
 import moment from "moment";
 import { Database } from "@includes/database";
 import logger from "@includes/logger";
