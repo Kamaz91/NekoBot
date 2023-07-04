@@ -128,6 +128,10 @@ export default class Config extends EventEmitter {
                     channelId: undefined,
                     usersDM: new Array()
                 },
+            },
+            LinkChanger: {
+                enabled: false,
+                urls: new Array()
             }
         }
     }

@@ -1,4 +1,4 @@
-import { AutoPurgeSettings, GuildMember, LogsType } from "./database";
+import { AutoPurgeSettings, GuildMember, LinkChangerSettings, LogsType } from "./database";
 export interface ConfigModule {
     enabled: boolean;
 }
@@ -22,6 +22,18 @@ export interface LogsChannels extends ConfigModule {
     voice: string;
 }
 
+export interface LinkChanger extends ConfigModule {
+    urls: Array<{
+        type: "reply" | "delete";
+        removeText: boolean
+        domain: string;
+        domainChangeTo: string;
+        tld: string;
+        tldChangeTo: string;
+        bots: boolean;
+    }>
+}
+
 export interface Notifier {
     messageDelete: {
         channelId: string;
@@ -42,7 +54,8 @@ export interface ConfigModules {
     MessageCounter: MessageCounter,
     Quotes: ConfigModule,
     LogsChannels: LogsChannels,
-    Notifier: Notifier
+    Notifier: Notifier,
+    LinkChanger: LinkChanger
 }
 
 export type Config = Map<string, ConfigModules>;

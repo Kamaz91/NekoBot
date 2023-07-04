@@ -136,3 +136,15 @@ export interface Quote {
   data: QuoteTemplate;
   hidden: boolean;
 }
+
+export interface LinkChangerSettings {
+  id: number;
+  guild_id: string;
+  type: "reply" | "delete";
+  remove_text: boolean
+  domain: string;
+  domain_change_to: string;
+  tld: string;
+  tld_change_to: string;
+  bots: boolean;
+}
