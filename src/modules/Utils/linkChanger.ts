@@ -4,7 +4,7 @@ import { Events, Message } from "discord.js";
 
 import { Client } from "@core/Bot";
 import ModuleManager from "@core/ModuleManager";
-import Config from "@core/config";
+import Config from "@core/Config";
 import EventsManager from "@core/EventsManager";
 
 import logger from "@includes/logger";
