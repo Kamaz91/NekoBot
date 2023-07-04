@@ -2,7 +2,7 @@ import { Quote } from "@/@types/database"
 import { QuoteTemplate } from "@/@types/core";
 import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, EmbedBuilder, MessageContextMenuCommandInteraction, ModalBuilder, ModalSubmitInteraction, Snowflake, SnowflakeUtil, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import { Client } from "@core/Bot";
-import Config from "@core/config";
+import Config from "@core/Config";
 import InteractionManager from "@core/InteractionManager";
 import { Database } from "@includes/database";
 import logger from "@includes/logger";

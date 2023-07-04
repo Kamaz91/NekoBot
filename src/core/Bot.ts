@@ -6,7 +6,7 @@ import ModuleManager from "@core/ModuleManager";
 import "@core/EventsManager";
 import "@core/InteractionManager"
 
-import Config from "@core/config";
+import Config from "@core/Config";
 
 import "@src/EnabledModules";
 import "@src/EnabledCommands";

@@ -1,7 +1,7 @@
 import cfg from "./config";
 import EventsManager from "@core/EventsManager";
 import ModuleManager from "@core/ModuleManager";
-import config from "@core/config";
+import config from "@core/Config";
 import { Events, Message } from "discord.js";
 import { Database } from "@includes/database";
 import moment from "moment";

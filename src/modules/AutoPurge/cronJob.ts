@@ -1,5 +1,5 @@
 import { CronJob } from "cron";
-import Config from "@core/config";
+import Config from "@core/Config";
 import Client from "@core/Connection";
 import { Database } from "@includes/database";
 import moment from "moment";

@@ -1,5 +1,5 @@
 import { Client } from "@core/Bot";
-import Config from "@core/config";
+import Config from "@core/Config";
 import { EmbedBuilder, Message, GuildChannel, Collection, VoiceState, GuildMember, ColorResolvable } from "discord.js";
 import Logger from "@includes/logger";
 import moment from "moment";
