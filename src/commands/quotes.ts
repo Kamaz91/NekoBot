@@ -1,6 +1,6 @@
 import { Quote } from "@/@types/database"
-import { CommandType, QuoteTemplate } from "@/@types/core";
-import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, EmbedBuilder, Guild, Interaction, MessageContextMenuCommandInteraction, ModalBuilder, ModalSubmitInteraction, Snowflake, SnowflakeUtil, TextInputBuilder, TextInputStyle, User } from "discord.js";
+import { QuoteTemplate } from "@/@types/core";
+import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, EmbedBuilder, MessageContextMenuCommandInteraction, ModalBuilder, ModalSubmitInteraction, Snowflake, SnowflakeUtil, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import { Client } from "@core/Bot";
 import Config from "@core/config";
 import InteractionManager from "@core/InteractionManager";
