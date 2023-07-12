@@ -60,7 +60,8 @@ function incrementUserHour(user_id: string, guild_id: string) {
             }
         })
         .catch(err => {
-            (err);
+            logger.error("Message Counter incrementUserHour error");
+            logger.error(JSON.stringify(err));
         });
 }
 
@@ -89,7 +90,8 @@ function incrementUserStats(user_id: string, guild_id: string, words: number, ch
             }
         })
         .catch(err => {
-            logger.info(err);
+            logger.error("Message Counter incrementUserStats error");
+            logger.error(JSON.stringify(err));
         });
 }
 
@@ -108,7 +110,8 @@ function incrementGuildCurrentHour(guild_id) {
             }
         })
         .catch(err => {
-            logger.info(err);
+            logger.error("Message Counter incrementGuildCurrentHour error");
+            logger.error(JSON.stringify(err));
         });
 }
 
@@ -129,7 +132,8 @@ function InsertUserDay(user_id: string, guild_id: string) {
             }
         })
         .catch(err => {
-            logger.info(err);
+            logger.error("Message Counter InsertUserDay error");
+            logger.error(JSON.stringify(err));
         });
 }
 
@@ -139,7 +143,6 @@ function InsertUserStats(user_id: string, guild_id: string, words: number, chars
         .insert({
             user_id: user_id,
             guild_id: guild_id,
-            random_quote_last_update: timestamp,
             created_timestamp: timestamp,
             last_message_timestamp: timestamp,
             total_messages: 1,
@@ -153,7 +156,8 @@ function InsertUserStats(user_id: string, guild_id: string, words: number, chars
             }
         })
         .catch(err => {
-            logger.info(err);
+            logger.error("Message Counter InsertUserStats error");
+            logger.error(JSON.stringify(err));
         });
 }
 
@@ -171,6 +175,7 @@ function InsertGuildDay(guild_id: string) {
             }
         })
         .catch(err => {
-            logger.info(err);
+            logger.error("Message Counter InsertGuildDay error");
+            logger.error(JSON.stringify(err));
         });
 }

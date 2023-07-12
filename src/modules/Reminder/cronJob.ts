@@ -26,7 +26,11 @@ async function ReminderJob() {
                 .setColor([37, 154, 72]) //#259A48
                 .addFields({ name: 'Text:', value: el.additional_text });
 
-            user.send({ embeds: [embed] });
+            user.send({ embeds: [embed] })
+                .catch((error) => {
+                    logger.error("Reminder ReminderJob user send error");
+                    logger.error(JSON.stringify(error));
+                });
 
             updateReminded(el.id);
         }

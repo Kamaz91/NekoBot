@@ -40,5 +40,8 @@ function insertMessage(guild_id, channel_id, message_id) {
             create_timestamp: moment().valueOf()
         })
         .then()
-        .catch(err => logger.error(err));
+        .catch(err => {
+            logger.error("AuroPurge insertMessage error");
+            logger.error(JSON.stringify(err));
+        });
 }

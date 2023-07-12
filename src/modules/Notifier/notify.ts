@@ -13,10 +13,11 @@ export function MessageDelete(Message: Message) {
     let GuildData = Config.getGuildConfig(Message.guildId);
     let LogsChannel = Client.channels.resolve(GuildData.Notifier.messageDelete.channelId);
 
-    if (!LogsChannel.isTextBased()) {
-        return;
-    }
     try {
+        if (!LogsChannel.isTextBased()) {
+            return;
+        }
+
         let embed = new EmbedBuilder()
             .setAuthor({ name: Message.member.displayName + " [" + Message.author.username + " #" + Message.author.discriminator + "]", iconURL: Message.author.displayAvatarURL() })
             .setDescription("**Deleted in **<#" + Message.channel.id + ">")
@@ -34,9 +35,14 @@ export function MessageDelete(Message: Message) {
                 embed.addFields({ name: attachment.contentType, value: attachment.url });
             });
         }
-        LogsChannel.send({ embeds: [embed] }).catch(e => Logger.error(e));
+        LogsChannel.send({ embeds: [embed] })
+            .catch(e => {
+                Logger.error("Notifier: Message Delete notify send to channel error");
+                Logger.error(JSON.stringify(e));
+            });
     } catch (e) {
-        Logger.error(e);
+        Logger.error("Notifier: Message Delete notify error");
+        Logger.error(JSON.stringify(e));
     };
 }
 
@@ -68,7 +74,11 @@ export function MessageBulkDelete(Messages: Collection<string, Message>, Channel
                 });
             }
         }
-        LogsChannel.send({ embeds: [embed] }).catch(e => Logger.error(e));
+        LogsChannel.send({ embeds: [embed] })
+            .catch(e => {
+                Logger.error("Notifier: Message Bulk Delete notify send to channel error");
+                Logger.error(JSON.stringify(e));
+            });
     } catch (e) {
         Logger.error(e);
     }
@@ -129,7 +139,11 @@ export function VoiceStateChange(OldState: VoiceState, NewState: VoiceState) {
         .setAuthor({ name: data.author.displayName, iconURL: data.author.displayAvatarURL() })
         .addFields({ name: data.action, value: data.channel })
         .setTimestamp()
-    LogsChannel.send({ embeds: [embed] });
+    LogsChannel.send({ embeds: [embed] })
+        .catch(e => {
+            Logger.error("Notifier: VoiceStateChange notify send to channel error");
+            Logger.error(JSON.stringify(e));
+        });
 }
 
 export function MemberRemoved(Member: GuildMember) {
@@ -174,6 +188,10 @@ export function MemberRemoved(Member: GuildMember) {
     }
 
     for (var recipientId of GuildData.Notifier.guildLeft.usersDM) {
-        Member.guild.members.resolve(recipientId).send({ embeds: [embed] });
+        Member.guild.members.resolve(recipientId).send({ embeds: [embed] })
+            .catch(e => {
+                Logger.error("Notifier: Member Removed notify send to user error");
+                Logger.error(JSON.stringify(e));
+            });
     }
 }
