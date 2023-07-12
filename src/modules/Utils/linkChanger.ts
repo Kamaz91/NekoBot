@@ -80,7 +80,7 @@ function replaceDomain(url: string, object: { domain: string, tld: string, domai
 function extractURLsFromString(text: string): string {
     const pattern = /(https?:\/\/[^\s]+)/gi;
     const matches = text.match(pattern);
-    return matches.join("\n");
+    return matches.join("\n") || "";
 }
 
 function processText(Message: Message, url: { type: "delete" | "reply"; removeText: boolean; domain: string; tld: string; domainChangeTo: string; tldChangeTo: string; bots: boolean; }): void {
