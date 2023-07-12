@@ -1,7 +1,7 @@
 import { QuoteTemplate } from "./core";
 
 type TokenType = "discord";
-type LogsType = "message_delete" | "voice_change" | "guild_left";
+export type LogsType = "message_delete" | "voice_change" | "guild_left";
 
 export interface ModuleSettings {
   id: number;
@@ -147,4 +147,5 @@ export interface LinkChangerSettings {
   tld: string;
   tld_change_to: string;
   bots: boolean;
+  on: boolean;
 }
