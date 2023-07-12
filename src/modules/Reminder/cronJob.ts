@@ -15,8 +15,8 @@ export function StartCron() {
 async function ReminderJob() {
     logger.info("Reminder: checking...");
     var data = await fetchActiveData();
-    if (data.status) {
-        for (let el of data.elements) {
+    if (data.length > 0) {
+        for (let el of data) {
             var user = await Client.users.fetch(el.user_id);
 
             const embed = new EmbedBuilder()
@@ -45,15 +45,11 @@ function fetchActiveData() {
         .andWhere(
             'fulfillment_timestamp', '<', moment().valueOf()
         )
-        .then((rows) => {
-            if (rows.length > 0) {
-                return { status: 1, elements: rows };
-            } else {
-                return { status: 0, elements: "no data" }
-            }
-        })
+        .then(rows => rows)
         .catch((error) => {
-            return { status: 0, elements: null, error: error }
+            logger.error("Reminder updateReminded error");
+            logger.error(JSON.stringify(error));
+            return [];
         });
 }
 
@@ -65,14 +61,9 @@ function updateReminded(id) {
         .where({
             id: id
         })
-        .then((rows) => {
-            if (rows > 0) {
-                return { status: true, error: false, request: rows[0] };
-            } else {
-                return { status: false, error: false, request: "Cant update" }
-            }
-        })
+        .then()
         .catch((error) => {
-            return { status: false, error: true, request: error }
+            logger.error("Reminder updateReminded error");
+            logger.error(JSON.stringify(error));
         });
 }
