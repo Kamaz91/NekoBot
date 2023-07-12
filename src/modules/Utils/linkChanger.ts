@@ -29,7 +29,7 @@ const cfg = {
         enabled: false
     },
     sql: [
-        (guildsArray) => Database().from("link_changer_domains").whereIn('guild_id', guildsArray),
+        (guildsArray) => Database().from("link_changer_domains").whereIn('guild_id', guildsArray).andWhere("on", 1),
         (guildsArray) => Database().from("modules_settings").whereIn('guild_id', guildsArray).andWhere("module_name", "linkChanger")
     ],
     prepareData(GuildsIds: string[], data: any[]) {
@@ -50,7 +50,7 @@ const cfg = {
 }
 
 
-function detectURLToReplace(url: string, object: { domain: string, tld: string, domainChangeTo: string, tldChangeTo: string }) {
+function detectURLToReplace(url: string, object: { domain: string, tld: string, domainChangeTo: string, tldChangeTo: string }): boolean {
     const { domain, tld } = object;
 
     // Construct the regular expression pattern dynamically
@@ -60,12 +60,12 @@ function detectURLToReplace(url: string, object: { domain: string, tld: string, 
     return pattern.test(url);
 }
 
-function detectURLs(text) {
+function detectURLs(text): boolean {
     const pattern = /(https?:\/\/[^\s]+)/gi;
     return pattern.test(text);
 }
 
-function replaceDomain(url: string, object: { domain: string, tld: string, domainChangeTo: string, tldChangeTo: string }) {
+function replaceDomain(url: string, object: { domain: string, tld: string, domainChangeTo: string, tldChangeTo: string }): string {
     const { domain, tld, domainChangeTo, tldChangeTo } = object;
 
     // Construct the regular expression pattern dynamically
@@ -77,13 +77,13 @@ function replaceDomain(url: string, object: { domain: string, tld: string, domai
     return replacedURL;
 }
 
-function extractURLsFromString(text: string) {
+function extractURLsFromString(text: string): string {
     const pattern = /(https?:\/\/[^\s]+)/gi;
     const matches = text.match(pattern);
     return matches.join("\n");
 }
 
-function processText(Message: Message, url: { type: "delete" | "reply"; removeText: boolean; domain: string; tld: string; domainChangeTo: string; tldChangeTo: string; bots: boolean; }) {
+function processText(Message: Message, url: { type: "delete" | "reply"; removeText: boolean; domain: string; tld: string; domainChangeTo: string; tldChangeTo: string; bots: boolean; }): void {
     let data = { domain: url.domain, tld: url.tld, domainChangeTo: url.domainChangeTo, tldChangeTo: url.tldChangeTo };
     if (detectURLToReplace(Message.content, data) && url.bots && Message.author.id !== Client.user.id) {
         let replacedText = replaceDomain(Message.content, data);
@@ -118,7 +118,7 @@ function processText(Message: Message, url: { type: "delete" | "reply"; removeTe
     }
 }
 
-function processMessage(Message: Message) {
+function processMessage(Message: Message): void {
     if (Message.inGuild() && detectURLs(Message.content)) {
         const Settings = Config.getGuildConfig(Message.guildId).LinkChanger;
         if (!Settings.enabled) {
