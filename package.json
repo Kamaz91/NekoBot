@@ -27,7 +27,7 @@
         "buildrun": "npm run build && npm run start",
         "buildrun-debug": "npm run build && npm run start-debug",
         "start-debug": "node --experimental-json-modules --inspect-brk ./build/NekoBot.js",
-        "start": "node --experimental-json-modules ./build/NekoBot.js",
+        "start": "node --experimental-json-modules ./build/src/NekoBot.js",
         "test": "echo \"Error: no test specified\" && exit 1",
         "register": "cd ./build/ && node RegisterCommands.js"
     },
