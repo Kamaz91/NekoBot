@@ -1,6 +1,6 @@
 import { Quote } from "@/@types/database"
 import { QuoteTemplate } from "@/@types/core";
-import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, EmbedBuilder, MessageContextMenuCommandInteraction, ModalBuilder, ModalSubmitInteraction, Snowflake, SnowflakeUtil, TextInputBuilder, TextInputStyle, User } from "discord.js";
+import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonInteraction, ButtonStyle, ChatInputCommandInteraction, Collection, CommandInteraction, EmbedBuilder, Guild, MessageContextMenuCommandInteraction, ModalBuilder, ModalSubmitInteraction, Snowflake, SnowflakeUtil, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import { Client } from "@core/Bot";
 import Config from "@core/Config";
 import InteractionManager from "@core/InteractionManager";
@@ -10,7 +10,7 @@ import { InteractionBuilder, Timer } from "@src/utils";
 
 interface QuoteTemplateHolder {
     Id: Snowflake;
-    Interaction: MessageContextMenuCommandInteraction;
+    Interaction: MessageContextMenuCommandInteraction | ChatInputCommandInteraction;
     Quote: QuoteTemplate;
     Timeout: Timer;
 }
@@ -80,16 +80,25 @@ async function getGuildMember(userId, guildId) {
     return { nickname: "User not found", avatar: Client.user.displayAvatarURL({ size: 64 }) };
 }
 
-async function SlashCommandExecute(interaction: CommandInteraction) {
+async function SlashCommandExecute(interaction: ChatInputCommandInteraction) {
+    const SubCommand = interaction.options.getSubcommand();
     const Settings = Config.getGuildConfig(interaction.guildId).Quotes;
-    const quotePosition = interaction.options.get("quote-position");
-    let quote: Quote;
-
     if (!Settings.enabled) {
         interaction.reply({ content: "Quotes not enabled on this server", ephemeral: true })
             .catch((e) => logger.error("Quotes: " + e));
         return;
     }
+    switch (SubCommand) {
+        case "show": SlashCommandShow(interaction); break;
+        case "show-embed": SlashCommandShowEmbed(interaction); break;
+        case "delete-template": SlashCommandDelete(interaction); break;
+        default: InteractionManager.sendInteractionNotExecutable(interaction);
+    }
+}
+
+async function SlashCommandShow(interaction: ChatInputCommandInteraction) {
+    const quotePosition = interaction.options.get("quote-position");
+    var quote: Quote;
 
     if (quotePosition?.value) {
         quote = await getQuote(interaction.guildId, quotePosition.value);
@@ -108,6 +117,40 @@ async function SlashCommandExecute(interaction: CommandInteraction) {
     embed.setFooter({ text: "Quote No. " + quote.quote_guild_position });
     interaction.reply({ embeds: [embed] })
         .catch((e) => logger.error("Quotes: " + e));
+}
+
+async function SlashCommandShowEmbed(interaction: ChatInputCommandInteraction) {
+    try {
+        var UserQuote = getGuildData(interaction.guildId, interaction.user.id);
+        let embed = embedBuildFields(UserQuote.Quote, UserQuote.Quote.messageLink, interaction.user.displayAvatarURL({ size: 64 }));
+        let components = buildInteractionComponents(UserQuote);
+
+        interaction.reply({ embeds: [embed], components: [components], ephemeral: true })
+            .then(reply => {
+                UserQuote.Interaction = interaction;
+                Store.Quotes.get(interaction.guildId).set(interaction.user.id, UserQuote);
+            })
+            .catch(e => {
+                logger.error("Quotes: Cant reply! " + interaction.commandName);
+                logger.error(JSON.stringify(e));
+            });
+
+    } catch (error) {
+        interaction.reply({ content: "No templates found", ephemeral: true });
+        logger.error(JSON.stringify(error));
+    }
+}
+
+async function SlashCommandDelete(interaction: ChatInputCommandInteraction) {
+    try {
+        const UserQuote = getGuildData(interaction.guildId, interaction.user.id);
+        if (DeleteQuoteTemplate(interaction, UserQuote.Id, "Quote Aborted")) {
+            interaction.reply({ content: "Template deleted", ephemeral: true });
+        }
+    } catch (error) {
+        interaction.reply({ content: "No templates found", ephemeral: true });
+        logger.error(JSON.stringify(error));
+    }
 }
 
 async function ContextMenuExecute(interaction: MessageContextMenuCommandInteraction) {
@@ -193,7 +236,7 @@ function getGuildData(guildId, userId) {
     return GuildData.get(userId);
 }
 
-function isInteractionIdValid(interaction: ButtonInteraction | ModalSubmitInteraction, id) {
+function isInteractionIdValid(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction, id) {
     try {
         let GuildData = getGuildData(interaction.guildId, interaction.user.id);
         return GuildData.Id == id ? true : false;
@@ -202,16 +245,18 @@ function isInteractionIdValid(interaction: ButtonInteraction | ModalSubmitIntera
     }
 }
 
-function DeleteQuoteTemplate(Interaction: ButtonInteraction, id, message: string) {
+function DeleteQuoteTemplate(Interaction: CommandInteraction | ButtonInteraction, id, message: string): boolean {
     if (!isInteractionIdValid(Interaction, id)) {
         InteractionManager.sendInteractionNotExecutable(Interaction);
-        return;
+        return false;
     }
     try {
         DeleteQuoteTemplateData(Interaction.guildId, Interaction.user.id, message);
+        return true;
     } catch (e) {
         logger.error("Quotes: Cant Delete TemplateData");
         logger.error(JSON.stringify(e));
+        return false;
     }
 }
 

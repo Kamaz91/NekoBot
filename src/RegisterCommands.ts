@@ -16,11 +16,22 @@ const commandsDefs = {
             .setName("quote")
             .setDescription("Quotes")
             .setDMPermission(false)
-            .addNumberOption((Option) =>
+            .addSubcommand((Option) =>
                 Option
-                    .setName('quote-position')
-                    .setDescription('Quote number')
-            )
+                    .setName("show")
+                    .setDescription("Show quote")
+                    .addNumberOption((Option) =>
+                        Option
+                            .setName('quote-position')
+                            .setDescription('Quote number')))
+            .addSubcommand((Option) =>
+                Option
+                    .setName("show-embed")
+                    .setDescription("Showing quote template"))
+            .addSubcommand((Option) =>
+                Option
+                    .setName("delete-template")
+                    .setDescription("Deletes actual quote template"))
             .toJSON()],
     Avatar: new SlashCommandBuilder()
         .setName("avatar")
