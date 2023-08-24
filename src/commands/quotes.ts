@@ -1,12 +1,12 @@
 import { Quote } from "@/@types/database"
 import { QuoteTemplate } from "@/@types/core";
-import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonInteraction, ButtonStyle, ChatInputCommandInteraction, Collection, CommandInteraction, EmbedBuilder, Guild, MessageContextMenuCommandInteraction, ModalBuilder, ModalSubmitInteraction, Snowflake, SnowflakeUtil, TextInputBuilder, TextInputStyle, User } from "discord.js";
+import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonInteraction, ButtonStyle, ChatInputCommandInteraction, Collection, CommandInteraction, EmbedBuilder, MessageContextMenuCommandInteraction, ModalBuilder, ModalSubmitInteraction, Snowflake, SnowflakeUtil, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import { Client } from "@core/Bot";
 import Config from "@core/Config";
 import InteractionManager from "@core/InteractionManager";
 import { Database } from "@includes/database";
 import logger from "@includes/logger";
-import { InteractionBuilder, Timer } from "@src/utils";
+import { InteractionBuilder, Timer, errorLog } from "@src/utils";
 
 interface QuoteTemplateHolder {
     Id: Snowflake;
@@ -65,8 +65,7 @@ function embedBuildFields(data: QuoteTemplate, messageLink: string, iconURL: str
         if (field.name && field.content) {
             embed.addFields({ name: field.name, value: field.content });
         } else {
-            logger.error(`Quotes: Fields are wrong`);
-            logger.error(JSON.stringify(field));
+            errorLog(logger, `Quotes: Fields are wrong`, field);
         }
     }
     return embed;
@@ -85,7 +84,7 @@ async function SlashCommandExecute(interaction: ChatInputCommandInteraction) {
     const Settings = Config.getGuildConfig(interaction.guildId).Quotes;
     if (!Settings.enabled) {
         interaction.reply({ content: "Quotes not enabled on this server", ephemeral: true })
-            .catch((e) => logger.error("Quotes: " + e));
+            .catch(e => errorLog(logger, "Quotes: Cant reply! " + interaction.commandName, e));
         return;
     }
     switch (SubCommand) {
@@ -107,7 +106,7 @@ async function SlashCommandShow(interaction: ChatInputCommandInteraction) {
     }
     if (!quote) {
         interaction.reply({ content: "Quote Not exist", ephemeral: true })
-            .catch((e) => logger.error("Quotes: " + e));
+            .catch(e => errorLog(logger, "Quotes: Cant reply! " + interaction.commandName, e));
         return;
     }
 
@@ -116,7 +115,7 @@ async function SlashCommandShow(interaction: ChatInputCommandInteraction) {
     embed.setDescription("Quote by: " + quoteAuthor.nickname);
     embed.setFooter({ text: "Quote No. " + quote.quote_guild_position });
     interaction.reply({ embeds: [embed] })
-        .catch((e) => logger.error("Quotes: " + e));
+        .catch(e => errorLog(logger, "Quotes: Cant reply! " + interaction.commandName, e));
 }
 
 async function SlashCommandShowEmbed(interaction: ChatInputCommandInteraction) {
@@ -130,14 +129,11 @@ async function SlashCommandShowEmbed(interaction: ChatInputCommandInteraction) {
                 UserQuote.Interaction = interaction;
                 Store.Quotes.get(interaction.guildId).set(interaction.user.id, UserQuote);
             })
-            .catch(e => {
-                logger.error("Quotes: Cant reply! " + interaction.commandName);
-                logger.error(JSON.stringify(e));
-            });
+            .catch(e => errorLog(logger, "Quotes: Cant reply! " + interaction.commandName, e));
 
     } catch (error) {
         interaction.reply({ content: "No templates found", ephemeral: true });
-        logger.error(JSON.stringify(error));
+        errorLog(logger, "Quotes: No templates found! " + interaction.commandName, error);
     }
 }
 
@@ -149,7 +145,7 @@ async function SlashCommandDelete(interaction: ChatInputCommandInteraction) {
         }
     } catch (error) {
         interaction.reply({ content: "No templates found", ephemeral: true });
-        logger.error(JSON.stringify(error));
+        errorLog(logger, "Quotes: No templates found! " + interaction.commandName, error);
     }
 }
 
@@ -159,16 +155,13 @@ async function ContextMenuExecute(interaction: MessageContextMenuCommandInteract
 
     if (!Settings.enabled) {
         interaction.reply({ content: "Quotes not enabled on this server", ephemeral: true })
-            .catch((e) => logger.error("Quotes: " + e));
+            .catch(e => errorLog(logger, "Quotes: Cant reply! " + interaction.commandName, e));
         return;
     }
 
     if (interaction.targetMessage.content.length == 0 && interaction.targetMessage.attachments.size == 0) {
         interaction.reply({ content: "Message is somehow empty", ephemeral: true })
-            .catch(e => {
-                logger.error("Quotes: Cant reply! " + interaction.commandName);
-                logger.error(JSON.stringify(e));
-            });
+            .catch(e => errorLog(logger, "Quotes: Cant reply! " + interaction.commandName, e));
         return;
     }
 
@@ -183,15 +176,9 @@ async function ContextMenuExecute(interaction: MessageContextMenuCommandInteract
         UserQuote.Timeout.reset();
 
         interaction.reply({ content: "Added!", ephemeral: true })
-            .catch(e => {
-                logger.error("Quotes: Cant reply! " + interaction.commandName);
-                logger.error(JSON.stringify(e));
-            });
+            .catch(e => errorLog(logger, "Quotes: Cant reply! " + interaction.commandName, e));
         interaction.deleteReply()
-            .catch(e => {
-                logger.error("Quotes: Cant deleteReply! " + interaction.commandName);
-                logger.error(JSON.stringify(e));
-            });
+            .catch(e => errorLog(logger, "Quotes: Cant deleteReply! " + interaction.commandName, e));
     } else {
         // if user is not set
         let UserData = {
@@ -206,20 +193,14 @@ async function ContextMenuExecute(interaction: MessageContextMenuCommandInteract
         // if quote have more than 1 field
         let embed = embedBuildFields(UserQuote.Quote, UserQuote.Quote.messageLink, interaction.user.displayAvatarURL({ size: 64 }));
         UserQuote.Interaction.editReply({ embeds: [embed] })
-            .catch(e => {
-                logger.error("Quotes: Cant editReply! " + interaction.commandName);
-                logger.error(JSON.stringify(e));
-            });
+            .catch(e => errorLog(logger, "Quotes: Cant editReply! " + interaction.commandName, e));
     } else {
         // if quote fields size is 1 
         let embed = embedBuildFields(UserQuote.Quote, UserQuote.Quote.messageLink, interaction.user.displayAvatarURL({ size: 64 }));
         let components = buildInteractionComponents(UserQuote);
 
         UserQuote.Interaction.reply({ embeds: [embed], components: [components], ephemeral: true })
-            .catch(e => {
-                logger.error("Quotes: Cant reply! " + interaction.commandName);
-                logger.error(JSON.stringify(e));
-            });
+            .catch(e => errorLog(logger, "Quotes: Cant reply! " + interaction.commandName, e));
     }
 }
 
@@ -254,8 +235,7 @@ function DeleteQuoteTemplate(Interaction: CommandInteraction | ButtonInteraction
         DeleteQuoteTemplateData(Interaction.guildId, Interaction.user.id, message);
         return true;
     } catch (e) {
-        logger.error("Quotes: Cant Delete TemplateData");
-        logger.error(JSON.stringify(e));
+        errorLog(logger, "Quotes: Cant Delete TemplateData", e);
         return false;
     }
 }
@@ -286,8 +266,7 @@ async function SaveQuoteTemplateToDatabase(Interaction: ButtonInteraction, id: s
         let quotePos = await AddQuoteToDatabase(Interaction.guildId, Interaction.user.id, UserQuote.Quote);
         DeleteQuoteTemplateData(Interaction.guildId, Interaction.user.id, `Quote No. ${quotePos} Saved!`);
     } catch (e) {
-        logger.error("Quotes: Error While saving quote");
-        logger.error(JSON.stringify(e));
+        errorLog(logger, "Quotes: Error While saving quote", e);
     }
 }
 
@@ -357,7 +336,7 @@ async function AddQuoteToDatabase(guild_id: guildId, user_id: string, Data: Quot
     return quotePosition;
 }
 
-function GetQuoteLastPosition(guild_id: guildId) {
+function GetQuoteLastPosition(guild_id: guildId): Promise<number> {
     return Database()
         .from('quotes')
         .select("quote_guild_position")
@@ -366,9 +345,8 @@ function GetQuoteLastPosition(guild_id: guildId) {
         .limit(1)
         .then((rows) => { return rows.length > 0 ? rows[0].quote_guild_position : 0 })
         .catch(e => {
-            logger.error(JSON.stringify(e));
-            logger.error("Quotes: Cant gather quote position");
             return 0;
+            errorLog(logger, "Quotes: Cant gather quote position", e);
         });
 }
 
@@ -377,8 +355,7 @@ function createQuoteDataTimeout(guildId: string, userId: string) {
         try {
             DeleteQuoteTemplateData(guildId, userId, "TimeOut! 5 minute inactivity, quote template removed");
         } catch (e) {
-            logger.error("Quotes: Quote Data Timeout error " + e);
-            logger.error(JSON.stringify(e));
+            errorLog(logger, "Quotes: Quote Data Timeout error", e);
         }
     }, Timeout * 1000);
 }
@@ -442,24 +419,21 @@ function removeLastLine(Interaction: ButtonInteraction, id: string) {
     if (UserQuote.Quote.fields.length < 2) {
         Interaction.reply({ content: "Cant remove First line", ephemeral: true })
             .catch(e => {
-                logger.error(JSON.stringify(e));
-                logger.error("Quotes: cant reply, removeLastLine");
+                errorLog(logger, "Quotes: cant reply, removeLastLine", e);
                 return 0;
             });
         return;
     }
     Interaction.reply({ content: "Removed last Line", ephemeral: true })
         .catch(e => {
-            logger.error(JSON.stringify(e));
-            logger.error("Quotes: cant reply, removeLastLine");
+            errorLog(logger, "Quotes: cant reply, removeLastLine", e);
             return 0;
         });
     UserQuote.Quote.fields.pop();
     let embed = embedBuildFields(UserQuote.Quote, UserQuote.Quote.messageLink, Interaction.user.displayAvatarURL({ size: 64 }));
     UserQuote.Interaction.editReply({ embeds: [embed] })
         .catch(e => {
-            logger.error(JSON.stringify(e));
-            logger.error("Quotes: cant editReply, removeLastLine");
+            errorLog(logger, "Quotes: cant editReply, removeLastLine", e);
             return 0;
         });
 }
