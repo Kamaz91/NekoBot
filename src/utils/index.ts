@@ -10,4 +10,9 @@ function wait(timeout, callback?) {
     });
 }
 
-export { InteractionBuilder, ModuleBuilder, Timer, wait };
+function errorLog(logger, text, error) {
+    logger.error(text);
+    logger.error(JSON.stringify(error));
+}
+
+export { InteractionBuilder, ModuleBuilder, Timer, wait, errorLog };

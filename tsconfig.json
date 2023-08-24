@@ -21,7 +21,8 @@
     "sourceMap": true,
     "target": "ESNext",
     "lib": [
-      "ESNext"
+      "ESNext",
+      "DOM"
     ],
     "baseUrl": "./",
     "outDir": "./build/",

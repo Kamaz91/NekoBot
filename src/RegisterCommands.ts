@@ -105,16 +105,20 @@ const commandsDefs = {
                 .setRequired(true)
         )
         .toJSON(),
-    Tapmusic: new SlashCommandBuilder()
-        .setName("tapmusic")
-        .setDescription('TapMusic image')
+    LastFM: new SlashCommandBuilder()
+        .setName("lastfm")
+        .setDescription('lastfm api')
         .setDMPermission(true)
-        .addStringOption((Option) =>
+        .addSubcommand((Option) =>
             Option
-                .setName('username')
-                .setDescription('The lastFM username you want image')
-                .setRequired(true)
-        )
+                .setName("3x3")
+                .setDescription("Showing 3x3 Albums Grid")
+                .addStringOption((Option) =>
+                    Option
+                        .setName('username')
+                        .setDescription('The lastFM username you want albums')
+                        .setRequired(true)
+                ))
         .toJSON()
 };
 (async () => {
