@@ -1,4 +1,4 @@
-import { BaseImageURLOptions, CommandInteraction, SlashCommandBuilder, User } from "discord.js";
+import { BaseImageURLOptions, ChatInputCommandInteraction, User } from "discord.js";
 import InteractionManager from "@core/InteractionManager";
 import { Client } from "@core/Bot"
 import { InteractionBuilder } from "@utils/index";
@@ -25,7 +25,7 @@ function getUsersFromMention(mention) {
 
 const name = "avatar";
 
-async function execute(interaction: CommandInteraction) {
+async function execute(interaction: ChatInputCommandInteraction) {
     const MaxAvatars = 10;
     const Options: BaseImageURLOptions = {
         size: 4096

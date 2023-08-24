@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, SnowflakeUtil } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ChatInputCommandInteraction, SnowflakeUtil } from "discord.js";
 import { InteractionBuilder } from "@src/utils";
 import InteractionManager from "@core/InteractionManager";
 
@@ -36,7 +36,7 @@ function allPlayersChose(players: Map<string, Player>) {
     return true;
 }
 
-async function execute(interaction: CommandInteraction) {
+async function execute(interaction: ChatInputCommandInteraction) {
     const rockid = SnowflakeUtil.generate().toString();
     const paperid = SnowflakeUtil.generate().toString();
     const scissorsid = SnowflakeUtil.generate().toString();

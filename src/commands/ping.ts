@@ -1,10 +1,10 @@
-import { CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction } from "discord.js";
 import InteractionManager from "@core/InteractionManager";
 import { InteractionBuilder } from "@utils/index";
 
 const name = "ping";
 
-async function execute(interaction: CommandInteraction) {
+async function execute(interaction: ChatInputCommandInteraction) {
     interaction.reply("Pong!");
 }
 

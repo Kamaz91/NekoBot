@@ -1,11 +1,11 @@
 import { InteractionBuilder } from "@src/utils";
 import InteractionManager from "@core/InteractionManager";
-import { CommandInteraction, EmbedBuilder } from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { Database } from "@includes/database";
 import moment from "moment";
 import logger from "../includes/logger";
 
-async function execute(interaction: CommandInteraction) {
+async function execute(interaction: ChatInputCommandInteraction) {
     const options = {
         year: Number.parseInt(interaction.options.get("year").value.toString()),
         month: Number.parseInt(interaction.options.get("month").value.toString()) - 1,
