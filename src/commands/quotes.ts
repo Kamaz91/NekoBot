@@ -264,7 +264,12 @@ async function SaveQuoteTemplateToDatabase(Interaction: ButtonInteraction, id: s
         let UserQuote = GuildQuotes.get(Interaction.user.id);
 
         let quotePos = await AddQuoteToDatabase(Interaction.guildId, Interaction.user.id, UserQuote.Quote);
-        DeleteQuoteTemplateData(Interaction.guildId, Interaction.user.id, `Quote No. ${quotePos} Saved!`);
+        if (quotePos == null) {
+            Interaction.reply({ content: "Error while adding to Database.", ephemeral: true });
+            errorLog(logger, "Quotes: Error While adding quote to database", quotePos);
+        } else {
+            DeleteQuoteTemplateData(Interaction.guildId, Interaction.user.id, `Quote No. ${quotePos} Saved!`);
+        }
     } catch (e) {
         errorLog(logger, "Quotes: Error While saving quote", e);
     }
@@ -326,13 +331,12 @@ function changeTitle(Interaction: ModalSubmitInteraction, id) {
 async function AddQuoteToDatabase(guild_id: guildId, user_id: string, Data: QuoteTemplate) {
     let quotePosition = await GetQuoteLastPosition(guild_id) + 1;
     let timestamp = new Date().getTime();
-    Database()
-        .table("quotes")
-        .insert({ guild_id: guild_id, quote_guild_position: quotePosition, user_id: user_id, data: JSON.stringify(Data), created_timestamp: timestamp })
-        .catch(e => {
-            logger.error(JSON.stringify(e));
-            logger.error("Quotes: Cant add quote to Database");
-        });
+    if (quotePosition != null) {
+        Database()
+            .table("quotes")
+            .insert({ guild_id: guild_id, quote_guild_position: quotePosition, user_id: user_id, data: JSON.stringify(Data), created_timestamp: timestamp })
+            .catch(e => errorLog(logger, "Quotes: Cant add quote to Database", e));
+    }
     return quotePosition;
 }
 
@@ -345,8 +349,8 @@ function GetQuoteLastPosition(guild_id: guildId): Promise<number> {
         .limit(1)
         .then((rows) => { return rows.length > 0 ? rows[0].quote_guild_position : 0 })
         .catch(e => {
-            return 0;
             errorLog(logger, "Quotes: Cant gather quote position", e);
+            return null;
         });
 }
 
