@@ -149,8 +149,6 @@ function isEmbeds(Embeds: Embed[], url: Url): boolean {
     var isValid = false;
     if (url.checkEmbed && Embeds.length > 0) {
         for (const embed of Embeds) {
-            console.log("embed:");
-            console.log(embed);
             if (embed.data.url || embed.data.title || embed.data.description) {
                 isValid = true;
             }
