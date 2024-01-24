@@ -144,6 +144,7 @@ export interface LinkChangerSettings {
   remove_text: boolean
   domain: string;
   domain_change_to: string;
+  check_embed: boolean;
   tld: string;
   tld_change_to: string;
   bots: boolean;

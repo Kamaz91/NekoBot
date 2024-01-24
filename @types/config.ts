@@ -30,6 +30,7 @@ export interface LinkChanger extends ConfigModule {
         domainChangeTo: string;
         tld: string;
         tldChangeTo: string;
+        checkEmbed: boolean;
         bots: boolean;
     }>
 }

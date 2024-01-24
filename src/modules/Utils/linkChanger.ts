@@ -1,6 +1,6 @@
 import { LinkChangerSettings } from "@/@types/database";
 import { LinkChanger } from "@/@types/config";
-import { Events, Message } from "discord.js";
+import { Embed, Events, Message } from "discord.js";
 
 import { Client } from "@core/Bot";
 import ModuleManager from "@core/ModuleManager";
@@ -10,14 +10,26 @@ import EventsManager from "@core/EventsManager";
 import logger from "@includes/logger";
 import { Database } from "@includes/database";
 
-import { ModuleBuilder } from "@utils/index"
+import { ModuleBuilder, wait } from "@utils/index"
 
-function createNewSettingsArray(oldArray: LinkChangerSettings[]): any {
+type Url = {
+    type: "delete" | "reply";
+    removeText: boolean;
+    domain: string;
+    tld: string;
+    domainChangeTo: string;
+    checkEmbed: boolean;
+    tldChangeTo: string;
+    bots: boolean;
+}
+
+function createNewSettingsArray(oldArray: LinkChangerSettings[]): Url[] {
     return oldArray.map((el) => ({
         type: el.type,
         removeText: el.remove_text,
         domain: el.domain,
         domainChangeTo: el.domain_change_to,
+        checkEmbed: el.check_embed,
         tld: el.tld,
         tldChangeTo: el.tld_change_to,
         bots: el.bots,
@@ -83,7 +95,7 @@ function extractURLsFromString(text: string): string {
     return matches.join("\n") || "";
 }
 
-function processText(Message: Message, url: { type: "delete" | "reply"; removeText: boolean; domain: string; tld: string; domainChangeTo: string; tldChangeTo: string; bots: boolean; }): void {
+function processText(Message: Message, url: Url): void {
     let data = { domain: url.domain, tld: url.tld, domainChangeTo: url.domainChangeTo, tldChangeTo: url.tldChangeTo };
     if (detectURLToReplace(Message.content, data) && url.bots && Message.author.id !== Client.user.id) {
         let replacedText = replaceDomain(Message.content, data);
@@ -92,7 +104,7 @@ function processText(Message: Message, url: { type: "delete" | "reply"; removeTe
         if (url.type == "reply") {
             Message.reply({ content: replacedText, allowedMentions: { repliedUser: false } })
                 .catch((e) => {
-                    console.log("Original Message:");
+                    console.log("LinkChanger: Original Message:");
                     console.log(Message.content);
                     console.log("replacedText:");
                     console.log(replacedText);
@@ -118,16 +130,33 @@ function processText(Message: Message, url: { type: "delete" | "reply"; removeTe
     }
 }
 
-function processMessage(Message: Message): void {
+async function processMessage(Message: Message): Promise<void> {
     if (Message.inGuild() && detectURLs(Message.content)) {
         const Settings = Config.getGuildConfig(Message.guildId).LinkChanger;
         if (!Settings.enabled) {
             return;
         }
+        await wait(1500);
         for (const url of Settings.urls) {
-            processText(Message, url);
+            if (!isEmbeds(Message.embeds, url)) {
+                processText(Message, url);
+            }
         }
     }
+}
+
+function isEmbeds(Embeds: Embed[], url: Url): boolean {
+    var isValid = false;
+    if (url.checkEmbed && Embeds.length > 0) {
+        for (const embed of Embeds) {
+            console.log("embed:");
+            console.log(embed);
+            if (embed.data.url || embed.data.title || embed.data.description) {
+                isValid = true;
+            }
+        }
+    }
+    return isValid;
 }
 
 
