@@ -5,6 +5,7 @@ export default new Client({
         GatewayIntentBits.Guilds,
         "DirectMessages",
         "Guilds",
+        "GuildMembers",
         "GuildMessages",
         "GuildMessageReactions",
         "GuildMessageTyping",
