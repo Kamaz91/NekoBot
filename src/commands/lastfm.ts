@@ -1,13 +1,11 @@
 import { AttachmentBuilder, ChatInputCommandInteraction } from "discord.js";
+import { loadImage, createCanvas } from 'canvas';
 import InteractionManager from "@core/InteractionManager";
 import { Database } from "@includes/database";
 import logger from "@includes/logger";
 import InteractionBuilder from "@utils/InteractionBuilder";
 import LastfmApi from "@utils/lastfmApi";
 import { errorLog } from "@src/utils";
-import axios from "axios";
-import Jimp from "jimp";
-import arrayBufferToBuffer from "arraybuffer-to-buffer"
 
 var lastfmapi = null;
 
@@ -66,35 +64,32 @@ async function print3x3Grid(interaction: ChatInputCommandInteraction) {
 
 }
 
-async function processImage(url: string, artistName: string, albumName: string, playcount: string) {
-    const fontBlack = await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK);
-    const fontWhite = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
-    const padding = 3;
+async function processImage(url: string, artistName: string, albumName: string, playcount: string): Promise<Buffer> {
+    // Capitalize first letter
+    albumName = albumName.split("").map((val, index) => index == 0 ? val.toUpperCase() : val).join("");
+    const width = 300;
+    const height = 300;
+    const canvas = createCanvas(width, height);
+    const context = canvas.getContext('2d');
+    const imgText = `${artistName}\n${albumName}\nPlays:${playcount}`;
+
+    context.quality = "best";
+
+    context.fillStyle = "#000000";
+    context.fillRect(0, 0, width, height);
+
     if (url) {
-        let imageBuffer: Buffer = arrayBufferToBuffer(await downloadImage(url));
-        var image = await Jimp.read(imageBuffer);
-    } else {
-        var image = await new Jimp(300, 300, "black");
+        let imgdata = await loadImage(url);
+        context.drawImage(imgdata, 0, 0);
     }
 
-    image.print(fontBlack, 3, 2 + 1, artistName);
-    image.print(fontBlack, 3, 16 + padding + 1, albumName);
-    image.print(fontBlack, 3, 32 + padding + 1, "Plays: " + playcount);
+    context.font = 'bold 13pt Courier';
+    context.shadowColor = "#000";
+    context.shadowBlur = 1;
+    context.fillStyle = '#FAFAFA';
+    context.fillText(imgText, 10, 20);
 
-    image.print(fontWhite, 2, 2, artistName);
-    image.print(fontWhite, 2, 16 + padding, albumName);
-    image.print(fontWhite, 2, 32 + padding, "Plays: " + playcount);
-
-    image.quality(100);
-    return new Promise((resolve, reject) => {
-        image.getBuffer(Jimp.MIME_PNG, (err, Buffer) => {
-            err == null ? resolve(Buffer) : reject(err);
-        });
-    });
-}
-
-async function downloadImage(url: string) {
-    return axios.get(url, { responseType: 'arraybuffer' }).then(res => res.data);
+    return canvas.toBuffer('image/png');
 }
 
 async function GetApiKey() {
