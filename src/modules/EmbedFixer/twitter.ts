@@ -37,7 +37,8 @@ function buildReply(twitterData: fxTwitterApiResponse): EmbedFixerReply {
             .setAuthor({ name: twitterData.tweet.author.name, iconURL: twitterData.tweet.author.avatar_url })
             .setFooter({ text: "Twitter" })
             .setThumbnail(twitterData.tweet.author.avatar_url)
-            .setColor("#1DA1F2")
+            .setColor("#1DA1F2"),
+        supressEmbeds: true
     }
     return reply;
 }

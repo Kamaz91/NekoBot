@@ -5,7 +5,8 @@ function getddinstagramdata(pathName: string): string {
 }
 export async function processInstagram(data: URL): Promise<EmbedFixerReply | undefined> {
     let reply: EmbedFixerReply = {
-        content: getddinstagramdata(data.pathname)
+        content: getddinstagramdata(data.pathname),
+        supressEmbeds: true
     }
 
     return reply;

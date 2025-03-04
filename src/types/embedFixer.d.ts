@@ -173,4 +173,5 @@ type fxTwitterApiMediaVideo = {
 type EmbedFixerReply = {
     content: string;
     embed?: EmbedBuilder;
+    supressEmbeds: boolean;
 }

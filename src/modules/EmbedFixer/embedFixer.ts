@@ -26,9 +26,12 @@ async function sendReply(Message: Message, reply: EmbedFixerReply): Promise<void
             // if there is an embed, we need to send it as an array
             embeds: reply.embed ? [reply.embed] : []
         }
+        if (reply.supressEmbeds) {
+            logger?.debug("[Embed Fixer] Supress Embeds");
+            Message.suppressEmbeds(true);
+        }
         if (messageData.embeds.length > 0) {
             logger?.debug("[Embed Fixer] Message with Embed");
-            Message.suppressEmbeds(true);
             await Message.reply({ content: "", embeds: messageData.embeds, allowedMentions: { repliedUser: false } })
                 .then((_msg) => {
                     logger?.debug("[Embed Fixer] Message Sent");
