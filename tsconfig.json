@@ -1,63 +1,28 @@
 {
-  "noImplicitThis": false,
   "include": [
     "./src/*.ts",
-    "./src/*.json"
+    "src/types/environment.d.ts"
   ],
   "exclude": [
     "node_modules",
-    "build",
-    "@types"
+    "build"
   ],
-  "tsc-alias": {
-    "resolveFullPaths": true
-  },
   "compilerOptions": {
-    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "module": "Node16",
+    "moduleResolution": "node16",
+    "target": "ES2015",
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "target": "ESNext",
     "lib": [
       "ESNext",
       "DOM"
     ],
-    "baseUrl": "./",
+    "baseUrl": ".",
     "outDir": "./build/",
     "typeRoots": [
-      "./nodemodules/@types",
-      "./@types"
+      "./node_modules/@types/",
+      "./src/types"
     ],
-    "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@src/*": [
-        "./src/*"
-      ],
-      "@core/*": [
-        "./src/core/*"
-      ],
-      "@config/*": [
-        "./src/config/*"
-      ],
-      "@commands/*": [
-        "./src/commands/*"
-      ],
-      "@modules/*": [
-        "./src/modules/*"
-      ],
-      "@includes/*": [
-        "./src/includes/*"
-      ],
-      "@type/*": [
-        "./@types/*"
-      ],
-      "@utils/*": [
-        "./src/utils/*"
-      ]
-    }
+    "types": [],
   }
 }

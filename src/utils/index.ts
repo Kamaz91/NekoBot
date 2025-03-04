@@ -1,6 +1,5 @@
-import InteractionBuilder from "./InteractionBuilder";
-import ModuleBuilder from "./ModuleBuilder";
-import Timer from "./Timer";
+import ModuleBuilder from "./ModuleBuilder.js";
+import Timer from "./Timer.js";
 
 function wait(timeout, callback?) {
     return new Promise<any>((resolve) => {
@@ -15,4 +14,4 @@ function errorLog(logger, text, error) {
     logger.error(JSON.stringify(error));
 }
 
-export { InteractionBuilder, ModuleBuilder, Timer, wait, errorLog };
+export { ModuleBuilder, Timer, wait, errorLog };

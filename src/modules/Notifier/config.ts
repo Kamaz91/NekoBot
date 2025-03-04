@@ -1,6 +1,6 @@
-import { NotifierChannels, NotifierUsersDM } from "@/@types/database";
-import { Database } from "@includes/database";
-import { Notifier } from "@/@types/config";
+import { NotifierChannels, NotifierUsersDM } from "../../types/database.js";
+import { Database } from "../../services/database/index.js";
+import { Notifier } from "../../types/config.js";
 
 const template: Notifier = {
     messageDelete: {

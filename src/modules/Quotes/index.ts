@@ -1,7 +1,7 @@
-import { ModuleBuilder } from "@src/utils";
-import cfg from "./config"
-import logger from "@includes/logger";
-import ModuleManager from "@core/ModuleManager";
+import { ModuleBuilder } from "../../utils/index.js";
+import cfg from "./config.js"
+import logger from "../../services/logger/index.js";
+import ModuleManager from "../../core/ModuleManager.js";
 
 const module = new ModuleBuilder();
 

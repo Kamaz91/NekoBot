@@ -1,5 +1,5 @@
-import EventsManager from "@includes/EventsManager";
-import Connection from "./Connection";
+import EventsManager from "../includes/EventsManager.class.js";
+import Connection from "./Connection.js";
 
 const EM = new EventsManager(Connection);
 

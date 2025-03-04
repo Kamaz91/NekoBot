@@ -1,10 +1,10 @@
-import EventsManager from "@core/EventsManager";
+import EventsManager from "../../core/EventsManager.js";
 import { Events } from "discord.js";
-import cfg from "./config";
-import { MessageDelete, MessageBulkDelete, MemberRemoved, VoiceStateChange } from "./notify"
-import ModuleManager from "@core/ModuleManager";
-import { ModuleBuilder } from "@src/utils";
-import logger from "@includes/logger";
+import cfg from "./config.js";
+import { MessageDelete, MessageBulkDelete, MemberRemoved, VoiceStateChange } from "./notify.js"
+import { ModuleBuilder } from "../..//utils/index.js";
+import logger from "../../services/logger/index.js";
+import ModuleManager from "../../core/ModuleManager.js";
 
 const module = new ModuleBuilder();
 

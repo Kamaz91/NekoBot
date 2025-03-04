@@ -1,39 +1,38 @@
 {
     "name": "nekobot",
-    "version": "12.0.0",
+    "version": "13.0.0",
     "description": "discord bot",
     "main": "./build/NekoBot.js",
     "type": "module",
     "dependencies": {
         "@discordjs/rest": "^1.3.0",
-        "@types/winston": "^2.4.4",
+        "@dotenvx/dotenvx": "^1.35.0",
         "axios": "^1.3.2",
         "bufferutil": "^4.0.1",
         "canvas": "^2.11.2",
         "colors": "^1.4.0",
         "console-stamp": "^3.1.0",
         "cron": "^2.1.0",
-        "discord-api-types": "^0.37.19",
         "discord.js": "^14.7.0",
         "knex": "^2.3.0",
         "lodash": "^4.17.19",
         "moment": "^2.29.4",
-        "mysql2": "^2.3.3",
+        "mysql2": "^3.12.0",
         "winston": "^3.8.2"
     },
     "scripts": {
         "lclean": "rm -rf ./build",
         "clean": "if exist ./build rmdir /q /s build",
         "build": "npm run clean && tsc --build && tsc-alias",
-        "lbuild": "npm run lclean && tsc --build && tsc-alias",
+        "lbuild": "npm run lclean && tsc --build && tsc-alias && cp .env ./build/.env",
         "buildnc": "tsc --build && tsc-alias",
         "buildrun": "npm run build && npm run start",
         "lbuildrun": "npm run lbuild && npm run start",
         "buildrun-debug": "npm run build && npm run start-debug",
-        "start-debug": "node --experimental-json-modules --inspect-brk ./build/NekoBot.js",
-        "start": "node --experimental-json-modules ./build/src/NekoBot.js",
+        "start-debug": "node --inspect-brk ./build/NekoBot.js",
+        "start": "node ./build/NekoBot.js",
         "test": "echo \"Error: no test specified\" && exit 1",
-        "register": "cd ./build/src/ && node RegisterCommands.js"
+        "register": "cd ./build && node RegisterCommands.js"
     },
     "repository": {
         "type": "git",
@@ -49,7 +48,9 @@
     },
     "homepage": "https://github.com/Kamaz91/NekoBot#readme",
     "devDependencies": {
-        "tsc-alias": "^1.8.1",
-        "typescript": "^4.9.3"
+        "@types/node": "^22.13.4",
+        "discord-api-types": "^0.37.19",
+        "tsc-alias": "^1.8.10",
+        "typescript": "^5.7.3"
     }
 }

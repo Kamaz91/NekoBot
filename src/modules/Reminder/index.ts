@@ -1,7 +1,7 @@
-import { ModuleBuilder } from "@src/utils";
-import ModuleManager from "@core/ModuleManager";
-import { StartCron } from "@modules/Reminder/cronJob"
-import logger from "@src/includes/logger";
+import { ModuleBuilder } from "../..//utils/index.js";
+import ModuleManager from "../../core/ModuleManager.js";
+import { StartCron } from "../../modules/Reminder/cronJob.js"
+import logger from "../../services/logger/index.js";
 
 const module = new ModuleBuilder();
 module.setExecute(() => {

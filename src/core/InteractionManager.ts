@@ -1,5 +1,5 @@
-import InteractionManager from "@includes/InteractionManager";
-import Connection from "./Connection";
+import InteractionManager from "../includes/InteractionManager.class.js";
+import Connection from "./Connection.js";
 
 const IM = new InteractionManager(Connection);
 

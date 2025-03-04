@@ -1,4 +1,4 @@
-import ModuleManager from "@includes/ModuleManager";
+import ModuleManager from "../includes/ModuleManager.class.js";
 
 const MM = new ModuleManager();
 

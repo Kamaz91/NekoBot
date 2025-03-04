@@ -1,0 +1,6 @@
+class ConfigModule {
+
+    constructor(){
+        
+    }
+}

@@ -1,6 +1,6 @@
-import { MessageCounterSettings, MessageCounterChannelList } from "@/@types/database";
-import { Database } from "@includes/database";
-import { MessageCounter } from "@/@types/config";
+import { MessageCounterSettings, MessageCounterChannelList } from "../../types/database.js";
+import { Database } from "../../services/database/index.js";
+import { MessageCounter } from "../../types/config.js";
 
 const template = {
     enabled: false,

@@ -1,8 +1,8 @@
 import { Message } from "discord.js";
-import config from "@core/Config";
+import config from "../../core/Config.js";
 import moment from "moment";
-import { Database } from "@includes/database";
-import logger from "@includes/logger";
+import { Database } from "../../services/database/index.js";
+import logger from "../../services/logger/index.js";
 
 export function processMessage(Message: Message) {
     var User = Message.author;

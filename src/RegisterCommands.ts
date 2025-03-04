@@ -1,5 +1,5 @@
 import { ApplicationCommandType, ContextMenuCommandBuilder, REST, Routes, SlashCommandBuilder } from 'discord.js';
-import { Database, Disconnect } from '@includes/database';
+import { Database, Disconnect } from './services/database/index.js';
 
 const commandsDefs = {
     Ping: new SlashCommandBuilder()
@@ -43,17 +43,6 @@ const commandsDefs = {
                 .setDescription('The users you want to see avatars, max 10. Use mentions with @')
                 // Ensure the text will fit in an embed description, if the user chooses that option
                 .setMaxLength(2000)
-        })
-        .toJSON(),
-    Rock: new SlashCommandBuilder()
-        .setName("rock")
-        .setDescription('Rock Paper Scisors')
-        .setDMPermission(false)
-        .addUserOption((Option) => {
-            return Option
-                .setName('user')
-                .setDescription('The user you want to battle!')
-                .setRequired(true);
         })
         .toJSON(),
     Reminder: new SlashCommandBuilder()

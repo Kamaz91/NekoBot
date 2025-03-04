@@ -1,10 +1,10 @@
-import logger from '@includes/logger';
+import "./core/env.js";
+import logger from './services/logger/index.js';
 
 logger.info('Starting...');
 logger.info('*****************************');
-logger.info('*       NekoBot v12.0       *');
+logger.info('*      NekoBot v13.0.0      *');
 logger.info('*****************************');
 
-import { login } from '@core/Bot';
-
+import { login } from './core/Bot.js';
 login();

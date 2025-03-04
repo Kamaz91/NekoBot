@@ -1,4 +1,4 @@
-import { Database } from "@includes/database";
+import { Database } from "../../services/database/index.js";
 
 const template = {
     enabled: false

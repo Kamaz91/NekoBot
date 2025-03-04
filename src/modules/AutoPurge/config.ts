@@ -1,6 +1,6 @@
-import { AutoPurgeSettings, ModuleSettings } from "@/@types/database";
-import { Database } from "@includes/database";
-import { AutoPurge } from "@/@types/config";
+import { AutoPurgeSettings, ModuleSettings } from "../../types/database.js";
+import { Database } from "../../services/database/index.js";
+import { AutoPurge } from "../../types/config.js";
 
 const Template = {
     enabled: false,

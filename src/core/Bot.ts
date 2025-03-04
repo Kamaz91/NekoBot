@@ -1,15 +1,17 @@
-import logger from "@includes/logger";
-import Client from "@core/Connection";
-import { Database, Disconnect } from '@includes/database';
+import Client from "./Connection.js";
 
-import ModuleManager from "@core/ModuleManager";
-import "@core/EventsManager";
-import "@core/InteractionManager"
+import logger from "../services/logger/index.js";
+import { Database, Disconnect } from '../services/database/index.js';
 
-import Config from "@core/Config";
+import process from "process"
+import ModuleManager from "./ModuleManager.js";
+import "./EventsManager.js";
+import "./InteractionManager.js"
 
-import "@src/EnabledModules";
-import "@src/EnabledCommands";
+import Config from "./Config.js";
+
+import "../EnabledModules.js";
+import "../EnabledCommands.js";
 
 Client.on('ready', () => {
     ModuleManager.setConfigReadyListener(Config);
@@ -35,6 +37,7 @@ process.on("SIGINT", () => {
     logger.info("Caught SIGINT.");
     Disconnect();
     Client.destroy();
+    process.exit(1);
 });
 /*client.on('message', message => {
     var guildchan = '';

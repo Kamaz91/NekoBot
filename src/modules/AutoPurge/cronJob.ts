@@ -1,15 +1,18 @@
 import { CronJob } from "cron";
-import Config from "@core/Config";
-import Client from "@core/Connection";
-import { Database } from "@includes/database";
+import Config from "../../core/Config.js";
+import Client from "../../core/Connection.js";
+import { Database } from "../../services/database/index.js";
 import moment from "moment";
-import { AutoPurgeMessage } from "@/@types/database";
-import logger from "@includes/logger";
+import { AutoPurgeMessage } from "../../types/database.js";
+import logger from "../../services/logger/index.js";
 
 export function StartCron() {
     const autoPurge = new CronJob('0 0 */1 * * *', CronTask);
     logger.info("AutoPurge: channels job started");
     autoPurge.start();
+    process.on("SIGINT", () => {
+        autoPurge.stop();
+    });
 }
 
 async function CronTask() {
@@ -19,7 +22,7 @@ async function CronTask() {
 }
 
 async function prepareData() {
-    let GuildsKeys = Array.from((await Client.guilds.fetch()).keys());
+    let GuildsKeys: string[] = Array.from((await Client.guilds.fetch()).keys());
     var query = Database()('auto_purge_messages');
 
     for (const GuildId of GuildsKeys) {

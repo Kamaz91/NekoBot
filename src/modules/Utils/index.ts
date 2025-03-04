@@ -1,2 +1,1 @@
-//import "./linkChanger";
-import "./linkChanger";
+import "./linkChanger.js";

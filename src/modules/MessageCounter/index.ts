@@ -1,10 +1,10 @@
-import cfg from "./config";
-import EventsManager from "@core/EventsManager";
+import cfg from "./config.js";
+import EventsManager from "../../core/EventsManager.js";
 import { Events } from "discord.js";
-import { processMessage } from "./counter";
-import { ModuleBuilder } from "@utils/index"
-import logger from "@includes/logger";
-import ModuleManager from "@core/ModuleManager";
+import { processMessage } from "./counter.js";
+import { ModuleBuilder } from "../../utils/index.js"
+import logger from "../../services/logger/index.js";
+import ModuleManager from "../../core/ModuleManager.js";
 
 const module = new ModuleBuilder();
 

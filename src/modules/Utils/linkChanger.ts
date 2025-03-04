@@ -1,16 +1,16 @@
-import { LinkChangerSettings } from "@/@types/database";
-import { LinkChanger } from "@/@types/config";
+import { LinkChangerSettings } from "../../types/database.js";
+import { LinkChanger } from "../../types/config.js";
 import { Embed, Events, Message } from "discord.js";
 
-import { Client } from "@core/Bot";
-import ModuleManager from "@core/ModuleManager";
-import Config from "@core/Config";
-import EventsManager from "@core/EventsManager";
+import { Client } from "../../core/Bot.js";
+import ModuleManager from "../../core/ModuleManager.js";
+import Config from "../../core/Config.js";
+import EventsManager from "../../core/EventsManager.js";
 
-import logger from "@includes/logger";
-import { Database } from "@includes/database";
+import logger from "../../services/logger/index.js";
+import { Database } from "../../services/database/index.js";
 
-import { ModuleBuilder, wait } from "@utils/index"
+import { ModuleBuilder, wait } from "../../utils/index.js"
 
 type Url = {
     type: "delete" | "reply";
@@ -100,14 +100,13 @@ function processText(Message: Message, url: Url): void {
     if (detectURLToReplace(Message.content, data) && url.bots && Message.author.id !== Client.user.id) {
         let replacedText = replaceDomain(Message.content, data);
         replacedText = url.removeText ? extractURLsFromString(replacedText) : replacedText;
+        if (!Message.channel.isSendable()) {
+            return;
+        }
 
         if (url.type == "reply") {
             Message.reply({ content: replacedText, allowedMentions: { repliedUser: false } })
                 .catch((e) => {
-                    console.log("LinkChanger: Original Message:");
-                    console.log(Message.content);
-                    console.log("replacedText:");
-                    console.log(replacedText);
                     logger.error("LinkChanger: Error while repling to message")
                     logger.error(JSON.stringify(e))
                 });
@@ -115,10 +114,6 @@ function processText(Message: Message, url: Url): void {
         if (url.type == "delete") {
             Message.channel.send({ content: replacedText, allowedMentions: { repliedUser: false } })
                 .catch((e) => {
-                    console.log("LinkChanger: Original Message:");
-                    console.log(Message.content);
-                    console.log("replacedText:");
-                    console.log(replacedText);
                     logger.error("LinkChanger: Error while sending message to channel")
                     logger.error(JSON.stringify(e))
                 });

@@ -1,11 +1,15 @@
 import { CronJob } from "cron";
-import { Client } from "@src/core/Bot";
-import { Database } from "@includes/database";
-import logger from "@includes/logger";
+import { Client } from "../../core/Bot.js";
+import { Database } from "../../services/database/index.js";
+import logger from "../../services/logger/index.js";
 import moment from "moment";
 import { EmbedBuilder } from "discord.js";
 
 var reminderLoop = new CronJob('0 */1 * * * *', ReminderJob);
+
+process.on("SIGINT", () => {
+    reminderLoop.stop();
+});
 
 export function StartCron() {
     logger.info("Reminder: cronJob started");

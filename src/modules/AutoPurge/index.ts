@@ -1,12 +1,12 @@
-import cfg from "./config";
-import EventsManager from "@core/EventsManager";
-import ModuleManager from "@core/ModuleManager";
-import config from "@core/Config";
+import cfg from "./config.js";
+import EventsManager from "../../core/EventsManager.js";
+import ModuleManager from "../../core/ModuleManager.js";
+import config from "../../core/Config.js";
 import { Events, Message } from "discord.js";
-import { Database } from "@includes/database";
+import { Database } from "../../services/database/index.js";
 import moment from "moment";
-import { StartCron } from "./cronJob";
-import logger from "@includes/logger";
+import { StartCron } from "./cronJob.js";
+import logger from "../../services/logger/index.js";
 
 ModuleManager.addModule("AutoPurge", cfg, execute);
 
