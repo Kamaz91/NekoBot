@@ -21,8 +21,8 @@ export async function mainCommand(interaction: ChatInputCommandInteraction) {
     await replied.edit({
         embeds: [
             {
-                title: "Pong!",
-                description: `🏓 Latency is ${ping}ms.`,
+                title: "Ping!",
+                description: `Interaction created at: ${new Date(interactionCreatedAt).toISOString()}\nPing:${ping}ms\n`,
                 color: 0x00ff00
             }
         ]
