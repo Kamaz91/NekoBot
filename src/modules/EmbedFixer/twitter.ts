@@ -16,7 +16,7 @@ async function getFxtwitterdata(pathName: string): Promise<fxTwitterApiResponse 
     return request;
 }
 
-function getVideos(videos: fxTwitterApiMediaVideo[]): string[] {
+function getBestQualityVideos(videos: fxTwitterApiMediaVideo[]): string[] {
     let videosUrl: string[] = [];
     for (const video of videos) {
         // get the highest bitrate video
@@ -27,11 +27,13 @@ function getVideos(videos: fxTwitterApiMediaVideo[]): string[] {
 }
 
 function buildReply(twitterData: fxTwitterApiResponse): EmbedFixerReply {
+    let videoUrls: string[] = twitterData.tweet.media?.videos ? getBestQualityVideos(twitterData.tweet.media.videos) : [];
+
     let reply: EmbedFixerReply = {
-        content: twitterData.tweet.media?.videos ? getVideos(twitterData.tweet.media.videos).join("\n") : "",
+        content: videoUrls.length ? videoUrls.join("\n") : "",
         embed: new EmbedBuilder()
             .setTitle(twitterData.tweet.author.name)
-            .setDescription(twitterData.tweet.text.length > 0 ? twitterData.tweet.text : "No text")
+            .setDescription(twitterData.tweet.text.length > 0 ? twitterData.tweet.text : ". . .")
             .setURL(twitterData.tweet.url)
             .setTimestamp(new Date(twitterData.tweet.created_at))
             .setAuthor({ name: twitterData.tweet.author.name, iconURL: twitterData.tweet.author.avatar_url })
