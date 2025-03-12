@@ -1,3 +1,4 @@
+import moment from 'moment';
 
 module.exports = (Connection) => {
     return {
