@@ -12,7 +12,7 @@ export async function mainCommand(interaction: ChatInputCommandInteraction) {
         let avatars = "";
         let i = 0;
 
-        for (const user of getUsersFromMention(Users.value)) {
+        for (const user of getUsersFromMention(Users)) {
             i++;
             avatars += user.avatarURL(Options) + "\n";
 

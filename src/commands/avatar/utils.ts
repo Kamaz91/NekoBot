@@ -1,9 +1,9 @@
-import { User } from "discord.js";
+import { CacheType, CommandInteractionOption, User } from "discord.js";
 import { Client } from "../../core/Bot.js";
 
-export function getUsersFromMention(mention) {
+export function getUsersFromMention(mention: CommandInteractionOption<CacheType>): User[] {
     // The id is the first and only match found by the RegEx.
-    const matches: string[] = mention.match(/<@?(\d+)>/g);
+    const matches: string[] = mention.value.toString().match(/<@?(\d+)>/g);
 
     // If supplied variable was not a mention, matches will be null instead of an array.
     if (!matches) return [];
