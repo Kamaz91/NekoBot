@@ -1,11 +1,11 @@
 import { EmbedBuilder } from "discord.js";
 import logger from "../../services/logger/index.js";
-import type { EmbedFixerReply, fxTwitterApiMediaVideo, fxTwitterApiResponse } from "../../types/embedFixer.js";
+import type { EmbedFixerReply, fxTwitterApi } from "../../types/embedFixer.js";
 import axios, { AxiosResponse } from "axios";
 
-async function getFxtwitterdata(pathName: string): Promise<fxTwitterApiResponse | undefined> {
+async function getFxtwitterdata(pathName: string): Promise<fxTwitterApi.Response | undefined> {
     let request = await axios.get(`https://api.fxtwitter.com${pathName}`, {})
-        .then((response: AxiosResponse<fxTwitterApiResponse>) => {
+        .then((response: AxiosResponse<fxTwitterApi.Response>) => {
             return response.data;
         }).catch((error) => {
             logger?.error("[Embed Fixer] Error while fetching data from fxtwitter api")
@@ -16,7 +16,7 @@ async function getFxtwitterdata(pathName: string): Promise<fxTwitterApiResponse 
     return request;
 }
 
-function getBestQualityVideos(videos: fxTwitterApiMediaVideo[]): string[] {
+function getBestQualityVideos(videos: fxTwitterApi.MediaVideo[]): string[] {
     let videosUrl: string[] = [];
     for (const video of videos) {
         // get the highest bitrate video
@@ -26,7 +26,8 @@ function getBestQualityVideos(videos: fxTwitterApiMediaVideo[]): string[] {
     return videosUrl;
 }
 
-function buildReply(twitterData: fxTwitterApiResponse): EmbedFixerReply {
+function buildReply(twitterData: fxTwitterApi.Response): EmbedFixerReply {
+    // get the best quality videos
     let videoUrls: string[] = twitterData.tweet.media?.videos ? getBestQualityVideos(twitterData.tweet.media.videos) : [];
 
     let reply: EmbedFixerReply = {
