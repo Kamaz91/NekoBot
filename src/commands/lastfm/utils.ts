@@ -11,18 +11,18 @@ export async function processImage(url: string, artistName: string, albumName: s
 
     context.quality = "best";
 
-    context.fillStyle = "#000000";
-    context.fillRect(0, 0, width, height);
-
     if (url) {
         let imgdata = await loadImage(url);
         context.drawImage(imgdata, 0, 0);
+    } else {
+        context.fillStyle = "#000000";
+        context.fillRect(0, 0, width, height);
     }
 
     context.font = 'bold 13pt Courier';
     context.shadowColor = "#000";
-    context.shadowBlur = 1;
-    context.fillStyle = '#FAFAFA';
+    context.shadowBlur = 3;
+    context.fillStyle = '#fafafa';
     context.fillText(imgText, 10, 20);
 
     return canvas.toBuffer('image/png');

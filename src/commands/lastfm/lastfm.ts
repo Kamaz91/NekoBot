@@ -35,7 +35,7 @@ export async function print3x3Grid(interaction?: ChatInputCommandInteraction, id
     }
     interaction?.deferReply().catch();
     const filteredAlbumCharts = response.weeklyalbumchart.album.filter((_el, index, _arr) => index < 9);
-    let imageArray = new Array();
+    let imageArray:Promise<Buffer>[] = new Array();
     for (const albumChart of filteredAlbumCharts) {
         let albumInfo = await lastfmapi.getAlbumInfo(albumChart.artist["#text"], albumChart.name);
         if (lastfmapi.isError(albumInfo)) {
@@ -44,7 +44,7 @@ export async function print3x3Grid(interaction?: ChatInputCommandInteraction, id
             break;
         }
         let albumImage = albumInfo.album.image.find((el => el.size == "extralarge"));
-        imageArray.push(processImage(albumImage["#text"], albumChart.artist["#text"], albumInfo.album.name, albumChart.playcount).catch(err => errorLog(logger, "LastFM: getBuffer error", err)));
+        imageArray.push(processImage(albumImage["#text"], albumChart.artist["#text"], albumInfo.album.name, albumChart.playcount));
     }
     let images = await Promise.all(imageArray).catch(err => errorLog(logger, "LastFM: getBuffer error", err));
     if (images) {
