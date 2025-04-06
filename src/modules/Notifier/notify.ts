@@ -1,91 +1,29 @@
 import { Client } from "../../core/Bot.js";
 import Config from "../../core/Config.js";
-import { EmbedBuilder, Message, GuildChannel, Collection, VoiceState, GuildMember, ColorResolvable } from "discord.js";
+import { EmbedBuilder, Message, GuildChannel, Collection, VoiceState, GuildMember, ColorResolvable, AttachmentBuilder, Attachment, Embed } from "discord.js";
 import Logger from "../../services/logger/index.js";
 import moment from "moment";
 
+import { downloadFile } from "../../utils/imageDownload.js";
+
+const AllowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp", "image/gif", "image/bmp", "image/tiff", "text/plain", "text/plain; charset=utf-8"];
+
 //! Pamiętać o dodaniu powiadomień dla użytkowników na DM dla każdego typu 
-export function MessageDelete(Message: Message) {
+export async function MessageDeleteNotice(Message: Message) {
     if (!Config.hasGuild(Message.guildId)) {
         return;
     }
 
-    let GuildData = Config.getGuildConfig(Message.guildId);
-    let LogsChannel = Client.channels.resolve(GuildData.Notifier.messageDelete.channelId);
-
-    try {
-        if (!LogsChannel.isTextBased()) {
-            return;
-        }
-
-        let embed = new EmbedBuilder()
-            .setAuthor({ name: Message.member.displayName + " [" + Message.author.username + " #" + Message.author.discriminator + "]", iconURL: Message.author.displayAvatarURL() })
-            .setDescription("**Deleted in **<#" + Message.channel.id + ">")
-            .setColor([214, 44, 38])
-            .setTimestamp(Message.createdAt)
-            .setFooter({ text: "Message id: " + Message.id });
-
-        if (Message.content.length > 0) {
-            embed.addFields({ name: 'Message:', value: Message.content });
-        }
-
-        if (Message.attachments.size > 0) {
-            Message.attachments.forEach((attachment) => {
-                embed.setImage(attachment.url)
-                embed.addFields({ name: attachment.contentType, value: attachment.url });
-            });
-        }
-        if (LogsChannel.isSendable()) {
-            LogsChannel.send({ embeds: [embed] })
-                .catch(e => {
-                    Logger.error("Notifier: Message Delete notify send to channel error");
-                    Logger.error(JSON.stringify(e));
-                });
-        }
-
-    } catch (e) {
-        Logger.error("Notifier: Message Delete notify error");
-        Logger.error(JSON.stringify(e));
-    };
+    processAndSendMessage(Message, false);
 }
 
-export function MessageBulkDelete(Messages: Collection<string, Message>, Channel: GuildChannel) {
+export async function MessageBulkDeleteNotice(Messages: Collection<string, Message>, Channel: GuildChannel) {
     if (!Config.hasGuild(Channel.guildId)) {
         return;
     }
 
-    let GuildData = Config.getGuildConfig(Channel.guildId);
-    let LogsChannel = Client.channels.resolve(GuildData.Notifier.messageDelete.channelId);
-
-    if (!LogsChannel.isTextBased()) {
-        return;
-    }
-
-    try {
-        let embed = new EmbedBuilder()
-            .setTitle("**Deleted in **<#" + Channel.id + ">")
-            .setColor([214, 44, 38]);
-        for (const [, Message] of Messages) {
-            let author = Message.member.displayName + " [" + Message.author.username + " #" + Message.author.discriminator + "]";
-            if (Message.content.length > 0) {
-                embed.addFields({ name: author, value: Message.content });
-            }
-            if (Message.attachments.size > 0) {
-                Message.attachments.forEach((attachment) => {
-                    embed.setImage(attachment.url)
-                    embed.addFields({ name: attachment.contentType, value: attachment.url });
-                });
-            }
-        }
-        if (LogsChannel.isSendable()) {
-            LogsChannel.send({ embeds: [embed] })
-                .catch(e => {
-                    Logger.error("Notifier: Message Bulk Delete notify send to channel error");
-                    Logger.error(JSON.stringify(e));
-                });
-        }
-    } catch (e) {
-        Logger.error(e);
+    for (const [, Message] of Messages) {
+        processAndSendMessage(Message, true);
     }
 }
 
@@ -202,4 +140,88 @@ export function MemberRemoved(Member: GuildMember) {
                 Logger.error(JSON.stringify(e));
             });
     }
+}
+
+async function processAndSendMessage(Message: Message, isBulk: boolean) {
+    let attachments: AttachmentBuilder[] = [];
+    let embeds: Embed[] = [];
+
+    let GuildData = Config.getGuildConfig(Message.guildId);
+    let LogsChannel = Client.channels.resolve(GuildData.Notifier.messageDelete.channelId);
+
+    if (!LogsChannel.isTextBased()) {
+        return;
+    }
+
+    Logger.debug("[Notifier] attachments: " + Message.attachments.size);
+    Logger.debug("[Notifier] content: " + Message.content);
+    Logger.debug("[Notifier] isBulk: " + isBulk);
+    Logger.debug("[Notifier] channel: " + Message.channel.id);
+    Logger.debug("[Notifier] guild: " + Message.guildId);
+    Logger.debug("[Notifier] author: " + Message.author.username + "#" + Message.author.discriminator);
+    Logger.debug("[Notifier] type: " + Message.type);
+
+    if (Message.attachments.size > 0) {
+        attachments = await composeAttachments(Message.attachments);
+    }
+
+    let embed = new EmbedBuilder()
+        .setAuthor({ name: Message.member.displayName + " [" + Message.author.username + " #" + Message.author.discriminator + "]", iconURL: Message.author.displayAvatarURL() })
+        .setDescription(`**${isBulk ? "Bulk " : ""}Deleted in** <#${Message.channel.id}>`)
+        .setColor([214, 44, 38])
+        .setTimestamp(Message.createdAt)
+        .setFooter({ text: "User Id: " + Message.author.id })
+
+    if (Message.attachments.size > 0) {
+        let i = 1;
+        embed.addFields({ name: 'Attachments:', value: Message.attachments.map((el) => `${i++}: ` + el.contentType).join("\n") });
+    }
+
+    if (Message.embeds.length > 0) {
+        embed.addFields({ name: 'Embeds count:', value: Message.embeds.length.toString() });
+    }
+
+    if (Message.content.length > 0) {
+        embed.addFields({ name: 'Message:', value: Message.content });
+    }
+
+    if (LogsChannel.isSendable()) {
+        LogsChannel.send({ embeds: [embed, ...Message.embeds], files: attachments })
+            .catch(e => {
+                Logger.error("Notifier: Message Delete notify send to channel error");
+                Logger.error(JSON.stringify(e));
+            });
+    }
+}
+
+async function composeAttachments(attachments: Collection<string, Attachment>): Promise<AttachmentBuilder[]> {
+    let filesDownloadTasks: Promise<{ data: Buffer, name: string }>[] = [];
+    let files: AttachmentBuilder[] = [];
+
+    for (const [id, attachment] of attachments) {
+        Logger.debug("[Notifier] Attachment id: " + id);
+        Logger.debug("[Notifier] Attachment name: " + attachment.name);
+        Logger.debug("[Notifier] Attachment type: " + attachment.contentType);
+
+        if (AllowedTypes.includes(attachment.contentType)) {
+            let task = new Promise<{ data: Buffer, name: string }>(async (resolve, reject) => {
+                try {
+                    let file = await downloadFile(attachment.url);
+                    resolve({ name: attachment.name, data: file });
+                } catch (e) {
+                    reject(e);
+                }
+            });
+            filesDownloadTasks.push(task);
+        }
+    }
+
+    let images = await Promise.all(filesDownloadTasks);
+    if (images) {
+        images.forEach((imageData) => {
+            files.push(new AttachmentBuilder(imageData.data, { name: imageData.name }));
+        });
+    }
+
+    return files;
 }
