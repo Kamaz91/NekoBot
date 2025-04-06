@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction } from "discord.js";
 
 export async function mainCommand(interaction: ChatInputCommandInteraction) {
+    let client = interaction.client;
     const interactionCreatedAt = interaction.createdAt.getTime();
     const botInteractionInterception = new Date().getTime();
     const ping = botInteractionInterception - interactionCreatedAt;
@@ -18,11 +19,11 @@ export async function mainCommand(interaction: ChatInputCommandInteraction) {
     const botInteractionInterception2 = new Date().getTime();
     const ping2 = botInteractionInterception2 - replied.createdAt.getTime();
 
-    await replied.edit({
+    await interaction.followUp({
         embeds: [
             {
-                title: "Ping!",
-                description: `Interaction created at: ${new Date(interactionCreatedAt).toISOString()}\nPing:${ping}ms\n`,
+                title: "Pong!",
+                description: `Interaction created at: ${new Date(interactionCreatedAt).toDateString()}\nPing:${ping}ms\n`,
                 color: 0x00ff00
             }
         ]
