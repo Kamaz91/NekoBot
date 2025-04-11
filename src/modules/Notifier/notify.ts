@@ -162,7 +162,12 @@ async function processAndSendMessage(Message: Message, isBulk: boolean) {
     Logger.debug("[Notifier] type: " + Message.type);
 
     if (Message.attachments.size > 0) {
-        attachments = await composeAttachments(Message.attachments);
+        attachments = await composeAttachments(Message.attachments)
+            .catch((err) => {
+                Logger.error("[Notifier] error while composing attachments");
+                Logger.error(err);
+                return [];
+            });
     }
 
     let embed = new EmbedBuilder()
@@ -204,24 +209,21 @@ async function composeAttachments(attachments: Collection<string, Attachment>): 
         Logger.debug("[Notifier] Attachment type: " + attachment.contentType);
 
         if (AllowedTypes.includes(attachment.contentType)) {
-            let task = new Promise<{ data: Buffer, name: string }>(async (resolve, reject) => {
-                try {
-                    let file = await downloadFile(attachment.url);
-                    resolve({ name: attachment.name, data: file });
-                } catch (e) {
-                    reject(e);
-                }
-            });
+            let task = (async () => {
+                return { name: attachment.name, data: await downloadFile(attachment.url) };
+            })();
             filesDownloadTasks.push(task);
         }
     }
 
-    let images = await Promise.all(filesDownloadTasks);
-    if (images) {
-        images.forEach((imageData) => {
-            files.push(new AttachmentBuilder(imageData.data, { name: imageData.name }));
-        });
-    }
+    let images = await Promise.allSettled(filesDownloadTasks);
+    images.forEach((result) => {
+        if (result.status === "fulfilled") {
+            files.push(new AttachmentBuilder(result.value.data, { name: result.value.name }));
+        } else {
+            Logger.warn("[Notifier] Failed to download attachment: " + result.reason);
+        }
+    });
 
     return files;
 }
