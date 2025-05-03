@@ -108,7 +108,68 @@ const commandsDefs = {
                         .setName('username')
                         .setDescription('The lastFM username you want albums')
                         .setRequired(true)
-                ))
+                )
+        )
+        .toJSON(),
+    MessageManagment: new SlashCommandBuilder()
+        .setName("purge")
+        .setDescription('Delete messages from channel')
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .setContexts(0)
+        .addSubcommand((Option) =>
+            Option
+                .setName("cache-check")
+                .setDescription("Check messages cache size")
+        )
+        .addSubcommand((Option) =>
+            Option
+                .setName("any")
+                .setDescription("Delete messages with filters")
+                .addNumberOption((Option) =>
+                    Option
+                        .setName("limit")
+                        .setDescription("Limit messages to delete")
+                        .setMinValue(1)
+                        .setMaxValue(100)
+                        .setRequired(true)
+                )
+        )
+        .addSubcommand((Option) =>
+            Option
+                .setName("filter")
+                .setDescription("Delete messages with filter")
+                .addStringOption((Option) =>
+                    Option
+                        .setName("filter")
+                        .setDescription("Filter messages")
+                        .setRequired(true)
+                        .addChoices(
+                            { name: "images", value: "images" },
+                            { name: "audio", value: "audio" },
+                            { name: "video", value: "video" },
+                            { name: "text", value: "text" },
+                            { name: "mentions-users", value: "mentions-users" },
+                            { name: "mentions-roles", value: "mentions-roles" },
+                            { name: "attachments", value: "attachments" },
+                            { name: "files", value: "files" },
+                            { name: "embeds", value: "embeds" }
+                        )
+                )
+                .addNumberOption((Option) =>
+                    Option
+                        .setName("limit")
+                        .setDescription("Limit messages to delete")
+                        .setMinValue(1)
+                        .setMaxValue(100)
+                        .setRequired(true)
+                )
+                .addUserOption((Option) =>
+                    Option
+                        .setName("user")
+                        .setDescription("User to filter messages")
+                        .setRequired(false)
+                )
+        )
         .toJSON()
 };
 (async () => {

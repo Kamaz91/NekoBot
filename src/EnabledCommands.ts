@@ -7,7 +7,9 @@ import reminderCommand from "./commands/reminder/index.js";
 import lastFM from "./commands/lastfm/index.js";
 import quoteCommands from "./commands/quotes/index.js";
 
-let Array = [...quoteCommands, avatarCommand, lastFM, reminderCommand, pingCommand];
+import moderationCommands from "./commands/moderation/index.js";
+
+let Array = [...quoteCommands, avatarCommand, lastFM, reminderCommand, pingCommand, ...moderationCommands];
 
 for (const Command of Array) {
     InteractionManager.addInteraction(Command);
