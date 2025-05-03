@@ -9,6 +9,8 @@ declare global {
             DB_PORT: string;
             DB_CLIENT: string
 
+            CLIENT_ID: string;
+
             // API keys
             DISCORD_KEY: string;
             LASTFM_KEY: string;
