@@ -19,7 +19,7 @@ export async function processImage(url: string, artistName: string, albumName: s
         context.fillRect(0, 0, width, height);
     }
 
-    context.font = 'bold 13pt Courier';
+    context.font = 'bold 13px Courier';
     context.shadowColor = "#000";
     context.shadowBlur = 3;
     context.fillStyle = '#fafafa';
