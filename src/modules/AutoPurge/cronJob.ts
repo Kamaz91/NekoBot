@@ -16,9 +16,15 @@ export function StartCron() {
 }
 
 async function CronTask() {
-    let Data = await prepareData();
-    let Messages = PrepareMessages(Data);
-    deleteMessages(Messages);
+    try {
+        let Data = await prepareData();
+        let Messages = PrepareMessages(Data);
+
+        deleteMessages(Messages);
+    } catch (error) {
+        logger.error("AutoPurge: Error while executing cron task");
+        logger.error(error);
+    }
 }
 
 async function prepareData() {
@@ -26,11 +32,11 @@ async function prepareData() {
     var query = Database()('auto_purge_messages');
 
     for (const GuildId of GuildsKeys) {
-        let AutoPurgeSettings = Config.getGuildConfig(GuildId).AutoPurge;
-        if (!AutoPurgeSettings.enabled) {
+        let Settings = Config.getGuildConfig(GuildId);
+        if (Settings && !Settings.AutoPurge.enabled) {
             break;
         }
-        for (const [ChannelId, channel] of AutoPurgeSettings.channels) {
+        for (const [ChannelId, channel] of Settings.AutoPurge.channels) {
             let timeDiff = moment().subtract(channel.older_than, 'h').valueOf();
 
             query.orWhere(function () {

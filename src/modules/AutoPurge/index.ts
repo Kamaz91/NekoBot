@@ -23,10 +23,10 @@ function processMessage(Message: Message) {
 
     var GuildId = Message.guildId;
     var ChannelId = Message.channelId;
-    var GuildData = config.getGuildConfig(GuildId).AutoPurge;
+    var GuildData = config.getGuildConfig(GuildId)?.AutoPurge;
 
     // If module is enabled and channel is set
-    if (GuildData.channels.has(ChannelId) && GuildData.enabled) {
+    if (GuildData && GuildData.channels.has(ChannelId) && GuildData.enabled) {
         insertMessage(GuildId, ChannelId, Message.id);
     }
 }
