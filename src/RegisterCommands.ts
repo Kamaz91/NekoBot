@@ -10,13 +10,13 @@ const commandsDefs = {
     Quotes: [
         new ContextMenuCommandBuilder()
             .setName("quote-create")
-            .setDMPermission(false)
+            .setContexts(0)
             .setType(ApplicationCommandType.Message)
             .toJSON(),
         new SlashCommandBuilder()
             .setName("quote")
             .setDescription("Quotes")
-            .setDMPermission(false)
+            .setContexts(0)
             .addSubcommand((Option) =>
                 Option
                     .setName("show")
@@ -37,7 +37,7 @@ const commandsDefs = {
     Avatar: new SlashCommandBuilder()
         .setName("avatar")
         .setDescription('Show user avatar image')
-        .setDMPermission(false)
+        .setContexts(0)
         .addStringOption((option) => {
             return option
                 .setName('users')
@@ -49,7 +49,7 @@ const commandsDefs = {
     Reminder: new SlashCommandBuilder()
         .setName("reminder")
         .setDescription('Set Remider')
-        .setDMPermission(true)
+        .setContexts(0)
         .addNumberOption((Option) =>
             Option
                 .setName('year')
@@ -98,7 +98,7 @@ const commandsDefs = {
     LastFM: new SlashCommandBuilder()
         .setName("lastfm")
         .setDescription('lastfm api')
-        .setDMPermission(true)
+        .setContexts(0)
         .addSubcommand((Option) =>
             Option
                 .setName("3x3")
