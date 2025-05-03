@@ -1,5 +1,6 @@
-import { ApplicationCommandType, ContextMenuCommandBuilder, REST, Routes, SlashCommandBuilder } from 'discord.js';
-import { Database, Disconnect } from './services/database/index.js';
+import { ApplicationCommandType, ContextMenuCommandBuilder, REST, Routes, SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+import dotenv from "@dotenvx/dotenvx";
+dotenv.config();
 
 const commandsDefs = {
     Ping: new SlashCommandBuilder()
@@ -111,9 +112,8 @@ const commandsDefs = {
         .toJSON()
 };
 (async () => {
-    const Tokens = await GetTokens();
 
-    const rest = new REST({ version: '10' }).setToken(Tokens.discord.token);
+    const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_KEY);
     var commands = new Array();
 
     for (const [, command] of Object.entries(commandsDefs)) {
@@ -132,21 +132,12 @@ const commandsDefs = {
     try {
         console.log('Started refreshing application (/) commands.');
         // Register Global
-        await rest.put(Routes.applicationCommands(Tokens.clientId.token), { body: commands });
+        await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
         console.log('Successfully reloaded application (/) commands.');
     } catch (error) {
         console.error(error);
     }
-    Disconnect();
 })();
-
-async function GetTokens() {
-    return {
-        discord: await Database().from("api_tokens").select("*").where({ token_type: "discord" }).first(),
-        clientId: await Database().from("api_tokens").select("*").where({ token_type: "DiscordClientId" }).first()
-    }
-}
-
 
 /**
 // Register Guild Command
