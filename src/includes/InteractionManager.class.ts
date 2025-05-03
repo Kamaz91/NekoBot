@@ -74,6 +74,11 @@ export default class InteractionManager extends EventEmitter {
     }
 
     public sendInteractionNotExecutable(Interaction: ManagerInteractionTypes) {
+        // Check if the interaction is already registered to prevent sending a message to the user
+        // that the interaction is not executable
+        if (!this.Interactions.has(this.extractCommandName(this.getInteractionName(Interaction)).name)) {
+            return;
+        }
         if (Interaction.isRepliable()) {
             Interaction.reply({ content: "Sorry This Interaction is not avaible or outdated", ephemeral: true })
                 .catch((e) => {
