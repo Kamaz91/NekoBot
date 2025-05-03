@@ -3,7 +3,7 @@ import { embedBuildFields, isInteractionCustomIdValid } from "../utility.js";
 import InteractionManager from "../../../core/InteractionManager.js";
 import Store from "../../../store/quotes.js";
 
-export function changeTitle(Interaction: ModalSubmitInteraction, id?: string) {
+export async function changeTitle(Interaction: ModalSubmitInteraction, id?: string) {
     if (!isInteractionCustomIdValid(id)) {
         InteractionManager.sendInteractionNotExecutable(Interaction);
         return;

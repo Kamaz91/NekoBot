@@ -19,7 +19,7 @@ export default [
         .setCheckIfEnabled("Quotes"),
 
     new InteractionObject<ButtonInteraction>("quote:delete-button")
-        .setExecutable((interaction: ButtonInteraction, id?: Snowflake) => { DeleteQuoteTemplate(interaction, id, "Quote Aborted") })
+        .setExecutable(async (interaction: ButtonInteraction, id?: Snowflake) => { DeleteQuoteTemplate(interaction, id, "Quote Aborted") })
         .setCheckIfEnabled("Quotes"),
 
     new InteractionObject<ButtonInteraction>("quote:save-button")

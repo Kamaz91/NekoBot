@@ -66,12 +66,11 @@ export default class InteractionManager extends EventEmitter {
     }
 
     private ProcessInteraction(interaction: ManagerInteractionTypes, interactionHandler: InteractionObjectInterface<ManagerInteractionTypes>, id?: string) {
-        try {
-            interactionHandler.process(interaction, id);
-        } catch (error) {
-            logger.error("[InteractionManager] -> [ProcessInteraction] Error!");
-            logger.error(error);
-        }
+        interactionHandler.process(interaction, id)
+            .catch((e) => {
+                logger.error("[InteractionManager] -> [ProcessInteraction] Error!");
+                logger.error(e);
+            });
     }
 
     public sendInteractionNotExecutable(Interaction: ManagerInteractionTypes) {

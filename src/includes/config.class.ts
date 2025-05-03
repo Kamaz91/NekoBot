@@ -145,7 +145,7 @@ export default class Config extends EventEmitter {
         return Promise.all(array).then(values => values);
     }
 
-    getGuildConfig(guild_id: string): ConfigModules {
+    getGuildConfig(guild_id: string): ConfigModules | undefined {
         return this.guilds.get(guild_id);
     }
 

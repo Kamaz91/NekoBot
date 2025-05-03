@@ -7,16 +7,17 @@ type InteractionType = ManagerInteractionTypes;
 
 export class InteractionObject<T extends InteractionType> implements InteractionObjectInterface<T> {
     name: string;
-    subOptions: Map<string, (interaction?: T, id?: string) => void> = new Map();
+    subOptions: Map<string, (interaction?: T, id?: string) => Promise<void>> = new Map();
     checkEnabled = false;
     settingsTable?: string = undefined;
 
-    mainExecutable: (interaction: T, id?: Snowflake) => void;
+    mainExecutable: (interaction: T, id?: Snowflake) => Promise<void>;
 
     constructor(name: string) {
         this.name = name;
     }
-    process(interaction: T, id?: string) {
+
+    async process(interaction: T, id?: string) {
         logger?.debug(`[InteractionObject:${this.name}] -> [process] id:${id}`);
         logger?.debug(`[InteractionObject:${this.name}] -> [process] subOptions size:${this.subOptions.size} isChatInputCommand:${interaction.isChatInputCommand()}`);
         if (this.subOptions.size > 0 && interaction.isChatInputCommand()) {
@@ -25,21 +26,21 @@ export class InteractionObject<T extends InteractionType> implements Interaction
             let option = this.subOptions.get(subCommand);
             logger?.debug(`[InteractionObject:${this.name}] -> [process] subCommand:${subCommand}`);
             if (option) {
-                option(interaction, id);
+                await option(interaction, id);
             }
             return;
         }
         logger?.debug(`[InteractionObject:${this.name}] -> [process] subcommand:false`);
         logger?.debug(`[InteractionObject:${this.name}] -> [process] executing:mainExecutable`);
-        this.mainExecutable(interaction, id);
+        await this.mainExecutable(interaction, id);
     }
 
-    addSubOption(name: string, executable: (interaction?: T, id?: Snowflake) => void) {
+    addSubOption(name: string, executable: (interaction?: T, id?: Snowflake) => Promise<void>) {
         this.subOptions.set(name, executable);
         return this;
     }
 
-    setExecutable(execute: (interaction: T) => void) {
+    setExecutable(execute: (interaction: T) => Promise<void>) {
         this.mainExecutable = execute;
         return this;
     }

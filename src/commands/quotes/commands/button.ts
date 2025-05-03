@@ -69,7 +69,7 @@ export async function SaveQuoteTemplateToDatabase(Interaction: ButtonInteraction
     }
 }
 
-export function removeLastLine(Interaction: ButtonInteraction, id?: string) {
+export async function removeLastLine(Interaction: ButtonInteraction, id?: string) {
     logger.debug(`[Quotes] [remove-button] id:${id}`);
     logger.debug(`[Quotes] [remove-button] isInteractionIdValid:${isInteractionCustomIdValid(id)}`);
     if (!isInteractionCustomIdValid(id)) {
@@ -120,7 +120,7 @@ export function removeLastLine(Interaction: ButtonInteraction, id?: string) {
         });
 }
 
-export function SendModal(Interaction: ButtonInteraction, id?: string) {
+export async function SendModal(Interaction: ButtonInteraction, id?: string) {
     logger.debug(`[Quotes] [modal-button] id:${id}`);
     logger.debug(`[Quotes] [modal-button] isInteractionIdValid:${isInteractionCustomIdValid(id)}`);
     if (!isInteractionCustomIdValid(id)) {
